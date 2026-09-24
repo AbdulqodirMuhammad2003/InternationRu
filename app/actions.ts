@@ -78,8 +78,24 @@ export async function markWordLearned(wordId: number, learned: boolean) {
   revalidatePath("/lessons");
 }
 
+/** Bugungi (Toshkent vaqti) faollikka to'g'ri javoblarni qo'shadi — streak
+ *  va kunlik maqsad shundan hisoblanadi. */
+async function recordActivity(userId: number, correctAnswers: number) {
+  await sql`
+    INSERT INTO user_daily_activity (user_id, day, correct_answers)
+    VALUES (${userId}, (now() AT TIME ZONE 'Asia/Tashkent')::date, ${correctAnswers})
+    ON CONFLICT (user_id, day)
+    DO UPDATE SET correct_answers = user_daily_activity.correct_answers + excluded.correct_answers
+  `;
+}
+
 export async function submitExerciseResult(exerciseId: number, scorePct: number) {
   const userId = await requireUserId();
+
+  const [{ total }] = await sql<{ total: number }[]>`
+    SELECT count(*)::int AS total FROM exercise_questions WHERE exercise_id = ${exerciseId}
+  `;
+  await recordActivity(userId, Math.round((scorePct / 100) * total));
   await sql`
     INSERT INTO user_exercise_progress (user_id, exercise_id, score_pct, completed_at)
     VALUES (${userId}, ${exerciseId}, ${scorePct}, now())
@@ -148,6 +164,7 @@ export async function setWordStagePassed(
   `;
 
   if (passed) {
+    await recordActivity(userId, 1);
     const rows = await sql<{ stage: string; passed: number }[]>`
       SELECT stage, passed FROM user_word_stage_progress WHERE user_id = ${userId} AND word_id = ${wordId}
     `;

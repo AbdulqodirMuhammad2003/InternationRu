@@ -9,8 +9,8 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
-import { getUserStats, getAllUnitsDetailed } from "@/lib/data";
-import { ProfileHeader } from "@/components/ProfileHeader";
+import { getUserStats, getAllUnitsDetailed, getActivityOverview } from "@/lib/data";
+import { TodayPanel } from "@/components/TodayPanel";
 import { VocabGauge } from "@/components/VocabGauge";
 
 const QUICK_LINKS = [
@@ -47,6 +47,7 @@ export default async function HomePage() {
   const session = await getSession();
   const user = (await getUserStats(session!.userId))!;
   const unitsDetailed = await getAllUnitsDetailed(user.id);
+  const activity = await getActivityOverview(user.id);
 
   const totalWords = unitsDetailed.reduce((s, u) => s + u.totalWords, 0);
   const learnedWords = unitsDetailed.reduce(
@@ -82,7 +83,7 @@ export default async function HomePage() {
         <p className="text-sm text-ink-700/60 dark:text-ink-300/60">Progressingiz haqida qisqacha ma'lumot.</p>
       </div>
 
-      <ProfileHeader user={user} />
+      <TodayPanel user={user} units={unitsDetailed} activity={activity} />
 
       <div>
         <h2 className="font-display mb-3 text-lg font-semibold text-ink-950 dark:text-ink-50">Kutubxona</h2>

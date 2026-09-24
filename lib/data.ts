@@ -1,5 +1,8 @@
 import "server-only";
 import { sql } from "./db";
+import type { ExerciseKind } from "./seed-exercises";
+
+export type { ExerciseKind };
 
 // ---------- Turlar ----------
 
@@ -102,6 +105,8 @@ export interface ExerciseRecord {
   id: number;
   title: string;
   skill_label: string;
+  kind: ExerciseKind;
+  instructions: string | null;
   order_index: number;
   question_count: number;
   score_pct: number;
@@ -140,6 +145,61 @@ export async function getUserStats(userId: number): Promise<UserRecord | undefin
     FROM users WHERE id = ${userId}
   `;
   return rows[0];
+}
+
+// ---------- Kunlik faollik (streak, haftalik belgilar, kunlik maqsad) ----------
+
+/** Kunlik maqsad: shuncha to'g'ri javob (mashq savollari + lug'at bosqichlari). */
+export const DAILY_GOAL = 20;
+
+export interface ActivityOverview {
+  streak: number;
+  todayCorrect: number;
+  /** Joriy hafta, dushanbadan yakshanbagacha. */
+  week: { label: string; active: boolean; isToday: boolean; isFuture: boolean }[];
+}
+
+const WEEKDAY_LABELS = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
+
+function shiftDay(iso: string, days: number) {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+export async function getActivityOverview(userId: number): Promise<ActivityOverview> {
+  const [{ today }] = await sql<{ today: string }[]>`
+    SELECT to_char((now() AT TIME ZONE 'Asia/Tashkent')::date, 'YYYY-MM-DD') AS today
+  `;
+  const rows = await sql<{ day: string; correct_answers: number }[]>`
+    SELECT to_char(day, 'YYYY-MM-DD') AS day, correct_answers
+    FROM user_daily_activity
+    WHERE user_id = ${userId} AND correct_answers > 0
+      AND day > (now() AT TIME ZONE 'Asia/Tashkent')::date - 400
+  `;
+  const activeDays = new Set(rows.map((r) => r.day));
+
+  // Bugun hali mashq qilinmagan bo'lsa, streak kechagi kundan hisoblanadi
+  // (kun tugamaguncha zanjir uzilgan hisoblanmaydi).
+  let streak = 0;
+  let cursor = activeDays.has(today) ? today : shiftDay(today, -1);
+  while (activeDays.has(cursor)) {
+    streak++;
+    cursor = shiftDay(cursor, -1);
+  }
+
+  const weekdayIndex = (new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7; // Du = 0
+  const monday = shiftDay(today, -weekdayIndex);
+  const week = WEEKDAY_LABELS.map((label, i) => {
+    const day = shiftDay(monday, i);
+    return { label, active: activeDays.has(day), isToday: day === today, isFuture: day > today };
+  });
+
+  return {
+    streak,
+    todayCorrect: rows.find((r) => r.day === today)?.correct_answers ?? 0,
+    week,
+  };
 }
 
 // ---------- Darajalar (A1, A2, B1, B2) ----------
@@ -218,12 +278,15 @@ export async function getUnitDetail(unitId: number, userId: number): Promise<Uni
       id: number;
       title: string;
       skill_label: string;
+      kind: ExerciseKind;
+      instructions: string | null;
       order_index: number;
       score_pct: number;
       attempted: boolean;
     }[]
   >`
-    SELECT e.id, e.title, e.skill_label, e.order_index, COALESCE(p.score_pct, 0) as score_pct,
+    SELECT e.id, e.title, e.skill_label, e.kind, e.instructions, e.order_index,
+           COALESCE(p.score_pct, 0) as score_pct,
            (p.exercise_id IS NOT NULL) as attempted
     FROM exercises e
     LEFT JOIN user_exercise_progress p ON p.exercise_id = e.id AND p.user_id = ${userId}

@@ -9,7 +9,7 @@
  */
 import bcrypt from "bcryptjs";
 import { sql } from "./db";
-import { LESSON1_SECTION1, type SeedExercise, type SeedQuestion } from "./seed-exercises";
+import { LESSON1_EXERCISES, type SeedExercise, type SeedQuestion } from "./seed-exercises";
 
 /** Mashqlarni savollari bilan birga darsga qo'shadi (tartib raqami
  *  darsdagi mavjud mashqlardan keyin davom etadi). Seed va bir martalik
@@ -24,8 +24,8 @@ export async function insertExercises(
   `;
   for (const [i, ex] of exercises.entries()) {
     const [row] = await db<{ id: number }[]>`
-      INSERT INTO exercises (unit_id, title, skill_label, order_index)
-      VALUES (${unitId}, ${ex.title}, ${ex.skill}, ${max + i + 1})
+      INSERT INTO exercises (unit_id, title, skill_label, kind, instructions, order_index)
+      VALUES (${unitId}, ${ex.title}, ${ex.skill}, ${ex.kind}, ${ex.instructions}, ${max + i + 1})
       RETURNING id
     `;
     const rows = ex.questions.map((q, qi) => ({
@@ -52,6 +52,7 @@ export async function resetDatabase() {
     "user_exercise_progress",
     "exercise_questions",
     "exercises",
+    "user_daily_activity",
     "user_word_stage_progress",
     "user_word_progress",
     "vocabulary_words",
@@ -139,7 +140,7 @@ export async function seedDatabase() {
       code: "C1a",
       level: "A1",
       title: "1-dars",
-      subtitle: "Tanishuv: olmoshlar va birinchi so'zlar",
+      subtitle: "Harflar, tovushlar va birinchi so'zlar",
       color: "green",
       icon: "headphones",
       locked: 0,
@@ -479,7 +480,7 @@ export async function seedDatabase() {
   await createRound(unitIds["C1c"], "4-bosqich", 4, dars3Round4);
 
   // ---------- Mashqlar (Exercises) ----------
-  await insertExercises(sql, unitIds["C1a"], LESSON1_SECTION1);
+  await insertExercises(sql, unitIds["C1a"], LESSON1_EXERCISES);
 
   async function addSimpleExercise(
     unitId: number,
@@ -487,7 +488,9 @@ export async function seedDatabase() {
     skill: string,
     questions: SeedQuestion[]
   ) {
-    await insertExercises(sql, unitId, [{ title, skill, questions }]);
+    await insertExercises(sql, unitId, [
+      { title, skill, kind: "choice", instructions: "To'g'ri javobni tanlang.", questions },
+    ]);
   }
 
   await addSimpleExercise(unitIds["C1c"], "1-topshiriq", "Olmoshlar", [

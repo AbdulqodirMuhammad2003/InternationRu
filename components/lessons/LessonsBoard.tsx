@@ -11,16 +11,34 @@ import {
   CheckCircle2,
   Clapperboard,
   Delete,
+  Headphones,
+  Info,
+  ListChecks,
+  MessagesSquare,
+  PenLine,
   PlayCircle,
+  Puzzle,
+  Shapes,
   Trophy,
+  UserRound,
   Volume2,
+  type LucideIcon,
 } from "lucide-react";
-import type { ClipKind, LevelRecord, UnitDetail } from "@/lib/data";
+import type { ClipKind, ExerciseKind, LevelRecord, UnitDetail } from "@/lib/data";
 import { submitExerciseResult } from "@/app/actions";
 import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
 
 type View = "main" | "vocab-rounds" | "exercises" | "exercise-run" | "clip";
+
+const EXERCISE_KIND_ICONS: Record<ExerciseKind, LucideIcon> = {
+  listen: Headphones,
+  choice: Shapes,
+  dialog: MessagesSquare,
+  ending: UserRound,
+  anagram: Puzzle,
+  type: PenLine,
+};
 
 const CLIP_KIND_LABELS: Record<ClipKind, string> = {
   film: "Film",
@@ -506,27 +524,40 @@ export function LessonsBoard({
               )}
 
               {view === "exercises" && (
-                <div className="flex flex-col gap-3">
-                  {openUnit.exercises.map((ex, i) => (
-                    <button
-                      key={ex.id}
-                      onClick={() => startExercise(ex.id)}
-                      style={{ animationDelay: `${i * 50}ms` }}
-                      className="animate-fade-up rounded-2xl border border-ink-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:shadow-none"
-                    >
-                      <span className="mb-2 inline-block rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
-                        {ex.skill_label}
-                      </span>
-                      <p className="font-semibold text-ink-950 dark:text-ink-50">{ex.title}</p>
-                      <p className="mb-2 text-xs text-ink-700/60 dark:text-ink-300/60">{ex.question_count} ta savol</p>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
-                        <div
-                          className="h-full rounded-full bg-rose-500 transition-[width] duration-500"
-                          style={{ width: `${ex.score_pct}%` }}
-                        />
-                      </div>
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 gap-3">
+                  {openUnit.exercises.map((ex, i) => {
+                    const KindIcon = EXERCISE_KIND_ICONS[ex.kind] ?? ListChecks;
+                    return (
+                      <button
+                        key={ex.id}
+                        onClick={() => startExercise(ex.id)}
+                        style={{ animationDelay: `${i * 50}ms` }}
+                        className="relative flex animate-fade-up flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10"
+                      >
+                        <span className="absolute left-0 top-0 rounded-br-xl rounded-tl-2xl bg-mint-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                          {ex.skill_label}
+                        </span>
+                        <KindIcon size={22} className="absolute right-3 top-2.5 text-ink-400 dark:text-ink-500" />
+                        <p className="font-semibold leading-snug text-ink-950 dark:text-ink-50">
+                          {i + 1}. {ex.title}
+                        </p>
+                        <p className="mb-3 mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                          {ex.question_count} ta savol
+                        </p>
+                        <div className="mt-auto flex items-center gap-2">
+                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
+                            <div
+                              className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
+                              style={{ width: `${ex.score_pct}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">
+                            {ex.score_pct}%
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
@@ -670,6 +701,23 @@ function RussianKeyboard({
   );
 }
 
+/** "книга (Иван)" → { noun: "книга", owner: "Иван", stem: "Иван" };
+ *  -а bilan tugagan ismda -а tushib qoladi (мама → мам + ы). */
+function parseEnding(prompt: string) {
+  const m = prompt.match(/^(.*)\s+\((.*)\)$/);
+  const noun = m?.[1] ?? prompt;
+  const owner = m?.[2] ?? "";
+  const stem = owner.endsWith("а") ? owner.slice(0, -1) : owner;
+  return { noun, owner, stem };
+}
+
+const OPTION_STATE_CLASSES = {
+  right: "border-mint-500 bg-mint-50 font-semibold text-mint-900 dark:bg-mint-950/40 dark:text-mint-100",
+  wrong: "border-rose-400 bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200",
+  selected: "border-azure-500 bg-azure-50 font-semibold text-azure-900 dark:bg-azure-950/40 dark:text-azure-100",
+  idle: "border-ink-100 bg-white hover:border-ink-200 hover:bg-ink-50/60 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10",
+};
+
 export function ExerciseRun({
   exercise,
   onFinish,
@@ -685,12 +733,14 @@ export function ExerciseRun({
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [typed, setTyped] = useState("");
+  // Anagramma: bosilgan harflarning (aralash qatordagi) indekslari.
+  const [picked, setPicked] = useState<number[]>([]);
   const [checked, setChecked] = useState<boolean | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [result, setResult] = useState<number | null>(null);
 
   const question = exercise.questions[qIndex];
-  const isTyping = !!question?.answer_text;
+  const kind = exercise.kind;
   const total = exercise.questions.length;
 
   // Tinglash savoli ochilishi bilan so'z bir marta avtomatik o'qiladi.
@@ -734,17 +784,20 @@ export function ExerciseRun({
     );
   }
 
+  const letters = kind === "anagram" ? question.prompt.split("") : [];
+  const answerValue = kind === "anagram" ? picked.map((i) => letters[i]).join("") : typed;
+  const isWritten = kind === "anagram" || !!question.answer_text;
   const acceptedAnswers = (question.answer_text ?? "").split("|").map(normalizeAnswer);
-  const canCheck = isTyping ? typed.trim() !== "" : selected !== null;
+  const canCheck = isWritten ? answerValue.trim() !== "" : selected !== null;
+  const ending = kind === "ending" ? parseEnding(question.prompt) : null;
 
   function check() {
     if (!canCheck || checked !== null) return;
-    const ok = isTyping
-      ? acceptedAnswers.includes(normalizeAnswer(typed))
+    const ok = isWritten
+      ? acceptedAnswers.includes(normalizeAnswer(answerValue))
       : selected === question.correct_index;
     setChecked(ok);
     if (ok) setCorrectCount((c) => c + 1);
-    if (question.audio_text && isTyping) speakRu(question.audio_text);
   }
 
   function next() {
@@ -752,6 +805,7 @@ export function ExerciseRun({
       setQIndex(qIndex + 1);
       setSelected(null);
       setTyped("");
+      setPicked([]);
       setChecked(null);
     } else {
       const pct = Math.round((correctCount / total) * 100);
@@ -760,122 +814,230 @@ export function ExerciseRun({
     }
   }
 
-  return (
-    <div key={qIndex} className="flex animate-fade-up flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
-          <div
-            className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
-            style={{ width: `${(qIndex / total) * 100}%` }}
-          />
-        </div>
-        <span className="text-xs font-semibold text-ink-500 dark:text-ink-400">
-          {qIndex + 1} / {total}
-        </span>
-      </div>
+  function optionState(i: number): keyof typeof OPTION_STATE_CLASSES {
+    if (checked === null) return selected === i ? "selected" : "idle";
+    if (i === question.correct_index) return "right";
+    return selected === i ? "wrong" : "idle";
+  }
 
-      <p className="whitespace-pre-line text-lg font-semibold leading-snug text-ink-950 dark:text-ink-50">
-        {question.prompt}
-      </p>
-
-      {question.audio_text && (
+  const shortOptions = question.options.every((o) => o.length <= 8);
+  const optionGrid = (prefix = "") => (
+    <div
+      className={`grid gap-2 ${
+        kind === "choice" || kind === "ending"
+          ? shortOptions
+            ? "grid-cols-4"
+            : "grid-cols-1 sm:grid-cols-2"
+          : "grid-cols-1 sm:grid-cols-2"
+      }`}
+    >
+      {question.options.map((opt, i) => (
         <button
-          onClick={() => speakRu(question.audio_text!)}
-          className="btn-press flex items-center gap-2 self-center rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-gold-700/30 hover:bg-gold-400"
+          key={i}
+          onClick={() => checked === null && setSelected(i)}
+          className={`rounded-xl border-2 px-3 py-3 text-base transition-all duration-150 ${
+            shortOptions ? "text-center" : "text-left"
+          } ${OPTION_STATE_CLASSES[optionState(i)]}`}
         >
-          <Volume2 size={18} /> Yana eshitish
+          {prefix}
+          {opt}
         </button>
+      ))}
+    </div>
+  );
+
+  const resultTone =
+    checked === null ? "text-azure-600 dark:text-azure-300" : checked ? "text-mint-600" : "text-rose-500";
+  const correctAnswerText = isWritten
+    ? question.answer_text!.split("|")[0]
+    : ending
+    ? `${ending.noun} ${ending.stem}${question.options[question.correct_index]}`
+    : question.options[question.correct_index];
+
+  return (
+    <div className="flex flex-col gap-4">
+      {exercise.instructions && (
+        <div className="flex gap-2.5 rounded-2xl bg-azure-50 px-4 py-3 text-sm leading-relaxed text-azure-900 dark:bg-azure-950/40 dark:text-azure-100">
+          <Info size={18} className="mt-0.5 shrink-0" />
+          <p>
+            <span className="font-bold">Shart: </span>
+            {exercise.instructions}
+          </p>
+        </div>
       )}
 
-      {isTyping ? (
-        <div className="flex flex-col gap-3">
-          <input
-            value={typed}
-            onChange={(e) => setTyped(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") (checked === null ? check : next)();
-            }}
-            disabled={checked !== null}
-            lang="ru"
-            autoComplete="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            placeholder="Javobni ruscha yozing"
-            className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-lg font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-300 dark:bg-white/5 dark:text-ink-50 ${
-              checked === true
-                ? "border-mint-500"
-                : checked === false
-                ? "border-rose-400"
-                : "border-ink-200 focus:border-azure-500 dark:border-white/10"
-            }`}
-          />
-          <RussianKeyboard
-            disabled={checked !== null}
-            onKey={(ch) => setTyped((t) => t + ch)}
-            onBackspace={() => setTyped((t) => t.slice(0, -1))}
-          />
+      <div key={qIndex} className="flex animate-fade-up flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
+            <div
+              className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
+              style={{ width: `${(qIndex / total) * 100}%` }}
+            />
+          </div>
+          <span className="text-xs font-semibold text-ink-500 dark:text-ink-400">
+            {qIndex + 1} / {total}
+          </span>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {question.options.map((opt, i) => {
-            const isRight = i === question.correct_index;
-            const state =
-              checked === null
-                ? selected === i
-                  ? "selected"
-                  : "idle"
-                : isRight
-                ? "right"
-                : selected === i
-                ? "wrong"
-                : "idle";
-            return (
-              <button
-                key={i}
-                onClick={() => checked === null && setSelected(i)}
-                className={`rounded-xl border-2 px-4 py-3 text-left text-base transition-all duration-150 ${
-                  state === "right"
-                    ? "border-mint-500 bg-mint-50 font-semibold text-mint-900 dark:bg-mint-950/40 dark:text-mint-100"
-                    : state === "wrong"
-                    ? "border-rose-400 bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200"
-                    : state === "selected"
-                    ? "border-azure-500 bg-azure-50 font-semibold text-azure-900 dark:bg-azure-950/40 dark:text-azure-100"
-                    : "border-ink-100 bg-white hover:border-ink-200 hover:bg-ink-50/60 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
+
+        {kind === "listen" && (
+          <>
+            <button
+              onClick={() => question.audio_text && speakRu(question.audio_text)}
+              className="btn-press mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
+              aria-label="Eshitish"
+            >
+              <Volume2 size={34} />
+            </button>
+            {optionGrid()}
+          </>
+        )}
+
+        {kind === "choice" && (
+          <>
+            <p
+              className={`whitespace-pre-line text-center font-semibold text-ink-950 dark:text-ink-50 ${
+                question.prompt.length <= 24 ? "font-display py-2 text-3xl" : "text-lg"
+              }`}
+            >
+              {question.prompt}
+            </p>
+            {optionGrid()}
+          </>
+        )}
+
+        {kind === "dialog" && (
+          <>
+            <div className="flex flex-col gap-2">
+              <p className="max-w-[80%] self-start rounded-2xl rounded-bl-md bg-ink-100 px-4 py-2.5 text-base text-ink-900 dark:bg-white/10 dark:text-ink-50">
+                — {question.prompt}
+              </p>
+              <p
+                className={`max-w-[80%] self-end rounded-2xl rounded-br-md px-4 py-2.5 text-base transition-colors ${
+                  checked === null
+                    ? "bg-azure-100 text-azure-900 dark:bg-azure-950/50 dark:text-azure-100"
+                    : checked
+                    ? "bg-mint-100 text-mint-900 dark:bg-mint-950/50 dark:text-mint-100"
+                    : "bg-rose-100 text-rose-900 dark:bg-rose-950/50 dark:text-rose-100"
                 }`}
               >
-                {opt}
-              </button>
-            );
-          })}
-        </div>
-      )}
+                — {selected === null ? "…" : question.options[selected]}
+              </p>
+            </div>
+            {optionGrid()}
+          </>
+        )}
 
-      {checked !== null && (
-        <div
-          className={`animate-fade-up rounded-2xl px-4 py-3 text-sm ${
-            checked
-              ? "bg-mint-50 text-mint-900 dark:bg-mint-950/40 dark:text-mint-100"
-              : "bg-rose-50 text-rose-900 dark:bg-rose-950/40 dark:text-rose-100"
-          }`}
+        {ending && (
+          <>
+            <div className="text-center">
+              <p className="text-sm text-ink-500 dark:text-ink-400">
+                {ending.noun} ({ending.owner}) →
+              </p>
+              <p className="font-display mt-1 text-3xl font-bold text-ink-950 dark:text-ink-50">
+                {ending.noun} {ending.stem}
+                <span className={`border-b-2 border-current px-1 ${resultTone}`}>
+                  {selected === null ? "_" : question.options[selected]}
+                </span>
+              </p>
+            </div>
+            {optionGrid("-")}
+          </>
+        )}
+
+        {kind === "anagram" && (
+          <>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {letters.map((_, i) => (
+                <span
+                  key={i}
+                  className={`flex h-12 w-10 items-center justify-center border-b-2 text-2xl font-bold ${
+                    checked === null
+                      ? "border-ink-300 text-ink-950 dark:border-white/30 dark:text-ink-50"
+                      : checked
+                      ? "border-mint-500 text-mint-700 dark:text-mint-300"
+                      : "border-rose-400 text-rose-600 dark:text-rose-300"
+                  }`}
+                >
+                  {picked[i] !== undefined ? letters[picked[i]] : ""}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {letters.map((ch, i) => (
+                <button
+                  key={i}
+                  disabled={picked.includes(i) || checked !== null}
+                  onClick={() => setPicked((p) => [...p, i])}
+                  className="btn-press h-12 w-11 rounded-xl bg-azure-50 text-xl font-bold text-azure-900 shadow-sm ring-1 ring-azure-200 transition-opacity hover:bg-azure-100 disabled:opacity-25 dark:bg-azure-950/40 dark:text-azure-100 dark:ring-azure-900"
+                >
+                  {ch}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setPicked((p) => p.slice(0, -1))}
+              disabled={picked.length === 0 || checked !== null}
+              className="mx-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-ink-500 hover:bg-ink-100 disabled:opacity-40 dark:text-ink-400 dark:hover:bg-white/10"
+            >
+              <Delete size={14} /> Oxirgi harfni o'chirish
+            </button>
+          </>
+        )}
+
+        {kind === "type" && (
+          <div className="flex flex-col gap-3">
+            <p className="font-display text-center text-3xl font-bold text-ink-950 dark:text-ink-50">
+              {question.prompt} <span className="text-ink-300 dark:text-ink-600">→ ?</span>
+            </p>
+            <input
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") (checked === null ? check : next)();
+              }}
+              disabled={checked !== null}
+              lang="ru"
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              placeholder="Javobni ruscha yozing"
+              className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-lg font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-300 dark:bg-white/5 dark:text-ink-50 ${
+                checked === true
+                  ? "border-mint-500"
+                  : checked === false
+                  ? "border-rose-400"
+                  : "border-ink-200 focus:border-azure-500 dark:border-white/10"
+              }`}
+            />
+            <RussianKeyboard
+              disabled={checked !== null}
+              onKey={(ch) => setTyped((t) => t + ch)}
+              onBackspace={() => setTyped((t) => t.slice(0, -1))}
+            />
+          </div>
+        )}
+
+        {checked !== null && (
+          <div
+            className={`animate-fade-up rounded-2xl px-4 py-3 text-sm ${
+              checked
+                ? "bg-mint-50 text-mint-900 dark:bg-mint-950/40 dark:text-mint-100"
+                : "bg-rose-50 text-rose-900 dark:bg-rose-950/40 dark:text-rose-100"
+            }`}
+          >
+            <p className="font-bold">{checked ? "To'g'ri!" : `To'g'ri javob: ${correctAnswerText}`}</p>
+            {question.explanation && <p className="mt-1 opacity-90">{question.explanation}</p>}
+          </div>
+        )}
+
+        <button
+          onClick={checked === null ? check : next}
+          disabled={checked === null && !canCheck}
+          className="btn-press mt-1 rounded-full bg-azure-600 py-3 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-40"
         >
-          <p className="font-bold">
-            {checked
-              ? "To'g'ri!"
-              : isTyping
-              ? `To'g'ri javob: ${question.answer_text!.split("|")[0]}`
-              : `To'g'ri javob: ${question.options[question.correct_index]}`}
-          </p>
-          {question.explanation && <p className="mt-1 opacity-90">{question.explanation}</p>}
-        </div>
-      )}
-
-      <button
-        onClick={checked === null ? check : next}
-        disabled={checked === null && !canCheck}
-        className="btn-press mt-1 rounded-full bg-azure-600 py-3 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-40"
-      >
-        {checked === null ? "Tekshirish" : qIndex + 1 < total ? "Keyingisi" : "Natijani ko'rish"}
-      </button>
+          {checked === null ? "Tekshirish" : qIndex + 1 < total ? "Keyingisi" : "Natijani ko'rish"}
+        </button>
+      </div>
     </div>
   );
 }

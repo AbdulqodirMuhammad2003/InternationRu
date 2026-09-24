@@ -92,6 +92,15 @@ CREATE TABLE IF NOT EXISTS user_word_progress (
 -- So'zni tekshirishning 4 bosqichi: imlo (spelling), ta'rif (definition),
 -- talaffuz (pronunciation), gap ichida (sentence). Har biri alohida
 -- o'tilgan/o'tilmaganligi shu yerda saqlanadi.
+-- O'quvchining har kungi faolligi (Toshkent vaqti bo'yicha kun): streak,
+-- haftalik belgilar va kunlik maqsad shu yerdan hisoblanadi.
+CREATE TABLE IF NOT EXISTS user_daily_activity (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day DATE NOT NULL,
+  correct_answers INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, day)
+);
+
 CREATE TABLE IF NOT EXISTS user_word_stage_progress (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   word_id INTEGER NOT NULL REFERENCES vocabulary_words(id) ON DELETE CASCADE,
@@ -106,7 +115,12 @@ CREATE TABLE IF NOT EXISTS exercises (
   unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   skill_label TEXT NOT NULL DEFAULT 'Ko''nikma',
-  order_index INTEGER NOT NULL
+  order_index INTEGER NOT NULL,
+  -- Savollar qanday ko'rsatiladi: choice, listen, dialog, ending, anagram,
+  -- type (batafsil — lib/seed-exercises.ts).
+  kind TEXT NOT NULL DEFAULT 'choice',
+  -- O'quvchiga ko'rsatiladigan shart (nima qilish kerakligi, misol bilan).
+  instructions TEXT
 );
 
 CREATE TABLE IF NOT EXISTS exercise_questions (
