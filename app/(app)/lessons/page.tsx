@@ -11,7 +11,7 @@ export default async function LessonsPage() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <h1 className="font-display animate-fade-up text-2xl font-bold text-olive-950 dark:text-olive-50">Darslar</h1>
+      <h1 className="font-display animate-fade-up text-2xl font-bold text-ink-950 dark:text-ink-50">Darslar</h1>
       <ProfileHeader user={user} />
       <LessonsBoard units={units} levels={levels} />
     </div>

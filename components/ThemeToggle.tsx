@@ -84,7 +84,7 @@ export function ThemeToggle() {
               y={10 - b.h}
               width={b.w}
               height={b.h}
-              className={dark ? "fill-[#05060a]" : "fill-olive-800/25"}
+              className={dark ? "fill-[#05060a]" : "fill-ink-800/25"}
             />
             {dark &&
               b.lit.map((row) => (

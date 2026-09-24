@@ -5,5 +5,5 @@ export const UNIT_GRADIENTS: Record<string, string> = {
   blue: "from-azure-500 to-azure-900",
   orange: "from-gold-400 to-gold-700",
   purple: "from-violet-500 to-azure-900",
-  black: "from-olive-600 to-olive-950",
+  black: "from-ink-600 to-ink-950",
 };

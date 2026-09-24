@@ -10,8 +10,8 @@ export default async function RankingPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div className="animate-fade-up">
-        <h1 className="font-display text-2xl font-bold text-olive-950 dark:text-olive-50">Reyting</h1>
-        <p className="text-sm text-olive-700/60 dark:text-olive-300/60">O'z natijalaringizni boshqa o'quvchilar bilan solishtiring.</p>
+        <h1 className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">Reyting</h1>
+        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">O'z natijalaringizni boshqa o'quvchilar bilan solishtiring.</p>
       </div>
       <RankingTabs branch={branch} group={group} />
     </div>

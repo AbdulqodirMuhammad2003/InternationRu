@@ -19,27 +19,27 @@ const QUICK_LINKS = [
     label: "Darslar",
     desc: "4-darsdan davom eting",
     icon: GraduationCap,
-    iconBg: "bg-olive-50 dark:bg-olive-900/40",
-    iconColor: "text-olive-600 dark:text-olive-300",
-    hover: "group-hover:bg-olive-600 group-hover:text-white",
+    iconBg: "bg-ink-50 dark:bg-ink-900/40",
+    iconColor: "text-ink-600 dark:text-ink-300",
+    hover: "group-hover:bg-ink-600 group-hover:text-white",
   },
   {
     href: "/marks",
     label: "Baholar",
     desc: "Natijalar tarixi",
     icon: ListChecks,
-    iconBg: "bg-olive-100 dark:bg-white/10",
-    iconColor: "text-olive-700 dark:text-olive-200",
-    hover: "group-hover:bg-olive-700 group-hover:text-white",
+    iconBg: "bg-ink-100 dark:bg-white/10",
+    iconColor: "text-ink-700 dark:text-ink-200",
+    hover: "group-hover:bg-ink-700 group-hover:text-white",
   },
   {
     href: "/ranking",
     label: "Reyting",
     desc: "O'quvchilar orasidagi o'rningiz",
     icon: Trophy,
-    iconBg: "bg-olive-950/5 dark:bg-white/10",
-    iconColor: "text-olive-950 dark:text-olive-100",
-    hover: "group-hover:bg-olive-950 group-hover:text-gold-300",
+    iconBg: "bg-ink-950/5 dark:bg-white/10",
+    iconColor: "text-ink-950 dark:text-ink-100",
+    hover: "group-hover:bg-ink-950 group-hover:text-gold-300",
   },
 ];
 
@@ -62,7 +62,7 @@ export default async function HomePage() {
       label: "Darslar",
       desc: `${totalUnits} ta dars mavjud`,
       icon: GraduationCap,
-      color: "text-olive-600",
+      color: "text-ink-600",
     },
     {
       href: "/lessons",
@@ -76,16 +76,16 @@ export default async function HomePage() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <div className="animate-fade-up">
-        <h1 className="font-display text-2xl font-bold text-olive-950 dark:text-olive-50">
+        <h1 className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
           Xush kelibsiz, {user.name.split(" ")[0]}!
         </h1>
-        <p className="text-sm text-olive-700/60 dark:text-olive-300/60">Progressingiz haqida qisqacha ma'lumot.</p>
+        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">Progressingiz haqida qisqacha ma'lumot.</p>
       </div>
 
       <ProfileHeader user={user} />
 
       <div>
-        <h2 className="font-display mb-3 text-lg font-semibold text-olive-950 dark:text-olive-50">Kutubxona</h2>
+        <h2 className="font-display mb-3 text-lg font-semibold text-ink-950 dark:text-ink-50">Kutubxona</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {LIBRARY_CARDS.map((c, i) => {
             const Icon = c.icon;
@@ -94,11 +94,11 @@ export default async function HomePage() {
                 key={c.label}
                 href={c.href}
                 style={{ animationDelay: `${i * 70}ms` }}
-                className="group flex animate-fade-up flex-col justify-between rounded-2xl bg-white p-5 shadow-sm shadow-olive-950/5 ring-1 ring-olive-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-[#1f2115] dark:shadow-none dark:ring-white/10"
+                className="group flex animate-fade-up flex-col justify-between rounded-2xl bg-white p-5 shadow-sm shadow-ink-950/5 ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-[#161b26] dark:shadow-none dark:ring-white/10"
               >
                 <div>
-                  <p className="font-semibold text-olive-950 dark:text-olive-50">{c.label}</p>
-                  <p className="mt-1 text-sm text-olive-700/60 dark:text-olive-300/60">{c.desc}</p>
+                  <p className="font-semibold text-ink-950 dark:text-ink-50">{c.label}</p>
+                  <p className="mt-1 text-sm text-ink-700/60 dark:text-ink-300/60">{c.desc}</p>
                 </div>
                 <Icon size={28} className={`mt-6 self-end ${c.color} opacity-80 transition-transform duration-200 group-hover:scale-110`} />
               </Link>
@@ -113,7 +113,7 @@ export default async function HomePage() {
         {currentUnit ? (
           <Link
             href={`/lessons?unit=${currentUnit.id}`}
-            className="group relative flex animate-fade-up flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-gold-600 via-gold-700 to-olive-900 p-6 text-white shadow-sm shadow-gold-900/20 transition-transform duration-200 hover:-translate-y-0.5"
+            className="group relative flex animate-fade-up flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-gold-600 via-gold-700 to-ink-900 p-6 text-white shadow-sm shadow-gold-900/20 transition-transform duration-200 hover:-translate-y-0.5"
           >
             <div className="sheen pointer-events-none absolute inset-0 animate-shimmer opacity-40" />
             <ArrowUpRight
@@ -133,7 +133,7 @@ export default async function HomePage() {
             </div>
           </Link>
         ) : (
-          <div className="flex animate-fade-up flex-col items-center justify-center gap-2 rounded-3xl bg-gradient-to-br from-gold-600 to-olive-900 p-6 text-center text-white shadow-sm">
+          <div className="flex animate-fade-up flex-col items-center justify-center gap-2 rounded-3xl bg-gradient-to-br from-gold-600 to-ink-900 p-6 text-center text-white shadow-sm">
             <PartyPopper size={28} />
             <p className="font-bold">Barcha darslar tugallandi!</p>
             <p className="text-xs text-white/80">Ajoyib natija — davom eting.</p>
@@ -142,7 +142,7 @@ export default async function HomePage() {
       </div>
 
       <div>
-        <h2 className="font-display mb-3 text-lg font-semibold text-olive-950 dark:text-olive-50">Tezkor o'tish</h2>
+        <h2 className="font-display mb-3 text-lg font-semibold text-ink-950 dark:text-ink-50">Tezkor o'tish</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {QUICK_LINKS.map((l, i) => {
             const Icon = l.icon;
@@ -151,7 +151,7 @@ export default async function HomePage() {
                 key={l.href}
                 href={l.href}
                 style={{ animationDelay: `${i * 60}ms` }}
-                className="group relative flex animate-fade-up items-center gap-4 rounded-2xl bg-white p-5 shadow-sm outline outline-1 outline-olive-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:bg-[#1f2115] dark:outline-white/10"
+                className="group relative flex animate-fade-up items-center gap-4 rounded-2xl bg-white p-5 shadow-sm outline outline-1 outline-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:bg-[#161b26] dark:outline-white/10"
               >
                 <div
                   className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${l.iconBg} ${l.iconColor} ${l.hover}`}
@@ -159,12 +159,12 @@ export default async function HomePage() {
                   <Icon size={20} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-olive-950 dark:text-olive-50">{l.label}</p>
-                  <p className="truncate text-xs text-olive-700/60 dark:text-olive-300/60">{l.desc}</p>
+                  <p className="font-semibold text-ink-950 dark:text-ink-50">{l.label}</p>
+                  <p className="truncate text-xs text-ink-700/60 dark:text-ink-300/60">{l.desc}</p>
                 </div>
                 <ChevronRight
                   size={16}
-                  className="ml-auto shrink-0 text-olive-300 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100 dark:text-olive-600"
+                  className="ml-auto shrink-0 text-ink-300 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100 dark:text-ink-600"
                 />
               </Link>
             );

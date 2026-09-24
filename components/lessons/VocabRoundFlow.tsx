@@ -209,14 +209,14 @@ export function VocabRoundFlow({
   if (round.words.length === 0) return null;
 
   const content = (
-    <div className="fixed inset-0 z-[200] flex animate-fade-in flex-col bg-gradient-to-br from-[#f7f5ee] to-[#eee9db] dark:from-[#14150d] dark:to-[#1a1c11]">
+    <div className="fixed inset-0 z-[200] flex animate-fade-in flex-col bg-gradient-to-br from-[#f5f7fb] to-[#e9edf6] dark:from-[#0d1017] dark:to-[#121620]">
       {/* Tepa panel */}
-      <div className="flex items-center justify-between border-b border-olive-900/10 px-5 py-4 dark:border-white/10 sm:px-8">
+      <div className="flex items-center justify-between border-b border-ink-900/10 px-5 py-4 dark:border-white/10 sm:px-8">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-olive-500 dark:text-olive-400">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">
             {round.title}
           </p>
-          <p className="font-display text-lg font-bold text-olive-950 dark:text-olive-50">
+          <p className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
             {phase === "learn" || phase === "learn-summary"
               ? "So'zlarni o'rganish"
               : phase === "check"
@@ -226,7 +226,7 @@ export function VocabRoundFlow({
         </div>
         <button
           onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-olive-600 shadow-sm transition-colors hover:bg-white dark:bg-white/5 dark:text-olive-200 dark:hover:bg-white/15"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-ink-600 shadow-sm transition-colors hover:bg-white dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/15"
           aria-label="Yopish"
         >
           <X size={20} />
@@ -244,7 +244,7 @@ export function VocabRoundFlow({
                   ? "bg-mint-500"
                   : i === stageIdx
                   ? "bg-gold-500"
-                  : "bg-olive-900/10 dark:bg-white/10"
+                  : "bg-ink-900/10 dark:bg-white/10"
               }`}
             />
           ))}
@@ -273,10 +273,10 @@ export function VocabRoundFlow({
               <Sparkles size={34} />
             </div>
             <div>
-              <p className="font-display text-2xl font-bold text-olive-950 dark:text-olive-50">
+              <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
                 Ajoyib!
               </p>
-              <p className="mt-1 text-sm text-olive-700/70 dark:text-olive-300/60">
+              <p className="mt-1 text-sm text-ink-700/70 dark:text-ink-300/60">
                 Siz {round.words.length} ta so'zni ko'rib chiqdingiz. Endi bilimingizni
                 tekshirib ko'ramizmi?
               </p>
@@ -287,7 +287,7 @@ export function VocabRoundFlow({
                   setLearnIndex(0);
                   setPhase("learn");
                 }}
-                className="btn-press flex items-center justify-center gap-2 rounded-full border border-olive-200 bg-white px-5 py-2.5 text-sm font-semibold text-olive-700 transition-colors hover:bg-olive-50 dark:border-white/10 dark:bg-white/5 dark:text-olive-200 dark:hover:bg-white/10"
+                className="btn-press flex items-center justify-center gap-2 rounded-full border border-ink-200 bg-white px-5 py-2.5 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-50 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
               >
                 <RotateCcw size={16} /> Qayta o'rganish
               </button>
@@ -326,7 +326,7 @@ export function VocabRoundFlow({
 
         {phase === "mistakes-review" && mistakes[mistakeIdx] && (
           <div className="flex w-full flex-col items-center gap-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-wine-600 dark:text-wine-300">
+            <p className="text-xs font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-300">
               Oxirgi imkoniyat · {mistakeIdx + 1} / {mistakes.length}
             </p>
             <StageQuestion
@@ -346,10 +346,10 @@ export function VocabRoundFlow({
               <Trophy size={34} />
             </div>
             <div>
-              <p className="font-display text-2xl font-bold text-olive-950 dark:text-olive-50">
+              <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
                 Round yakunlandi
               </p>
-              <p className="mt-1 text-sm text-olive-700/70 dark:text-olive-300/60">
+              <p className="mt-1 text-sm text-ink-700/70 dark:text-ink-300/60">
                 {fixedMistakes} ta xato tuzatildi
                 {mistakes.length - fixedMistakes > 0
                   ? `, ${mistakes.length - fixedMistakes} tasi keyingi safar takrorlanadi.`
@@ -389,15 +389,15 @@ function LearnCard({
   return (
     <div
       key={word.id}
-      className="flex w-full max-w-md animate-pop-in flex-col gap-4 rounded-3xl bg-white p-6 shadow-xl shadow-olive-900/5 dark:bg-[#1f2115] dark:shadow-none"
+      className="flex w-full max-w-md animate-pop-in flex-col gap-4 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none"
     >
-      <p className="text-center text-xs font-semibold text-olive-500 dark:text-olive-400">
+      <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         So'z {index + 1} / {total}
       </p>
-      <div className="flex h-36 items-center justify-center rounded-2xl bg-gradient-to-br from-olive-50 to-gold-50 text-6xl dark:from-white/5 dark:to-gold-950/30">
+      <div className="flex h-36 items-center justify-center rounded-2xl bg-gradient-to-br from-ink-50 to-gold-50 text-6xl dark:from-white/5 dark:to-gold-950/30">
         {word.emoji}
       </div>
-      <div className="flex items-center gap-3 rounded-2xl bg-olive-50/70 p-4 dark:bg-white/5">
+      <div className="flex items-center gap-3 rounded-2xl bg-ink-50/70 p-4 dark:bg-white/5">
         <button
           onClick={() => speak(word.word)}
           className="btn-press flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-500 text-white shadow-sm shadow-gold-700/30 hover:bg-gold-400"
@@ -406,29 +406,29 @@ function LearnCard({
           <Volume2 size={18} />
         </button>
         <div>
-          <p className="font-display text-lg font-bold text-olive-950 dark:text-olive-50">
+          <p className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
             {word.word}
           </p>
-          <p className="text-sm text-olive-700/60 dark:text-olive-300/60">
+          <p className="text-sm text-ink-700/60 dark:text-ink-300/60">
             [{word.transcription}]
           </p>
         </div>
       </div>
-      <div className="rounded-2xl bg-olive-50/70 p-4 dark:bg-white/5">
-        <p className="mb-1 text-xs text-olive-500 dark:text-olive-400">{word.part_of_speech}</p>
-        <p className="mb-3 text-base font-bold text-olive-900 dark:text-olive-50">
+      <div className="rounded-2xl bg-ink-50/70 p-4 dark:bg-white/5">
+        <p className="mb-1 text-xs text-ink-500 dark:text-ink-400">{word.part_of_speech}</p>
+        <p className="mb-3 text-base font-bold text-ink-900 dark:text-ink-50">
           {word.translation_uz}
         </p>
-        <p className="mb-1 text-xs text-olive-500 dark:text-olive-400">Izoh:</p>
-        <p className="mb-3 text-sm text-olive-700 dark:text-olive-200/80">{word.definition}</p>
+        <p className="mb-1 text-xs text-ink-500 dark:text-ink-400">Izoh:</p>
+        <p className="mb-3 text-sm text-ink-700 dark:text-ink-200/80">{word.definition}</p>
         {word.example_sentence && (
           <>
-            <p className="mb-1 text-xs text-olive-500 dark:text-olive-400">Misol:</p>
-            <p className="text-sm italic text-olive-700 dark:text-olive-200/80">
+            <p className="mb-1 text-xs text-ink-500 dark:text-ink-400">Misol:</p>
+            <p className="text-sm italic text-ink-700 dark:text-ink-200/80">
               {word.example_sentence}
             </p>
             {word.example_translation && (
-              <p className="mt-1 text-sm text-olive-600/80 dark:text-olive-300/70">
+              <p className="mt-1 text-sm text-ink-600/80 dark:text-ink-300/70">
                 {word.example_translation}
               </p>
             )}
@@ -464,10 +464,10 @@ function RoundSummary({
         <span className="font-display text-3xl font-bold">{percent}%</span>
       </div>
       <div>
-        <p className="font-display text-2xl font-bold text-olive-950 dark:text-olive-50">
+        <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
           Round yakunlandi!
         </p>
-        <p className="mt-1 text-sm text-olive-700/70 dark:text-olive-300/60">
+        <p className="mt-1 text-sm text-ink-700/70 dark:text-ink-300/60">
           {mistakeCount > 0
             ? `${mistakeCount} ta savolda ikkinchi marta xato qildingiz — ularni qayta ko'rib chiqishingiz mumkin.`
             : "Barcha savollarga muvaffaqiyatli javob berdingiz."}
@@ -477,14 +477,14 @@ function RoundSummary({
         {mistakeCount > 0 && (
           <button
             onClick={onReview}
-            className="btn-press flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-wine-600 to-wine-800 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-wine-900/30 hover:from-wine-500 hover:to-wine-700"
+            className="btn-press flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-rose-600 to-rose-800 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-rose-900/30 hover:from-rose-500 hover:to-rose-700"
           >
             Xatolarni qayta ko'rish
           </button>
         )}
         <button
           onClick={onFinish}
-          className="btn-press rounded-full border border-olive-200 bg-white px-6 py-2.5 text-sm font-semibold text-olive-700 transition-colors hover:bg-olive-50 dark:border-white/10 dark:bg-white/5 dark:text-olive-200 dark:hover:bg-white/10"
+          className="btn-press rounded-full border border-ink-200 bg-white px-6 py-2.5 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-50 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
         >
           Yakunlash
         </button>
@@ -510,7 +510,7 @@ function StageQuestion({
 }) {
   return (
     <div className="flex w-full max-w-md flex-col gap-3">
-      <p className="text-center text-xs font-semibold text-olive-500 dark:text-olive-400">
+      <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         Qolgan savollar: {remaining}
       </p>
       {stage === "spelling" && <SpellingStage word={word} onResult={onResult} />}
@@ -601,11 +601,11 @@ function SpellingStage({
   const availableTiles = tileLetters.filter((t) => !usedTileIds.has(t.id));
 
   return (
-    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-olive-900/5 dark:bg-[#1f2115] dark:shadow-none">
-      <div className="flex h-28 items-center justify-center rounded-2xl bg-gradient-to-br from-olive-50 to-gold-50 text-5xl dark:from-white/5 dark:to-gold-950/30">
+    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
+      <div className="flex h-28 items-center justify-center rounded-2xl bg-gradient-to-br from-ink-50 to-gold-50 text-5xl dark:from-white/5 dark:to-gold-950/30">
         {word.emoji}
       </div>
-      <p className="text-center text-base font-bold text-olive-900 dark:text-olive-50">
+      <p className="text-center text-base font-bold text-ink-900 dark:text-ink-50">
         {word.translation_uz}
       </p>
 
@@ -622,12 +622,12 @@ function SpellingStage({
               disabled={checked !== null}
               className={`flex h-11 w-9 items-center justify-center rounded-xl border-2 text-lg font-bold uppercase transition-colors ${
                 checked === true
-                  ? "border-olive-500 bg-olive-50 text-olive-700 dark:bg-olive-900/40 dark:text-olive-200"
+                  ? "border-ink-500 bg-ink-50 text-ink-700 dark:bg-ink-900/40 dark:text-ink-200"
                   : checked === false
-                  ? "border-wine-400 bg-wine-50 text-wine-700 dark:bg-wine-950/40 dark:text-wine-300"
+                  ? "border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
                   : letter
-                  ? "border-olive-300 bg-olive-50 text-olive-900 dark:border-white/20 dark:bg-white/10 dark:text-olive-50"
-                  : "border-dashed border-olive-200 bg-white dark:border-white/15 dark:bg-white/5"
+                  ? "border-ink-300 bg-ink-50 text-ink-900 dark:border-white/20 dark:bg-white/10 dark:text-ink-50"
+                  : "border-dashed border-ink-200 bg-white dark:border-white/15 dark:bg-white/5"
               }`}
             >
               {letter}
@@ -642,7 +642,7 @@ function SpellingStage({
             key={tile.id}
             onClick={() => placeTile(tile)}
             disabled={checked !== null}
-            className="btn-press flex h-10 w-10 items-center justify-center rounded-xl bg-olive-100 text-base font-bold uppercase text-olive-800 shadow-sm transition-colors hover:bg-olive-200 dark:bg-white/10 dark:text-olive-100 dark:hover:bg-white/20"
+            className="btn-press flex h-10 w-10 items-center justify-center rounded-xl bg-ink-100 text-base font-bold uppercase text-ink-800 shadow-sm transition-colors hover:bg-ink-200 dark:bg-white/10 dark:text-ink-100 dark:hover:bg-white/20"
           >
             {tile.ch}
           </button>
@@ -652,7 +652,7 @@ function SpellingStage({
       <button
         onClick={clearAll}
         disabled={checked !== null}
-        className="mx-auto flex items-center gap-1.5 text-xs font-semibold text-olive-500 hover:text-olive-700 disabled:opacity-40 dark:text-olive-400 dark:hover:text-olive-200"
+        className="mx-auto flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-700 disabled:opacity-40 dark:text-ink-400 dark:hover:text-ink-200"
       >
         <Eraser size={14} /> Tozalash
       </button>
@@ -698,11 +698,11 @@ function DefinitionStage({
   }
 
   return (
-    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-olive-900/5 dark:bg-[#1f2115] dark:shadow-none">
-      <p className="text-center text-xs font-semibold text-olive-500 dark:text-olive-400">
+    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
+      <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         Ta'rifga mos so'zni tanlang
       </p>
-      <p className="rounded-2xl bg-olive-50/70 p-4 text-center text-base font-semibold text-olive-900 dark:bg-white/5 dark:text-olive-50">
+      <p className="rounded-2xl bg-ink-50/70 p-4 text-center text-base font-semibold text-ink-900 dark:bg-white/5 dark:text-ink-50">
         {word.definition}
       </p>
       <div className="flex flex-col gap-2">
@@ -717,10 +717,10 @@ function DefinitionStage({
               disabled={checked !== null}
               className={`rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-all duration-150 ${
                 showState && isCorrectOpt
-                  ? "border-olive-500 bg-olive-50 text-olive-800 dark:bg-olive-900/40 dark:text-olive-100"
+                  ? "border-ink-500 bg-ink-50 text-ink-800 dark:bg-ink-900/40 dark:text-ink-100"
                   : showState && isSelected
-                  ? "border-wine-400 bg-wine-50 text-wine-700 dark:bg-wine-950/40 dark:text-wine-300"
-                  : "border-olive-100 bg-white hover:bg-olive-50/60 dark:border-white/10 dark:bg-white/5 dark:text-olive-200 dark:hover:bg-white/10"
+                  ? "border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+                  : "border-ink-100 bg-white hover:bg-ink-50/60 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
               }`}
             >
               {opt}
@@ -799,8 +799,8 @@ function PronunciationStage({
   }
 
   return (
-    <div className="flex animate-pop-in flex-col items-center gap-5 rounded-3xl bg-white p-6 text-center shadow-xl shadow-olive-900/5 dark:bg-[#1f2115] dark:shadow-none">
-      <p className="text-xs font-semibold text-olive-500 dark:text-olive-400">
+    <div className="flex animate-pop-in flex-col items-center gap-5 rounded-3xl bg-white p-6 text-center shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
+      <p className="text-xs font-semibold text-ink-500 dark:text-ink-400">
         So'zni to'g'ri talaffuz qiling
       </p>
 
@@ -813,10 +813,10 @@ function PronunciationStage({
       </button>
 
       <div>
-        <p className="font-display text-2xl font-bold text-olive-950 dark:text-olive-50">
+        <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
           {word.word}
         </p>
-        <p className="text-sm text-olive-700/60 dark:text-olive-300/60">[{word.transcription}]</p>
+        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">[{word.transcription}]</p>
       </div>
 
       {!unsupported ? (
@@ -828,7 +828,7 @@ function PronunciationStage({
               checked === true
                 ? "bg-azure-600 shadow-azure-700/30"
                 : checked === false
-                ? "bg-wine-600 shadow-wine-700/30"
+                ? "bg-rose-600 shadow-rose-700/30"
                 : listening
                 ? "animate-pulse bg-gold-500 shadow-gold-600/40"
                 : "bg-gradient-to-b from-azure-600 to-azure-800 shadow-azure-900/30 hover:from-azure-500 hover:to-azure-700"
@@ -837,7 +837,7 @@ function PronunciationStage({
           >
             {checked === true ? <Check size={30} /> : <Mic size={30} />}
           </button>
-          <p className="text-xs text-olive-500 dark:text-olive-400">
+          <p className="text-xs text-ink-500 dark:text-ink-400">
             {listening
               ? "Tinglanmoqda…"
               : checked !== null
@@ -851,7 +851,7 @@ function PronunciationStage({
         </>
       ) : (
         <div className="flex flex-col items-center gap-2">
-          <p className="max-w-xs text-xs text-olive-500 dark:text-olive-400">
+          <p className="max-w-xs text-xs text-ink-500 dark:text-ink-400">
             Brauzeringiz ovozni tanib olishni qo'llab-quvvatlamaydi. So'zni ovoz chiqarib
             talaffuz qiling, so'ng natijani o'zingiz belgilang.
           </p>
@@ -866,7 +866,7 @@ function PronunciationStage({
             <button
               onClick={() => finish(false)}
               disabled={checked !== null}
-              className="btn-press rounded-full bg-wine-600 px-4 py-2 text-xs font-bold text-white hover:bg-wine-500"
+              className="btn-press rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-500"
             >
               Xato qildim
             </button>
@@ -874,7 +874,7 @@ function PronunciationStage({
         </div>
       )}
 
-      <p className="text-[11px] text-olive-400 dark:text-olive-500">
+      <p className="text-[11px] text-ink-400 dark:text-ink-500">
         Hozircha talaffuz brauzer orqali tekshiriladi — kelajakda AI-yordamchi ulanadi.
       </p>
     </div>
@@ -905,15 +905,15 @@ function SentenceStage({
   }
 
   return (
-    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-olive-900/5 dark:bg-[#1f2115] dark:shadow-none">
-      <p className="text-center text-xs font-semibold text-olive-500 dark:text-olive-400">
+    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
+      <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         Bo'sh joyga mos so'zni yozing
       </p>
-      <p className="rounded-2xl bg-olive-50/70 p-4 text-center text-base leading-relaxed text-olive-900 dark:bg-white/5 dark:text-olive-50">
+      <p className="rounded-2xl bg-ink-50/70 p-4 text-center text-base leading-relaxed text-ink-900 dark:bg-white/5 dark:text-ink-50">
         {found ? (
           <>
             {before}
-            <span className="mx-1 inline-block min-w-[4rem] border-b-2 border-dashed border-olive-400 align-bottom">
+            <span className="mx-1 inline-block min-w-[4rem] border-b-2 border-dashed border-ink-400 align-bottom">
               &nbsp;
             </span>
             {after}
@@ -923,7 +923,7 @@ function SentenceStage({
         )}
       </p>
       {checked !== null && word.example_translation && (
-        <p className="-mt-2 text-center text-sm text-olive-600/80 dark:text-olive-300/70">
+        <p className="-mt-2 text-center text-sm text-ink-600/80 dark:text-ink-300/70">
           {word.example_translation}
         </p>
       )}
@@ -936,10 +936,10 @@ function SentenceStage({
         placeholder="So'zni yozing…"
         className={`w-full rounded-xl border-2 px-4 py-2.5 text-center text-sm font-semibold outline-none transition-colors ${
           checked === true
-            ? "border-olive-500 bg-olive-50 text-olive-700 dark:bg-olive-900/40 dark:text-olive-200"
+            ? "border-ink-500 bg-ink-50 text-ink-700 dark:bg-ink-900/40 dark:text-ink-200"
             : checked === false
-            ? "border-wine-400 bg-wine-50 text-wine-700 dark:bg-wine-950/40 dark:text-wine-300"
-            : "border-olive-200 bg-white text-olive-900 focus:border-olive-500 dark:border-white/10 dark:bg-white/5 dark:text-olive-50"
+            ? "border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+            : "border-ink-200 bg-white text-ink-900 focus:border-ink-500 dark:border-white/10 dark:bg-white/5 dark:text-ink-50"
         }`}
       />
       <button

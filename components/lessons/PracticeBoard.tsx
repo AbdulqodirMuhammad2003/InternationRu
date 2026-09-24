@@ -61,22 +61,22 @@ export function PracticeBoard({ units }: { units: UnitDetail[] }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {flat.length === 0 && (
-        <p className="text-sm text-olive-700/60 dark:text-olive-300/60">Hozircha mashq qilish uchun topshiriqlar yo'q.</p>
+        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">Hozircha mashq qilish uchun topshiriqlar yo'q.</p>
       )}
       {flat.map(({ unitTitle, exercise }, i) => (
         <button
           key={exercise.id}
           onClick={() => start({ unitTitle, exercise })}
           style={{ animationDelay: `${i * 50}ms` }}
-          className="animate-fade-up rounded-2xl bg-white p-5 text-left shadow-sm ring-1 ring-olive-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-[#1f2115] dark:shadow-none dark:ring-white/10"
+          className="animate-fade-up rounded-2xl bg-white p-5 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-[#161b26] dark:shadow-none dark:ring-white/10"
         >
-          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-olive-50 text-olive-600 dark:bg-white/10 dark:text-olive-300">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-ink-50 text-ink-600 dark:bg-white/10 dark:text-ink-300">
             <Mic size={18} />
           </div>
-          <p className="mb-1 text-xs text-olive-500 line-clamp-1 dark:text-olive-400">{unitTitle}</p>
-          <p className="mb-2 font-semibold text-olive-950 dark:text-olive-50">{exercise.title}</p>
-          <p className="mb-3 text-xs text-olive-700/60 dark:text-olive-300/60">{exercise.question_count} ta savol</p>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-olive-100 dark:bg-white/10">
+          <p className="mb-1 text-xs text-ink-500 line-clamp-1 dark:text-ink-400">{unitTitle}</p>
+          <p className="mb-2 font-semibold text-ink-950 dark:text-ink-50">{exercise.title}</p>
+          <p className="mb-3 text-xs text-ink-700/60 dark:text-ink-300/60">{exercise.question_count} ta savol</p>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
             <div
               className="h-full rounded-full bg-gold-500 transition-[width] duration-500"
               style={{ width: `${exercise.score_pct}%` }}
@@ -87,11 +87,11 @@ export function PracticeBoard({ units }: { units: UnitDetail[] }) {
 
       {active && (
         <>
-          <div className="fixed inset-0 z-40 animate-fade-in bg-olive-950/30 backdrop-blur-[2px]" onClick={close} />
-          <div className="fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-white shadow-2xl dark:bg-[#1a1c11]">
-            <div className="flex items-center justify-between border-b border-olive-100 px-6 py-4 dark:border-white/10">
-              <h2 className="font-display text-lg font-bold text-olive-950 dark:text-olive-50">{active.exercise.title}</h2>
-              <button onClick={close} className="rounded-full p-1.5 text-olive-500 transition-colors hover:bg-olive-50 dark:text-olive-300 dark:hover:bg-white/10">
+          <div className="fixed inset-0 z-40 animate-fade-in bg-ink-950/30 backdrop-blur-[2px]" onClick={close} />
+          <div className="fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-white shadow-2xl dark:bg-[#121620]">
+            <div className="flex items-center justify-between border-b border-ink-100 px-6 py-4 dark:border-white/10">
+              <h2 className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">{active.exercise.title}</h2>
+              <button onClick={close} className="rounded-full p-1.5 text-ink-500 transition-colors hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-white/10">
                 <X size={20} />
               </button>
             </div>

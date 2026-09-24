@@ -217,8 +217,8 @@ export function LessonsBoard({
                 active
                   ? "bg-gradient-to-br from-azure-700 to-azure-950 text-white shadow-sm shadow-azure-900/30"
                   : level.locked
-                  ? "bg-white text-olive-300 hover:bg-olive-50 dark:bg-[#1f2115] dark:text-olive-700 dark:hover:bg-white/10"
-                  : "bg-white text-olive-700 shadow-sm hover:-translate-y-0.5 hover:bg-olive-50 dark:bg-[#1f2115] dark:text-olive-200 dark:hover:bg-white/10"
+                  ? "bg-white text-ink-300 hover:bg-ink-50 dark:bg-[#161b26] dark:text-ink-700 dark:hover:bg-white/10"
+                  : "bg-white text-ink-700 shadow-sm hover:-translate-y-0.5 hover:bg-ink-50 dark:bg-[#161b26] dark:text-ink-200 dark:hover:bg-white/10"
               }`}
             >
               {level.locked ? <Lock size={13} /> : null}
@@ -229,14 +229,14 @@ export function LessonsBoard({
       </div>
 
       {selectedLevel && (
-        <p className="mb-4 text-sm text-olive-700/60 dark:text-olive-300/60">{selectedLevel.description}</p>
+        <p className="mb-4 text-sm text-ink-700/60 dark:text-ink-300/60">{selectedLevel.description}</p>
       )}
 
       {visibleUnits.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-3xl bg-white p-12 text-center shadow-sm dark:bg-[#1f2115] dark:shadow-none">
-          <Lock size={28} className="text-olive-200 dark:text-olive-700" />
-          <p className="font-semibold text-olive-700 dark:text-olive-200">Bu daraja hali ochilmagan</p>
-          <p className="text-sm text-olive-400 dark:text-olive-500">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-3xl bg-white p-12 text-center shadow-sm dark:bg-[#161b26] dark:shadow-none">
+          <Lock size={28} className="text-ink-200 dark:text-ink-700" />
+          <p className="font-semibold text-ink-700 dark:text-ink-200">Bu daraja hali ochilmagan</p>
+          <p className="text-sm text-ink-400 dark:text-ink-500">
             {selectedLevel?.code} darajasi avvalgi darajani tugatgach ochiladi.
           </p>
         </div>
@@ -291,7 +291,7 @@ export function LessonsBoard({
                             className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-gold-300 to-gold-500 transition-[width] duration-700"
                             style={{ width: `${unit.percent}%` }}
                           />
-                          <span className="relative flex h-full items-center justify-center text-lg font-extrabold text-olive-950">
+                          <span className="relative flex h-full items-center justify-center text-lg font-extrabold text-ink-950">
                             {unit.percent}%
                           </span>
                         </div>
@@ -308,7 +308,7 @@ export function LessonsBoard({
             <button
               onClick={() => scrollToCard(activeCard - 1)}
               disabled={activeCard === 0}
-              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-olive-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#1f2115]/90 dark:text-olive-100"
+              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
               aria-label="Chapga aylantirish"
             >
               <ChevronLeft size={20} />
@@ -316,7 +316,7 @@ export function LessonsBoard({
             <button
               onClick={() => scrollToCard(activeCard + 1)}
               disabled={activeCard === visibleUnits.length - 1}
-              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-olive-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#1f2115]/90 dark:text-olive-100"
+              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
               aria-label="O’ngga aylantirish"
             >
               <ChevronRight size={20} />
@@ -333,7 +333,7 @@ export function LessonsBoard({
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === activeCard
                     ? "w-6 bg-gold-400"
-                    : "w-2 bg-olive-200 hover:bg-olive-300 dark:bg-white/15"
+                    : "w-2 bg-ink-200 hover:bg-ink-300 dark:bg-white/15"
                 }`}
               />
             ))}
@@ -346,25 +346,25 @@ export function LessonsBoard({
 
       {/* Dars yon paneli (mashq bajarilayotganda butun ekranga kengayadi) */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full flex-col bg-white shadow-2xl transition-all duration-300 dark:bg-[#1a1c11] ${
+        className={`fixed right-0 top-0 z-50 flex h-full flex-col bg-white shadow-2xl transition-all duration-300 dark:bg-[#121620] ${
           openUnit ? "translate-x-0" : "translate-x-full"
         } ${view === "exercise-run" ? "w-full" : "w-full max-w-md"}`}
       >
         {openUnit && (
           <>
-            <div className="flex items-center justify-between border-b border-olive-100 px-6 py-4 dark:border-white/10">
-              <h2 className="font-display text-lg font-bold text-olive-950 dark:text-olive-50">
+            <div className="flex items-center justify-between border-b border-ink-100 px-6 py-4 dark:border-white/10">
+              <h2 className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
                 {view !== "main" ? (
                   <button
                     onClick={() => setView("main")}
-                    className="mr-2 inline-flex items-center text-olive-400 hover:text-olive-700 dark:text-olive-500 dark:hover:text-olive-200"
+                    className="mr-2 inline-flex items-center text-ink-400 hover:text-ink-700 dark:text-ink-500 dark:hover:text-ink-200"
                   >
                     <ChevronLeft size={18} />
                   </button>
                 ) : null}
                 {openUnit.title}
               </h2>
-              <button onClick={closePanel} className="rounded-full p-1.5 text-olive-500 transition-colors hover:bg-olive-50 dark:text-olive-300 dark:hover:bg-white/10">
+              <button onClick={closePanel} className="rounded-full p-1.5 text-ink-500 transition-colors hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-white/10">
                 <X size={20} />
               </button>
             </div>
@@ -401,18 +401,18 @@ export function LessonsBoard({
                           unitVideoUnlocked(openUnit) ? setView("video") : setVideoNotice(true)
                         }
                         style={{ animationDelay: "60ms" }}
-                        className="flex animate-fade-up items-center gap-4 rounded-2xl bg-olive-50 p-4 text-left transition-colors hover:bg-olive-100/70 dark:bg-white/5 dark:hover:bg-white/10"
+                        className="flex animate-fade-up items-center gap-4 rounded-2xl bg-ink-50 p-4 text-left transition-colors hover:bg-ink-100/70 dark:bg-white/5 dark:hover:bg-white/10"
                       >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-olive-200 text-olive-600 dark:bg-white/10 dark:text-olive-300">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-ink-200 text-ink-600 dark:bg-white/10 dark:text-ink-300">
                           {unitVideoUnlocked(openUnit) ? <PlayCircle size={20} /> : <Lock size={20} />}
                         </div>
                         <div className="flex-1">
-                          <p className="font-semibold text-olive-800 dark:text-olive-100">Video dars</p>
-                          <p className="text-xs text-olive-600/70 dark:text-olive-300/60">
+                          <p className="font-semibold text-ink-800 dark:text-ink-100">Video dars</p>
+                          <p className="text-xs text-ink-600/70 dark:text-ink-300/60">
                             Ruscha qisqa video (5-10 daqiqa)
                           </p>
                         </div>
-                        <span className="rounded-full bg-olive-200/70 px-2.5 py-1 text-xs font-semibold text-olive-600 dark:bg-white/10 dark:text-olive-300">
+                        <span className="rounded-full bg-ink-200/70 px-2.5 py-1 text-xs font-semibold text-ink-600 dark:bg-white/10 dark:text-ink-300">
                           {unitVideoUnlocked(openUnit) ? "Ochiq" : "Yopiq"}
                         </span>
                       </button>
@@ -456,23 +456,23 @@ export function LessonsBoard({
                         key={round.id}
                         onClick={() => setFlowRoundId(round.id)}
                         style={{ animationDelay: `${i * 50}ms` }}
-                        className="animate-fade-up rounded-2xl border border-olive-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:shadow-none"
+                        className="animate-fade-up rounded-2xl border border-ink-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:shadow-none"
                       >
                         <div className="mb-2 flex items-center justify-between">
                           <span
                             className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
                               pct === 100
-                                ? "bg-olive-100 text-olive-700 dark:bg-white/10 dark:text-olive-200"
-                                : "bg-olive-50 text-olive-600 dark:bg-white/5 dark:text-olive-300"
+                                ? "bg-ink-100 text-ink-700 dark:bg-white/10 dark:text-ink-200"
+                                : "bg-ink-50 text-ink-600 dark:bg-white/5 dark:text-ink-300"
                             }`}
                           >
                             {pct === 100 ? "Tugallangan" : "Faol"}
                           </span>
-                          {pct === 100 && <CheckCircle2 size={18} className="text-olive-600 dark:text-olive-300" />}
+                          {pct === 100 && <CheckCircle2 size={18} className="text-ink-600 dark:text-ink-300" />}
                         </div>
-                        <p className="font-semibold text-olive-950 dark:text-olive-50">{round.title}</p>
-                        <p className="mb-2 text-xs text-olive-700/60 dark:text-olive-300/60">{round.words.length} ta so’z</p>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-olive-100 dark:bg-white/10">
+                        <p className="font-semibold text-ink-950 dark:text-ink-50">{round.title}</p>
+                        <p className="mb-2 text-xs text-ink-700/60 dark:text-ink-300/60">{round.words.length} ta so’z</p>
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
                           <div
                             className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
                             style={{ width: `${pct}%` }}
@@ -491,16 +491,16 @@ export function LessonsBoard({
                       key={ex.id}
                       onClick={() => startExercise(ex.id)}
                       style={{ animationDelay: `${i * 50}ms` }}
-                      className="animate-fade-up rounded-2xl border border-olive-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:shadow-none"
+                      className="animate-fade-up rounded-2xl border border-ink-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:shadow-none"
                     >
-                      <span className="mb-2 inline-block rounded-full bg-wine-50 px-2 py-0.5 text-[10px] font-bold uppercase text-wine-600 dark:bg-wine-950/40 dark:text-wine-300">
+                      <span className="mb-2 inline-block rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
                         {ex.skill_label}
                       </span>
-                      <p className="font-semibold text-olive-950 dark:text-olive-50">{ex.title}</p>
-                      <p className="mb-2 text-xs text-olive-700/60 dark:text-olive-300/60">{ex.question_count} ta savol</p>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-olive-100 dark:bg-white/10">
+                      <p className="font-semibold text-ink-950 dark:text-ink-50">{ex.title}</p>
+                      <p className="mb-2 text-xs text-ink-700/60 dark:text-ink-300/60">{ex.question_count} ta savol</p>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
                         <div
-                          className="h-full rounded-full bg-wine-500 transition-[width] duration-500"
+                          className="h-full rounded-full bg-rose-500 transition-[width] duration-500"
                           style={{ width: `${ex.score_pct}%` }}
                         />
                       </div>
@@ -530,7 +530,7 @@ export function LessonsBoard({
                     const embedUrl = toYouTubeEmbedUrl(openUnit.video_url!);
                     if (!embedUrl) {
                       return (
-                        <p className="text-sm text-olive-600/70 dark:text-olive-300/60">
+                        <p className="text-sm text-ink-600/70 dark:text-ink-300/60">
                           Video havolasi noto'g'ri formatda.
                         </p>
                       );
@@ -547,7 +547,7 @@ export function LessonsBoard({
                       </div>
                     );
                   })()}
-                  <p className="text-xs text-olive-600/70 dark:text-olive-300/60">
+                  <p className="text-xs text-ink-600/70 dark:text-ink-300/60">
                     Bu darsda o'rgangan so'zlaringizni ruscha nutqda tanib olishga harakat qiling.
                   </p>
                 </div>
@@ -594,8 +594,8 @@ export function ExerciseRun({
     return (
       <div className="flex animate-pop-in flex-col items-center gap-4 py-10 text-center">
         <PlayCircle size={48} className="text-gold-500" />
-        <p className="font-display text-2xl font-bold text-olive-950 dark:text-olive-50">{exerciseResult}%</p>
-        <p className="text-sm text-olive-700/60 dark:text-olive-300/60">
+        <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">{exerciseResult}%</p>
+        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">
           To'g'ri javoblar: {correctCount} / {exercise.questions.length}
         </p>
         <button
@@ -612,10 +612,10 @@ export function ExerciseRun({
 
   return (
     <div key={qIndex} className="flex animate-fade-up flex-col gap-4">
-      <p className="text-xs font-semibold text-olive-500 dark:text-olive-400">
+      <p className="text-xs font-semibold text-ink-500 dark:text-ink-400">
         Savol {qIndex + 1} / {exercise.questions.length}
       </p>
-      <p className="text-base font-semibold leading-snug text-olive-950 dark:text-olive-50">{question.prompt}</p>
+      <p className="text-base font-semibold leading-snug text-ink-950 dark:text-ink-50">{question.prompt}</p>
       <div className="flex flex-col gap-2">
         {question.options.map((opt, i) => (
           <button
@@ -623,8 +623,8 @@ export function ExerciseRun({
             onClick={() => onSelect(i)}
             className={`rounded-xl border px-4 py-3 text-left text-sm transition-all duration-150 ${
               selectedAnswer === i
-                ? "border-olive-500 bg-olive-50 font-semibold text-olive-900 dark:bg-olive-900/40 dark:text-olive-50"
-                : "border-olive-100 bg-white hover:bg-olive-50/60 dark:border-white/10 dark:bg-white/5 dark:text-olive-200 dark:hover:bg-white/10"
+                ? "border-ink-500 bg-ink-50 font-semibold text-ink-900 dark:bg-ink-900/40 dark:text-ink-50"
+                : "border-ink-100 bg-white hover:bg-ink-50/60 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
             }`}
           >
             {opt}

@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
-import { Lora } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 
-const lora = Lora({
+// Ikkalasi ham kirill harflarini to'liq qo'llab-quvvatlaydi (ruscha matn
+// uchun muhim). Manrope — sarlavhalar uchun zamonaviy, do'stona geometrik
+// shrift; Inter — ekranda o'qish uchun eng qulay matn shriftlaridan biri.
+const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700"],
-  variable: "--font-lora",
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -24,7 +32,7 @@ const THEME_INIT_SCRIPT = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`h-full antialiased ${lora.variable}`} suppressHydrationWarning>
+    <html lang="ru" className={`h-full antialiased ${manrope.variable} ${inter.variable}`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {/* next/script'ning "beforeInteractive" strategiyasi o'rniga oddiy
             inline <script> ishlatilmoqda — u HTML parse qilinayotganda,

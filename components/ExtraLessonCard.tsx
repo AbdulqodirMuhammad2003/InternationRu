@@ -19,22 +19,22 @@ export function ExtraLessonCard({ lesson }: { lesson: ExtraLessonRecord }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-olive-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-center gap-2 text-xs font-semibold text-wine-600">
+    <div className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-center gap-2 text-xs font-semibold text-rose-600">
         <CalendarClock size={14} /> {lesson.date_label}
         <Clock size={14} className="ml-2" /> {lesson.time_label}
       </div>
-      <p className="font-display text-lg font-bold text-olive-950">{lesson.title}</p>
-      <p className="text-sm text-olive-700/60">{lesson.description}</p>
-      <div className="flex items-center gap-2 text-xs text-olive-400">
+      <p className="font-display text-lg font-bold text-ink-950">{lesson.title}</p>
+      <p className="text-sm text-ink-700/60">{lesson.description}</p>
+      <div className="flex items-center gap-2 text-xs text-ink-400">
         <User size={14} /> {lesson.teacher}
       </div>
       <div className="mt-1 flex items-center justify-between">
-        <span className="text-xs text-olive-700/60">
+        <span className="text-xs text-ink-700/60">
           {lesson.seats_taken}/{lesson.seats_total} o'rin band
         </span>
         {lesson.booked_by_user ? (
-          <span className="flex items-center gap-1 rounded-full bg-olive-50 px-3 py-1.5 text-xs font-semibold text-olive-700">
+          <span className="flex items-center gap-1 rounded-full bg-ink-50 px-3 py-1.5 text-xs font-semibold text-ink-700">
             <CheckCircle2 size={14} /> Siz yozildingiz
           </span>
         ) : (

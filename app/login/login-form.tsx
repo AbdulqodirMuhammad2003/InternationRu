@@ -11,7 +11,7 @@ export function LoginForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <div>
-        <label className="mb-1 block text-sm font-medium text-olive-800">
+        <label className="mb-1 block text-sm font-medium text-ink-800">
           Elektron pochta
         </label>
         <input
@@ -20,11 +20,11 @@ export function LoginForm() {
           required
           defaultValue="demo@avangard.uz"
           placeholder="you@example.com"
-          className="w-full rounded-xl border border-olive-200 px-4 py-2.5 text-sm outline-none transition-colors focus:border-olive-500 focus:ring-2 focus:ring-olive-100"
+          className="w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-300 focus:border-azure-500 focus:ring-2 focus:ring-azure-100"
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-olive-800">
+        <label className="mb-1 block text-sm font-medium text-ink-800">
           Parol
         </label>
         <input
@@ -33,12 +33,12 @@ export function LoginForm() {
           required
           defaultValue="demo1234"
           placeholder="••••••••"
-          className="w-full rounded-xl border border-olive-200 px-4 py-2.5 text-sm outline-none transition-colors focus:border-olive-500 focus:ring-2 focus:ring-olive-100"
+          className="w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-300 focus:border-azure-500 focus:ring-2 focus:ring-azure-100"
         />
       </div>
 
       {state.error && (
-        <p className="animate-fade-up rounded-lg bg-wine-50 px-3 py-2 text-sm text-wine-700">
+        <p className="animate-fade-up rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
           {state.error}
         </p>
       )}

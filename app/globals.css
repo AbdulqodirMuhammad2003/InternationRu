@@ -6,17 +6,17 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f8f6ef;
-  --foreground: #1e1c13;
+  --background: #f5f7fb;
+  --foreground: #121826;
   --card: #ffffff;
-  --card-muted: #f4f2e9;
-  --line: rgba(30, 32, 18, 0.08);
+  --card-muted: #eef1f7;
+  --line: rgba(18, 24, 38, 0.08);
 }
 
 :root.dark {
-  --background: #15160d;
-  --foreground: #efe9d6;
-  --card: #1f2115;
+  --background: #0d1017;
+  --foreground: #e8ecf4;
+  --card: #161b26;
   --card-muted: rgba(255, 255, 255, 0.045);
   --line: rgba(255, 255, 255, 0.08);
 }
@@ -26,21 +26,25 @@
   --color-foreground: var(--foreground);
 }
 
-/* Avangard premium palette — olive (brand), gold (accent/achievement),
-   wine (secondary accent). Muted, desaturated jewel tones for an
-   understated, expensive feel rather than bright/candy colors. */
+/* Avangard palitrasi:
+   - ink   — neytral (matn, fon, chegaralar); ozgina ko'k tusli, uzoq
+             o'qishda ko'zni charchatmaydi.
+   - azure — asosiy harakatlar (tugmalar, faol holatlar), diqqat va ishonch.
+   - mint  — progress va "o'rganildi" holatlari, muvaffaqiyat hissi.
+   - gold  — logodagi oltin; mukofot va urg'u (foizlar, tangalar).
+   - rose  — (Tailwind'ning o'zidagi) yopiq darslar va xatolar, kam ishlatiladi. */
 @theme {
-  --color-olive-50: #f6f6ee;
-  --color-olive-100: #eaebd6;
-  --color-olive-200: #d4d6ae;
-  --color-olive-300: #b8bd7e;
-  --color-olive-400: #9da256;
-  --color-olive-500: #7f8542;
-  --color-olive-600: #666b35;
-  --color-olive-700: #52562c;
-  --color-olive-800: #434627;
-  --color-olive-900: #393c24;
-  --color-olive-950: #1e2012;
+  --color-ink-50: #f5f7fb;
+  --color-ink-100: #eceff6;
+  --color-ink-200: #d9dfeb;
+  --color-ink-300: #b7c0d3;
+  --color-ink-400: #8b96ae;
+  --color-ink-500: #667189;
+  --color-ink-600: #4d566c;
+  --color-ink-700: #3a4256;
+  --color-ink-800: #272d3d;
+  --color-ink-900: #1a1f2c;
+  --color-ink-950: #0f131c;
 
   --color-gold-50: #fbf7ec;
   --color-gold-100: #f5ecce;
@@ -54,21 +58,6 @@
   --color-gold-900: #563a22;
   --color-gold-950: #2f1d10;
 
-  --color-wine-50: #faf1f1;
-  --color-wine-100: #f1dcdd;
-  --color-wine-200: #e2b8bb;
-  --color-wine-300: #cd8b90;
-  --color-wine-400: #b15f66;
-  --color-wine-500: #954650;
-  --color-wine-600: #7a3640;
-  --color-wine-700: #652c35;
-  --color-wine-800: #55272f;
-  --color-wine-900: #49242b;
-  --color-wine-950: #281114;
-
-  /* Diqqatni jamlash uchun sovuq ranglar: azure (asosiy tugmalar,
-     harakatlar) va mint (progress, "o'rganildi" holatlari). Olive brend
-     (logo, sarlavhalar, yon panel) sifatida qoladi. */
   --color-azure-50: #edf2ff;
   --color-azure-100: #dbe4ff;
   --color-azure-200: #bac8ff;
@@ -93,7 +82,7 @@
   --color-mint-900: #087f5b;
   --color-mint-950: #04402e;
 
-  --font-display: var(--font-lora), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
 
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-fade-in: fade-in 0.5s ease both;
@@ -176,8 +165,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family:
-    "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji";
+    var(--font-inter), "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 

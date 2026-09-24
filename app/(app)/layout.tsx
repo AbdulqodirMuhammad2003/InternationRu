@@ -14,16 +14,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect("/login");
 
   return (
-    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-[#f8f6ef] dark:bg-[#15160d]">
+    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-[#f5f7fb] dark:bg-[#0d1017]">
       <Sidebar />
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-olive-100 bg-white/80 px-8 py-3 backdrop-blur-sm dark:border-white/10 dark:bg-[#1a1c11]/80">
+        <header className="flex items-center justify-between gap-4 border-b border-ink-100 bg-white/80 px-8 py-3 backdrop-blur-sm dark:border-white/10 dark:bg-[#121620]/80">
           <CommandPalette />
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
 
-            <div className="mx-1 h-6 w-px bg-olive-100 dark:bg-white/10" />
+            <div className="mx-1 h-6 w-px bg-ink-100 dark:bg-white/10" />
 
             <EditableAvatar
               name={user.name}
@@ -32,8 +32,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               triggerClassName="gap-3"
             >
               <div className="leading-tight">
-                <p className="text-sm font-semibold text-olive-950 dark:text-olive-50">{user.name}</p>
-                <p className="text-xs text-olive-600/70 dark:text-olive-300/60">{user.level}</p>
+                <p className="text-sm font-semibold text-ink-950 dark:text-ink-50">{user.name}</p>
+                <p className="text-xs text-ink-600/70 dark:text-ink-300/60">{user.level}</p>
               </div>
             </EditableAvatar>
           </div>

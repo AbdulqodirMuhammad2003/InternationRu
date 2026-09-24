@@ -9,9 +9,9 @@ function initials(name: string) {
 
 const PALETTE = [
   "bg-gold-200",
-  "bg-olive-200",
-  "bg-olive-300",
-  "bg-wine-200",
+  "bg-ink-200",
+  "bg-ink-300",
+  "bg-rose-200",
   "bg-gold-300",
 ];
 
@@ -44,7 +44,7 @@ export function Avatar({
 
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full font-semibold text-olive-950 ring-2 ring-white/60 ${colorFor(
+      className={`flex shrink-0 items-center justify-center rounded-full font-semibold text-ink-950 ring-2 ring-white/60 ${colorFor(
         name
       )}`}
       style={{ width: size, height: size, fontSize: size * 0.38 }}

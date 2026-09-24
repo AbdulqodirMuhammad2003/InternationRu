@@ -7,7 +7,7 @@ export function VocabGauge({ learned, total }: { learned: number; total: number 
   const offset = circumference * (1 - pct / 100);
 
   return (
-    <div className="group relative animate-fade-up overflow-hidden rounded-3xl bg-gradient-to-br from-olive-700 via-olive-800 to-olive-950 p-6 text-white shadow-sm shadow-olive-950/20 ring-1 ring-transparent transition-transform duration-300 hover:-translate-y-0.5 dark:ring-white/10">
+    <div className="group relative animate-fade-up overflow-hidden rounded-3xl bg-gradient-to-br from-ink-700 via-ink-800 to-ink-950 p-6 text-white shadow-sm shadow-ink-950/20 ring-1 ring-transparent transition-transform duration-300 hover:-translate-y-0.5 dark:ring-white/10">
       {/* Fon naqshi */}
       <svg
         className="pointer-events-none absolute -bottom-6 -left-6 h-40 w-40 opacity-20"

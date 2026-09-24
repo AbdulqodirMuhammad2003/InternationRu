@@ -64,18 +64,18 @@ export function EditableAvatar({
 
   const modal = open && (
     <div
-      className="fixed inset-0 z-[100] flex animate-fade-in items-start justify-center overflow-y-auto bg-olive-950/40 p-4 py-10 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[100] flex animate-fade-in items-start justify-center overflow-y-auto bg-ink-950/40 p-4 py-10 backdrop-blur-sm sm:items-center"
       onClick={() => setOpen(false)}
     >
       <div
-        className="my-auto max-h-[85vh] w-full max-w-sm animate-pop-in overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-[#1f2115]"
+        className="my-auto max-h-[85vh] w-full max-w-sm animate-pop-in overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-[#161b26]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">
-          <h3 className="font-display text-lg font-bold text-olive-950 dark:text-olive-50">Profilni tahrirlash</h3>
+          <h3 className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">Profilni tahrirlash</h3>
           <button
             onClick={() => setOpen(false)}
-            className="rounded-full p-1.5 text-olive-500 transition-colors hover:bg-olive-50 dark:text-olive-300 dark:hover:bg-white/10"
+            className="rounded-full p-1.5 text-ink-500 transition-colors hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-white/10"
             aria-label="Yopish"
           >
             <X size={18} />
@@ -91,7 +91,7 @@ export function EditableAvatar({
               aria-label="Rasm tanlash"
             >
               <Avatar name={name} size={88} photoUrl={preview || avatarUrl} />
-              <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-olive-950/0 text-transparent transition-colors duration-200 group-hover:bg-olive-950/45 group-hover:text-white">
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-ink-950/0 text-transparent transition-colors duration-200 group-hover:bg-ink-950/45 group-hover:text-white">
                 <Camera size={22} />
               </span>
             </button>
@@ -106,26 +106,26 @@ export function EditableAvatar({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="text-xs font-semibold text-olive-600 transition-colors hover:text-olive-800 dark:text-olive-300 dark:hover:text-olive-100"
+              className="text-xs font-semibold text-ink-600 transition-colors hover:text-ink-800 dark:text-ink-300 dark:hover:text-ink-100"
             >
               Rasm tanlash
             </button>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-olive-800 dark:text-olive-200">Ism</label>
+            <label className="mb-1 block text-sm font-medium text-ink-800 dark:text-ink-200">Ism</label>
             <input
               type="text"
               name="name"
               defaultValue={name}
               required
               maxLength={60}
-              className="w-full rounded-xl border border-olive-200 px-4 py-2.5 text-sm outline-none transition-colors focus:border-olive-500 focus:ring-2 focus:ring-olive-100 dark:border-white/10 dark:bg-white/5 dark:text-olive-50 dark:focus:border-olive-400 dark:focus:ring-white/10"
+              className="w-full rounded-xl border border-ink-200 px-4 py-2.5 text-sm outline-none transition-colors focus:border-ink-500 focus:ring-2 focus:ring-ink-100 dark:border-white/10 dark:bg-white/5 dark:text-ink-50 dark:focus:border-ink-400 dark:focus:ring-white/10"
             />
           </div>
 
           {state.error && (
-            <p className="animate-fade-up rounded-lg bg-wine-50 px-3 py-2 text-sm text-wine-700 dark:bg-wine-950/40 dark:text-wine-300">
+            <p className="animate-fade-up rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
               {state.error}
             </p>
           )}
@@ -156,7 +156,7 @@ export function EditableAvatar({
           style={{ width: size, height: size }}
         >
           <Avatar name={name} size={size} photoUrl={avatarUrl} />
-          <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-olive-950/0 text-transparent transition-colors duration-200 group-hover:bg-olive-950/45 group-hover:text-white">
+          <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-ink-950/0 text-transparent transition-colors duration-200 group-hover:bg-ink-950/45 group-hover:text-white">
             <Camera size={Math.max(13, Math.round(size * 0.32))} />
           </span>
         </span>

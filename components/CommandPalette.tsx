@@ -81,12 +81,12 @@ export function CommandPalette() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group flex items-center gap-2 rounded-full border border-olive-100 bg-white px-3 py-1.5 text-xs text-olive-500 transition-colors hover:border-olive-300 hover:bg-olive-50 dark:border-white/10 dark:bg-white/5 dark:text-olive-200/70 dark:hover:bg-white/10"
+        className="group flex items-center gap-2 rounded-full border border-ink-100 bg-white px-3 py-1.5 text-xs text-ink-500 transition-colors hover:border-ink-300 hover:bg-ink-50 dark:border-white/10 dark:bg-white/5 dark:text-ink-200/70 dark:hover:bg-white/10"
         aria-label="Tezkor qidiruv (Cmd+K)"
       >
         <Search size={14} />
         <span className="hidden sm:inline">Qidirish</span>
-        <kbd className="hidden rounded border border-olive-200 bg-olive-50 px-1 text-[10px] font-semibold text-olive-500 sm:inline dark:border-white/10 dark:bg-white/10 dark:text-olive-200/70">
+        <kbd className="hidden rounded border border-ink-200 bg-ink-50 px-1 text-[10px] font-semibold text-ink-500 sm:inline dark:border-white/10 dark:bg-white/10 dark:text-ink-200/70">
           ⌘K
         </kbd>
       </button>
@@ -94,15 +94,15 @@ export function CommandPalette() {
       {mounted && open
         ? createPortal(
             <div
-              className="animate-fade-in fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-olive-950/50 p-4 pt-[14vh] backdrop-blur-sm"
+              className="animate-fade-in fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-ink-950/50 p-4 pt-[14vh] backdrop-blur-sm"
               onClick={() => setOpen(false)}
             >
               <div
-                className="animate-pop-in w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#1f2115]"
+                className="animate-pop-in w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#161b26]"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center gap-3 border-b border-olive-100 px-4 py-3 dark:border-white/10">
-                  <Search size={16} className="text-olive-400" />
+                <div className="flex items-center gap-3 border-b border-ink-100 px-4 py-3 dark:border-white/10">
+                  <Search size={16} className="text-ink-400" />
                   <input
                     autoFocus
                     value={query}
@@ -112,15 +112,15 @@ export function CommandPalette() {
                     }}
                     onKeyDown={onKeyDown}
                     placeholder="Sahifa qidirish..."
-                    className="flex-1 bg-transparent text-sm text-olive-950 outline-none placeholder:text-olive-300 dark:text-olive-50 dark:placeholder:text-olive-500"
+                    className="flex-1 bg-transparent text-sm text-ink-950 outline-none placeholder:text-ink-300 dark:text-ink-50 dark:placeholder:text-ink-500"
                   />
-                  <kbd className="rounded border border-olive-200 px-1.5 py-0.5 text-[10px] text-olive-400 dark:border-white/10 dark:text-olive-300/60">
+                  <kbd className="rounded border border-ink-200 px-1.5 py-0.5 text-[10px] text-ink-400 dark:border-white/10 dark:text-ink-300/60">
                     esc
                   </kbd>
                 </div>
                 <div className="max-h-72 overflow-y-auto p-2">
                   {filtered.length === 0 && (
-                    <p className="px-3 py-6 text-center text-sm text-olive-400">Hech narsa topilmadi.</p>
+                    <p className="px-3 py-6 text-center text-sm text-ink-400">Hech narsa topilmadi.</p>
                   )}
                   {filtered.map((c, i) => {
                     const Icon = c.icon;
@@ -131,13 +131,13 @@ export function CommandPalette() {
                         onMouseEnter={() => setActiveIndex(i)}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
                           i === activeIndex
-                            ? "bg-olive-50 text-olive-950 dark:bg-white/10 dark:text-olive-50"
-                            : "text-olive-700 dark:text-olive-200/70"
+                            ? "bg-ink-50 text-ink-950 dark:bg-white/10 dark:text-ink-50"
+                            : "text-ink-700 dark:text-ink-200/70"
                         }`}
                       >
-                        <Icon size={16} className="text-olive-500 dark:text-gold-300" />
+                        <Icon size={16} className="text-ink-500 dark:text-gold-300" />
                         {c.label}
-                        {i === activeIndex && <CornerDownLeft size={13} className="ml-auto text-olive-300" />}
+                        {i === activeIndex && <CornerDownLeft size={13} className="ml-auto text-ink-300" />}
                       </button>
                     );
                   })}

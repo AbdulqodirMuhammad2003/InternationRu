@@ -40,7 +40,7 @@ export function Logo({
       {showText && (
         <div>
           <p className="font-display text-sm font-bold leading-tight tracking-wide">Avangard</p>
-          <p className="text-[11px] text-olive-700/70">{subtitle}</p>
+          <p className="text-[11px] text-ink-700/70">{subtitle}</p>
         </div>
       )}
     </div>
