@@ -104,7 +104,7 @@ export async function seedDatabase() {
   // базовый" tuzilmasiga muvofiq).
   const units = [
     {
-      code: "C1",
+      code: "C1a",
       level: "A1",
       title: "1-dars",
       subtitle: "Tanishuv: olmoshlar va birinchi so'zlar",
@@ -114,72 +114,92 @@ export async function seedDatabase() {
       date: "11 avg",
     },
     {
-      code: "C2",
+      code: "C1b",
       level: "A1",
       title: "2-dars",
-      subtitle: "Ismlar va birinchi fe'l",
+      subtitle: "Kasblar, buyumlar va oziq-ovqat",
       color: "blue",
       icon: "book",
       locked: 1,
       date: "",
     },
     {
-      code: "C3",
+      code: "C1c",
       level: "A1",
       title: "3-dars",
-      subtitle: "Fe'llar: bor-yo'q va harakatlar",
+      subtitle: "Tillar, mamlakatlar va egalik olmoshlari",
       color: "orange",
       icon: "chart",
       locked: 1,
       date: "",
     },
     {
-      code: "C4",
+      code: "C2",
       level: "A1",
       title: "4-dars",
-      subtitle: "Vaqt, joy va mashg'ulotlar",
+      subtitle: "Ismlar va birinchi fe'l",
       color: "purple",
       icon: "chat",
       locked: 1,
       date: "",
     },
     {
-      code: "C5",
-      level: "A2",
+      code: "C3",
+      level: "A1",
       title: "5-dars",
-      subtitle: "Sifatlar va solishtirish darajasi",
+      subtitle: "Fe'llar: bor-yo'q va harakatlar",
       color: "black",
       icon: "lock",
       locked: 1,
       date: "",
     },
     {
-      code: "C6",
-      level: "A2",
+      code: "C4",
+      level: "A1",
       title: "6-dars",
-      subtitle: "Fe'l turlari va \"Necha yosh?\"",
+      subtitle: "Vaqt, joy va mashg'ulotlar",
       color: "green",
       icon: "headphones",
       locked: 1,
       date: "",
     },
     {
-      code: "C7",
+      code: "C5",
       level: "A2",
       title: "7-dars",
-      subtitle: "Harakat fe'llari va narx so'rash",
+      subtitle: "Sifatlar va solishtirish darajasi",
       color: "blue",
       icon: "book",
       locked: 1,
       date: "",
     },
     {
-      code: "C8",
+      code: "C6",
       level: "A2",
       title: "8-dars",
-      subtitle: "Kelishiklar va harakat fe'llari",
+      subtitle: "Fe'l turlari va \"Necha yosh?\"",
       color: "orange",
       icon: "chart",
+      locked: 1,
+      date: "",
+    },
+    {
+      code: "C7",
+      level: "A2",
+      title: "9-dars",
+      subtitle: "Harakat fe'llari va narx so'rash",
+      color: "purple",
+      icon: "chat",
+      locked: 1,
+      date: "",
+    },
+    {
+      code: "C8",
+      level: "A2",
+      title: "10-dars",
+      subtitle: "Kelishiklar va harakat fe'llari",
+      color: "black",
+      icon: "lock",
       locked: 1,
       date: "",
     },
@@ -200,9 +220,10 @@ export async function seedDatabase() {
     unitIds[u.code] = row.id;
   }
 
-  // Hozircha faqat 1-dars (1-sikl) to'liq lug'at bilan tayyor — demo
-  // foydalanuvchi uni "0%" holatda ochib, yangi lug'at tizimini birinchi
-  // marta sinab ko'ra oladi (so'zlar oldindan "yodlandi" deb belgilanmagan).
+  // Hozircha faqat 1-sikl (1, 2, 3-darslar) to'liq lug'at bilan tayyor —
+  // demo foydalanuvchi ularni "0%" holatda ochib, yangi lug'at tizimini
+  // birinchi marta sinab ko'ra oladi (so'zlar oldindan "yodlandi" deb
+  // belgilanmagan).
 
   // ---------- Lug'at (Vocabulary) ----------
 
@@ -222,8 +243,10 @@ export async function seedDatabase() {
     exUz: string;
   };
 
-  // 1-dars (1-sikl): kitobning "Словарь цикла" ro'yxati — 95 so'z, xuddi
-  // kitobdagi tartibda, 3 bosqichga (round) bo'lib. Misol gaplarning katta
+  // 1-sikl: kitobning "Словарь цикла" ro'yxati — 95 so'z, xuddi kitobdagi
+  // tartibda. Avval 3 ta katta guruhga (`cycle1Round1/2/3`) yig'ilgan —
+  // quyida bu 95 so'z 3 ta darsga (~40/40/15 so'zdan), har biri esa 4
+  // roundga (~10 so'zdan) bo'lib qayta taqsimlanadi. Misol gaplarning katta
   // qismi kitobning o'zidagi dialog va namunalardan olingan.
   const cycle1Round1: WordSeed[] = [
     { emoji: "👨", word: "Он", transcription: "on", pos: "olmosh", uz: "U (erkak)", def: "Местоимение 3-го лица единственного числа мужского рода.", ex: "Он тут, и она тут.", exUz: "U (erkak) shu yerda, u (ayol) ham shu yerda." },
@@ -355,9 +378,38 @@ export async function seedDatabase() {
     return roundId;
   }
 
-  await createRound(unitIds["C1"], "1-bosqich", 1, cycle1Round1);
-  await createRound(unitIds["C1"], "2-bosqich", 2, cycle1Round2);
-  await createRound(unitIds["C1"], "3-bosqich", 3, cycle1Round3);
+  // 95 so'zni 3 ta darsga (~40/40/15) va har birini 4 roundga (~10 so'zdan)
+  // taqsimlaymiz — mavjud `cycle1Round1/2/3` massivlaridan bo'lib olish
+  // orqali (so'zlar qayta terilmaydi, faqat qismlarga bo'linadi).
+  const dars1Round1 = cycle1Round1.slice(0, 10);
+  const dars1Round2 = cycle1Round1.slice(10, 20);
+  const dars1Round3 = cycle1Round1.slice(20, 30);
+  const dars1Round4 = [...cycle1Round1.slice(30, 32), ...cycle1Round2.slice(0, 8)];
+
+  const dars2Round1 = cycle1Round2.slice(8, 18);
+  const dars2Round2 = cycle1Round2.slice(18, 28);
+  const dars2Round3 = [...cycle1Round2.slice(28, 32), ...cycle1Round3.slice(0, 6)];
+  const dars2Round4 = cycle1Round3.slice(6, 16);
+
+  const dars3Round1 = cycle1Round3.slice(16, 20);
+  const dars3Round2 = cycle1Round3.slice(20, 24);
+  const dars3Round3 = cycle1Round3.slice(24, 28);
+  const dars3Round4 = cycle1Round3.slice(28, 31);
+
+  await createRound(unitIds["C1a"], "1-bosqich", 1, dars1Round1);
+  await createRound(unitIds["C1a"], "2-bosqich", 2, dars1Round2);
+  await createRound(unitIds["C1a"], "3-bosqich", 3, dars1Round3);
+  await createRound(unitIds["C1a"], "4-bosqich", 4, dars1Round4);
+
+  await createRound(unitIds["C1b"], "1-bosqich", 1, dars2Round1);
+  await createRound(unitIds["C1b"], "2-bosqich", 2, dars2Round2);
+  await createRound(unitIds["C1b"], "3-bosqich", 3, dars2Round3);
+  await createRound(unitIds["C1b"], "4-bosqich", 4, dars2Round4);
+
+  await createRound(unitIds["C1c"], "1-bosqich", 1, dars3Round1);
+  await createRound(unitIds["C1c"], "2-bosqich", 2, dars3Round2);
+  await createRound(unitIds["C1c"], "3-bosqich", 3, dars3Round3);
+  await createRound(unitIds["C1c"], "4-bosqich", 4, dars3Round4);
 
   // ---------- Mashqlar (Exercises) ----------
   async function addSimpleExercise(
@@ -384,14 +436,14 @@ export async function seedDatabase() {
     return exId;
   }
 
-  await addSimpleExercise(unitIds["C1"], "1-topshiriq", "Olmoshlar", [
+  await addSimpleExercise(unitIds["C1c"], "1-topshiriq", "Olmoshlar", [
     { prompt: "«Она» olmoshi kimga nisbatan ishlatiladi?", options: ["Erkakka", "Ayolga", "Ko'plikka", "Narsaga"], correct: 1 },
     { prompt: "«Мой стол» iborasidagi «мой» nima ma'noni bildiradi?", options: ["Sening", "Mening", "Bizning", "Ularning"], correct: 1 },
     { prompt: "«Да» so'zining tarjimasi qanday?", options: ["Yo'q", "Ha", "Balki", "Albatta"], correct: 1 },
     { prompt: "«Где» so'zi nimani so'raydi?", options: ["Kim", "Nima", "Qayerda", "Qachon"], correct: 2 },
   ]);
 
-  await addSimpleExercise(unitIds["C1"], "2-topshiriq", "So'z boyligi", [
+  await addSimpleExercise(unitIds["C1c"], "2-topshiriq", "So'z boyligi", [
     { prompt: "«Родной город» iborasi nimani anglatadi?", options: ["Yangi shahar", "Tug'ilgan shahar", "Katta shahar", "Chet el shahri"], correct: 1 },
     { prompt: "«Студентка» kim?", options: ["O'qituvchi ayol", "Talaba qiz", "Shifokor ayol", "Sotuvchi ayol"], correct: 1 },
     { prompt: "«Слева» so'zining tarjimasi qanday?", options: ["O'ng tomonda", "Chap tomonda", "Yuqorida", "Pastda"], correct: 1 },
@@ -400,7 +452,7 @@ export async function seedDatabase() {
   // ---------- Baholar (Marks) ----------
   await sql`
     INSERT INTO marks (user_id, unit_id, subject, score, max_score, date)
-    VALUES (${userId}, ${unitIds["C1"]}, ${"Tinglab tushunish"}, ${96}, ${100}, ${"2026-08-11"})
+    VALUES (${userId}, ${unitIds["C1a"]}, ${"Tinglab tushunish"}, ${96}, ${100}, ${"2026-08-11"})
   `;
   await sql`
     INSERT INTO marks (user_id, unit_id, subject, score, max_score, date)
@@ -435,6 +487,11 @@ export async function seedDatabase() {
   await sql`INSERT INTO ranking_entries ${sql(groupRows)}`;
 
   // ---------- Qo'shimcha darslar (Extra lessons) ----------
+  // Diqqat: `sql(rows)` helper'ining o'zi "(ustunlar) values (...)" qismini
+  // to'liq generatsiya qiladi — shuning uchun ustunlar ro'yxati va "VALUES"
+  // so'zini alohida yozish shart emas (aks holda ustunlar ikki marta
+  // yozilib, "INSERT has more target columns than expressions" xatosi
+  // chiqadi).
   await sql`
     INSERT INTO extra_lessons ${sql([
       {

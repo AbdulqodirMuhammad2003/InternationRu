@@ -7,12 +7,13 @@ import {
   ChevronRight,
   X,
   Lock,
+  LockKeyhole,
   CheckCircle2,
   PlayCircle,
 } from "lucide-react";
 import type { LevelRecord, UnitDetail } from "@/lib/data";
 import { submitExerciseResult } from "@/app/actions";
-import { UNIT_GRADIENTS, UNIT_ICONS } from "./unit-style";
+import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
 
 type View = "main" | "vocab-rounds" | "exercises" | "exercise-run";
@@ -183,7 +184,6 @@ export function LessonsBoard({
             className="no-scrollbar flex min-w-0 flex-1 gap-4 overflow-x-auto scroll-smooth py-2"
           >
             {visibleUnits.map((unit, i) => {
-              const Icon = UNIT_ICONS[unit.icon] || UNIT_ICONS.book;
               const gradient = UNIT_GRADIENTS[unit.color] || UNIT_GRADIENTS.green;
               return (
                 <button
@@ -201,22 +201,38 @@ export function LessonsBoard({
                       {unit.subtitle}
                     </p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <Icon size={34} className="text-white/80" />
-                    {unit.locked ? (
-                      <span className="flex items-center gap-1 rounded-full bg-black/30 px-3 py-1 text-xs font-semibold">
-                        <Lock size={12} /> Yopiq
+                  {unit.locked ? (
+                    <div className="flex items-end justify-between">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm">
+                        <LockKeyhole size={28} strokeWidth={2.2} />
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-white/70">
+                        Yopiq
                       </span>
-                    ) : (
-                      <span className="rounded-full bg-gold-400 px-3 py-1 text-xs font-bold text-olive-950">
-                        {unit.percent}%
-                      </span>
-                    )}
-                  </div>
-                  {unit.date_label && (
-                    <span className="absolute bottom-3 right-5 text-[11px] text-white/70">
-                      {unit.date_label}
-                    </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-white/60">
+                            Uy vazifasi
+                          </p>
+                          <p className="font-display text-4xl font-bold leading-none">
+                            {unit.percent}
+                            <span className="text-xl">%</span>
+                          </p>
+                        </div>
+                        {unit.date_label && (
+                          <span className="text-[11px] text-white/70">{unit.date_label}</span>
+                        )}
+                      </div>
+                      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/20">
+                        <div
+                          className="h-full rounded-full bg-gold-400 transition-[width] duration-500"
+                          style={{ width: `${unit.percent}%` }}
+                        />
+                      </div>
+                    </div>
                   )}
                 </button>
               );
