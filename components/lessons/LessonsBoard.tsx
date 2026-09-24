@@ -172,9 +172,9 @@ export function LessonsBoard({
     return unit.exercises.length > 0 && unit.exercises.every((e) => e.attempted);
   }
 
-  function finishExercise(exerciseId: number, pct: number) {
+  function finishExercise(exerciseId: number, answers: { questionId: number; correct: boolean }[]) {
     startTransition(async () => {
-      await submitExerciseResult(exerciseId, pct);
+      await submitExerciseResult(exerciseId, answers);
       router.refresh();
     });
   }
@@ -549,7 +549,7 @@ export function LessonsBoard({
                   <ExerciseRun
                     key={runKey}
                     exercise={activeExercise}
-                    onFinish={(pct) => finishExercise(activeExercise.id, pct)}
+                    onFinish={(answers) => finishExercise(activeExercise.id, answers)}
                     onRetry={() => startExercise(activeExercise.id)}
                     onDone={() => setView("main")}
                   />
@@ -782,8 +782,9 @@ export function ExerciseRun({
   onDone,
 }: {
   exercise: UnitDetail["exercises"][number];
-  /** Oxirgi savoldan keyin natija foizi bilan bir marta chaqiriladi. */
-  onFinish: (pct: number) => void;
+  /** Oxirgi savoldan keyin shu safar berilgan javoblar bilan bir marta
+   *  chaqiriladi (server ularni avvalgi natijalar bilan birlashtiradi). */
+  onFinish: (answers: { questionId: number; correct: boolean }[]) => void;
   onRetry: () => void;
   onDone: () => void;
 }) {
@@ -793,12 +794,23 @@ export function ExerciseRun({
   // Anagramma: bosilgan harflarning (aralash qatordagi) indekslari.
   const [picked, setPicked] = useState<number[]>([]);
   const [checked, setChecked] = useState<boolean | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [answers, setAnswers] = useState<{ questionId: number; correct: boolean }[]>([]);
   const [result, setResult] = useState<number | null>(null);
 
-  const question = exercise.questions[qIndex];
+  // Mashq qisman bajarilgan bo'lsa, faqat hali to'g'ri topilmagan savollar
+  // beriladi (mashq ochilgandagi holat saqlanadi). Hammasi to'g'ri yoki
+  // hech biri ishlanmagan bo'lsa — butun mashq.
+  const [pending] = useState(() => {
+    const left = exercise.questions.filter((q) => !q.answered_correctly);
+    return left.length > 0 ? left : exercise.questions;
+  });
+  const alreadyCorrect = exercise.questions.length - pending.length;
+  const resuming = alreadyCorrect > 0;
+  const correctCount = answers.filter((a) => a.correct).length;
+
+  const question = pending[qIndex];
   const kind = exercise.kind;
-  const total = exercise.questions.length;
+  const total = pending.length;
 
   // Tinglash savoli ochilishi bilan so'z bir marta avtomatik o'qiladi.
   useEffect(() => {
@@ -820,8 +832,8 @@ export function ExerciseRun({
         </div>
         <p className="font-display text-4xl font-bold text-ink-950 dark:text-ink-50">{result}%</p>
         <p className="text-sm text-ink-600 dark:text-ink-300">
-          {great ? "Ajoyib natija!" : "Yaxshi urinish! Yana bir marta ishlab ko'ring."}{" "}
-          To'g'ri javoblar: {correctCount} / {total}
+          {great ? "Ajoyib natija!" : "Xato qilingan savollarni yana bir marta ishlab ko'ring."}{" "}
+          To'g'ri javoblar: {alreadyCorrect + correctCount} / {exercise.questions.length}
         </p>
         <div className="mt-2 flex gap-2">
           <button
@@ -854,7 +866,7 @@ export function ExerciseRun({
       ? acceptedAnswers.includes(normalizeAnswer(answerValue))
       : selected === question.correct_index;
     setChecked(ok);
-    if (ok) setCorrectCount((c) => c + 1);
+    setAnswers((a) => [...a, { questionId: question.id, correct: ok }]);
   }
 
   function next() {
@@ -865,9 +877,9 @@ export function ExerciseRun({
       setPicked([]);
       setChecked(null);
     } else {
-      const pct = Math.round((correctCount / total) * 100);
+      const pct = Math.round(((alreadyCorrect + correctCount) / exercise.questions.length) * 100);
       setResult(pct);
-      onFinish(pct);
+      onFinish(answers);
     }
   }
 
@@ -913,6 +925,11 @@ export function ExerciseRun({
 
   return (
     <div className="flex flex-col gap-4">
+      {resuming && (
+        <p className="rounded-2xl bg-gold-50 px-4 py-2.5 text-sm font-semibold text-gold-800 dark:bg-gold-950/40 dark:text-gold-200">
+          Faqat xato qilingan {total} ta savol qoldi — {alreadyCorrect} tasi avval to'g'ri topilgan.
+        </p>
+      )}
       {exercise.instructions && (
         <div className="flex gap-2.5 rounded-2xl bg-azure-50 px-4 py-3 text-sm leading-relaxed text-azure-900 dark:bg-azure-950/40 dark:text-azure-100">
           <Info size={18} className="mt-0.5 shrink-0" />

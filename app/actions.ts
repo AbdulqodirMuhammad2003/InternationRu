@@ -89,13 +89,35 @@ async function recordActivity(userId: number, correctAnswers: number) {
   `;
 }
 
-export async function submitExerciseResult(exerciseId: number, scorePct: number) {
+/** Mashq yakunlanganda javob berilgan savollar natijasini saqlaydi va
+ *  mashq foizini qayta hisoblaydi: avval to'g'ri topilgan savollar to'g'ri
+ *  bo'lib qoladi, shuning uchun o'quvchi faqat xato qilganlarini qayta
+ *  ishlab, foizni 100 ga yetkazishi mumkin. Yangi foizni qaytaradi. */
+export async function submitExerciseResult(
+  exerciseId: number,
+  answers: { questionId: number; correct: boolean }[]
+): Promise<number> {
   const userId = await requireUserId();
 
-  const [{ total }] = await sql<{ total: number }[]>`
-    SELECT count(*)::int AS total FROM exercise_questions WHERE exercise_id = ${exerciseId}
+  if (answers.length > 0) {
+    await sql`
+      INSERT INTO user_question_progress ${sql(
+        answers.map((a) => ({ user_id: userId, question_id: a.questionId, correct: a.correct ? 1 : 0 }))
+      )}
+      ON CONFLICT (user_id, question_id) DO UPDATE
+      SET correct = GREATEST(user_question_progress.correct, excluded.correct), updated_at = now()
+    `;
+  }
+  await recordActivity(userId, answers.filter((a) => a.correct).length);
+
+  const [{ total, correct }] = await sql<{ total: number; correct: number }[]>`
+    SELECT count(*)::int AS total, count(*) FILTER (WHERE p.correct = 1)::int AS correct
+    FROM exercise_questions q
+    LEFT JOIN user_question_progress p ON p.question_id = q.id AND p.user_id = ${userId}
+    WHERE q.exercise_id = ${exerciseId}
   `;
-  await recordActivity(userId, Math.round((scorePct / 100) * total));
+  const scorePct = total > 0 ? Math.round((correct / total) * 100) : 0;
+
   await sql`
     INSERT INTO user_exercise_progress (user_id, exercise_id, score_pct, completed_at)
     VALUES (${userId}, ${exerciseId}, ${scorePct}, now())
@@ -126,7 +148,7 @@ export async function submitExerciseResult(exerciseId: number, scorePct: number)
   }
 
   revalidatePath("/lessons");
-  revalidatePath("/practice");
+  return scorePct;
 }
 
 export async function bookExtraLesson(lessonId: number) {

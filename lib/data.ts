@@ -100,6 +100,9 @@ export interface ExerciseQuestion {
   /** Yozish savoli — to'g'ri javob(lar), "|" bilan ajratilgan. */
   answer_text: string | null;
   explanation: string | null;
+  /** O'quvchi bu savolga avval to'g'ri javob berganmi — mashq qayta
+   *  ochilganda bunday savollar so'ralmaydi. */
+  answered_correctly: boolean;
 }
 
 export interface ExerciseRecord {
@@ -338,10 +341,15 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
         audio_text: string | null;
         answer_text: string | null;
         explanation: string | null;
+        answered_correctly: boolean;
       }[]
     >`
-      SELECT id, exercise_id, prompt, options_json, correct_index, order_index, audio_text, answer_text, explanation
-      FROM exercise_questions ORDER BY order_index ASC
+      SELECT q.id, q.exercise_id, q.prompt, q.options_json, q.correct_index, q.order_index,
+             q.audio_text, q.answer_text, q.explanation,
+             COALESCE(p.correct, 0) = 1 AS answered_correctly
+      FROM exercise_questions q
+      LEFT JOIN user_question_progress p ON p.question_id = q.id AND p.user_id = ${userId}
+      ORDER BY q.order_index ASC
     `,
   ]);
 
@@ -376,6 +384,7 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
         audio_text: q.audio_text,
         answer_text: q.answer_text,
         explanation: q.explanation,
+        answered_correctly: q.answered_correctly,
       }));
       return { ...e, question_count: questions.length, questions };
     });

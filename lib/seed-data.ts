@@ -49,6 +49,7 @@ export async function resetDatabase() {
     "ranking_entries",
     "marks",
     "user_unit_progress",
+    "user_question_progress",
     "user_exercise_progress",
     "exercise_questions",
     "exercises",

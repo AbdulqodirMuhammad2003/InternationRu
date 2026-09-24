@@ -151,6 +151,16 @@ CREATE TABLE IF NOT EXISTS exercise_questions (
   explanation TEXT
 );
 
+-- Har bir mashq savoliga o'quvchi to'g'ri javob berganmi — mashq qayta
+-- ochilganda faqat xato qilingan savollar so'raladi.
+CREATE TABLE IF NOT EXISTS user_question_progress (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  question_id INTEGER NOT NULL REFERENCES exercise_questions(id) ON DELETE CASCADE,
+  correct INTEGER NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (user_id, question_id)
+);
+
 CREATE TABLE IF NOT EXISTS user_exercise_progress (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   exercise_id INTEGER NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
