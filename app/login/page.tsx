@@ -1,11 +1,21 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { getUserStats } from "@/lib/data";
 import { LoginForm } from "./login-form";
 import { LogoMark } from "@/components/Logo";
 
 export default async function LoginPage() {
   const session = await getSession();
-  if (session) redirect("/lessons");
+  // Cookie mavjudligi hali foydalanuvchi bazada borligini bildirmaydi —
+  // masalan, `npm run db:seed` qayta ishga tushirilsa, eski cookie'dagi
+  // ID endi bazada mavjud bo'lmasligi mumkin. Shu holatda "/lessons"ga
+  // yubormaymiz (aks holda u yerdan yana "/login"ga qaytarib, cheksiz
+  // aylanish - ERR_TOO_MANY_REDIRECTS - yuzaga keladi), balki login
+  // formasini ko'rsatamiz.
+  if (session) {
+    const user = await getUserStats(session.userId);
+    if (user) redirect("/lessons");
+  }
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#1b1e10] via-[#20230f] to-[#2b2013] px-4">
