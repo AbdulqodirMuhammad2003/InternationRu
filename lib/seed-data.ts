@@ -436,8 +436,7 @@ export async function seedDatabase() {
 
   // ---------- Qo'shimcha darslar (Extra lessons) ----------
   await sql`
-    INSERT INTO extra_lessons (title, description, teacher, date_label, time_label, seats_total, seats_taken)
-    VALUES ${sql([
+    INSERT INTO extra_lessons ${sql([
       {
         title: "Rus tilida suhbat klubi",
         description: "Kundalik mavzularda kichik guruhlarda rus tilida erkin suhbat mashqi.",
