@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { sql } from "./db";
 import type { ExerciseKind } from "./seed-exercises";
 
@@ -138,14 +139,16 @@ export async function getUserByEmail(email: string) {
   return rows[0];
 }
 
-export async function getUserStats(userId: number): Promise<UserRecord | undefined> {
+/** `cache` — bitta so'rov (sahifa render) ichida layout va sahifa ikkalasi
+ *  chaqirsa ham bazaga faqat bir marta murojaat qilinadi. */
+export const getUserStats = cache(async (userId: number): Promise<UserRecord | undefined> => {
   const rows = await sql<UserRecord[]>`
     SELECT id, name, email, avatar_url, course, level, coins, stars, branch_rank, group_rank,
            battle_wins, august_average, reading_pct, writing_pct, listening_pct, speaking_pct
     FROM users WHERE id = ${userId}
   `;
   return rows[0];
-}
+});
 
 // ---------- Kunlik faollik (streak, haftalik belgilar, kunlik maqsad) ----------
 
@@ -275,35 +278,23 @@ export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
   `;
 }
 
-export async function getUnitDetail(unitId: number, userId: number): Promise<UnitDetail | undefined> {
-  const unitRows = await sql<UnitRecord[]>`
-    SELECT u.id, u.level_id, l.code as level_code, u.code, u.title, u.subtitle, u.color, u.icon,
-           u.order_index, u.locked, u.date_label,
-           u.clip_url, u.clip_title, u.clip_kind, u.clip_start, u.clip_end,
-           COALESCE(p.percent, 0) as percent
-    FROM units u
-    JOIN levels l ON l.id = u.level_id
-    LEFT JOIN user_unit_progress p ON p.unit_id = u.id AND p.user_id = ${userId}
-    WHERE u.id = ${unitId}
-  `;
-  const unit = unitRows[0];
-  if (!unit) return undefined;
-
-  const rounds = await sql<{ id: number; title: string; order_index: number }[]>`
-    SELECT id, title, order_index FROM vocabulary_rounds WHERE unit_id = ${unitId} ORDER BY order_index ASC
-  `;
-
-  const fullRounds: VocabRound[] = [];
-  for (const r of rounds) {
-    // Diqqat: PostgreSQL SQLite'dan farqli o'laroq GROUP BY'da bo'lmagan
-    // ustunlarni erkin tanlashga ruxsat bermaydi — bundan mustasno, faqat
-    // GROUP BY qilingan jadvalning PRIMARY KEY ustuni orqali "funksional
-    // bog'liq" bo'lgan o'sha JADVALNING boshqa ustunlari (w.* — chunki
-    // GROUP BY w.id bor). Boshqa jadvaldan kelgan p.learned esa MAX() bilan
-    // o'raladi (har bir (user, word) uchun ko'pi bilan bitta qator bo'lgani
-        // sababli bu xavfsiz — natija o'zgarmaydi).
-    const words = await sql<VocabWord[]>`
-      SELECT w.id, w.word, w.transcription, w.part_of_speech, w.translation_uz, w.definition,
+/** Barcha darslarni lug'at, mashq va o'quvchi progressi bilan birga yuklaydi.
+ *  Baza boshqa mintaqada bo'lgani uchun har bir so'rov qimmat — shu sababli
+ *  darslar soniga bog'liq bo'lmagan holda 5 ta so'rov parallel yuboriladi va
+ *  natijalar shu yerda yig'iladi (avval har bir bosqich/mashq uchun alohida
+ *  so'rov ketardi — ~50 ta ketma-ket so'rov). */
+export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]> {
+  const [units, rounds, words, exerciseRows, questionRows] = await Promise.all([
+    getUnitsForUser(userId),
+    sql<{ id: number; unit_id: number; title: string; order_index: number }[]>`
+      SELECT id, unit_id, title, order_index FROM vocabulary_rounds ORDER BY order_index ASC
+    `,
+    // PostgreSQL GROUP BY'da faqat w.id bo'lsa ham w.* ustunlarini beradi
+    // (PRIMARY KEY orqali funksional bog'liq); boshqa jadvallardan kelgan
+    // qiymatlar MAX() bilan o'raladi — har bir (user, word, stage) uchun
+    // ko'pi bilan bitta qator bo'lgani sababli natija o'zgarmaydi.
+    sql<(VocabWord & { round_id: number })[]>`
+      SELECT w.id, w.round_id, w.word, w.transcription, w.part_of_speech, w.translation_uz, w.definition,
              w.example_sentence, w.example_translation, w.emoji, w.order_index,
              COALESCE(MAX(p.learned), 0) as learned,
              COALESCE(MAX(CASE WHEN sp.stage = 'spelling' THEN sp.passed END), 0) as stage_spelling,
@@ -313,40 +304,33 @@ export async function getUnitDetail(unitId: number, userId: number): Promise<Uni
       FROM vocabulary_words w
       LEFT JOIN user_word_progress p ON p.word_id = w.id AND p.user_id = ${userId}
       LEFT JOIN user_word_stage_progress sp ON sp.word_id = w.id AND sp.user_id = ${userId}
-      WHERE w.round_id = ${r.id}
       GROUP BY w.id
       ORDER BY w.order_index ASC
-    `;
-    fullRounds.push({ ...r, words });
-  }
-
-  const totalWords = fullRounds.reduce((sum, r) => sum + r.words.length, 0);
-
-  const exerciseRows = await sql<
-    {
-      id: number;
-      title: string;
-      skill_label: string;
-      kind: ExerciseKind;
-      instructions: string | null;
-      order_index: number;
-      score_pct: number;
-      attempted: boolean;
-    }[]
-  >`
-    SELECT e.id, e.title, e.skill_label, e.kind, e.instructions, e.order_index,
-           COALESCE(p.score_pct, 0) as score_pct,
-           (p.exercise_id IS NOT NULL) as attempted
-    FROM exercises e
-    LEFT JOIN user_exercise_progress p ON p.exercise_id = e.id AND p.user_id = ${userId}
-    WHERE e.unit_id = ${unitId} ORDER BY e.order_index ASC
-  `;
-
-  const exercises: ExerciseRecord[] = [];
-  for (const e of exerciseRows) {
-    const questionRows = await sql<
+    `,
+    sql<
       {
         id: number;
+        unit_id: number;
+        title: string;
+        skill_label: string;
+        kind: ExerciseKind;
+        instructions: string | null;
+        order_index: number;
+        score_pct: number;
+        attempted: boolean;
+      }[]
+    >`
+      SELECT e.id, e.unit_id, e.title, e.skill_label, e.kind, e.instructions, e.order_index,
+             COALESCE(p.score_pct, 0) as score_pct,
+             (p.exercise_id IS NOT NULL) as attempted
+      FROM exercises e
+      LEFT JOIN user_exercise_progress p ON p.exercise_id = e.id AND p.user_id = ${userId}
+      ORDER BY e.order_index ASC
+    `,
+    sql<
+      {
+        id: number;
+        exercise_id: number;
         prompt: string;
         options_json: string;
         correct_index: number;
@@ -356,29 +340,48 @@ export async function getUnitDetail(unitId: number, userId: number): Promise<Uni
         explanation: string | null;
       }[]
     >`
-      SELECT id, prompt, options_json, correct_index, order_index, audio_text, answer_text, explanation
-      FROM exercise_questions WHERE exercise_id = ${e.id} ORDER BY order_index ASC
-    `;
-    const questions: ExerciseQuestion[] = questionRows.map((q) => ({
-      id: q.id,
-      prompt: q.prompt,
-      options: JSON.parse(q.options_json) as string[],
-      correct_index: q.correct_index,
-      order_index: q.order_index,
-      audio_text: q.audio_text,
-      answer_text: q.answer_text,
-      explanation: q.explanation,
-    }));
-    exercises.push({ ...e, question_count: questions.length, questions });
+      SELECT id, exercise_id, prompt, options_json, correct_index, order_index, audio_text, answer_text, explanation
+      FROM exercise_questions ORDER BY order_index ASC
+    `,
+  ]);
+
+  function groupBy<T, K>(rows: readonly T[], key: (row: T) => K) {
+    const map = new Map<K, T[]>();
+    for (const row of rows) {
+      const k = key(row);
+      const list = map.get(k);
+      if (list) list.push(row);
+      else map.set(k, [row]);
+    }
+    return map;
   }
 
-  return { ...unit, rounds: fullRounds, exercises, totalWords };
-}
+  const wordsByRound = groupBy(words, (w) => w.round_id);
+  const roundsByUnit = groupBy(rounds, (r) => r.unit_id);
+  const questionsByExercise = groupBy(questionRows, (q) => q.exercise_id);
+  const exercisesByUnit = groupBy(exerciseRows, (e) => e.unit_id);
 
-export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]> {
-  const units = await getUnitsForUser(userId);
-  const details = await Promise.all(units.map((u) => getUnitDetail(u.id, userId)));
-  return details.filter((u): u is UnitDetail => !!u);
+  return units.map((unit) => {
+    const fullRounds: VocabRound[] = (roundsByUnit.get(unit.id) ?? []).map(({ unit_id: _u, ...r }) => ({
+      ...r,
+      words: (wordsByRound.get(r.id) ?? []).map(({ round_id: _r, ...w }) => w),
+    }));
+    const exercises: ExerciseRecord[] = (exercisesByUnit.get(unit.id) ?? []).map(({ unit_id: _u, ...e }) => {
+      const questions: ExerciseQuestion[] = (questionsByExercise.get(e.id) ?? []).map((q) => ({
+        id: q.id,
+        prompt: q.prompt,
+        options: JSON.parse(q.options_json) as string[],
+        correct_index: q.correct_index,
+        order_index: q.order_index,
+        audio_text: q.audio_text,
+        answer_text: q.answer_text,
+        explanation: q.explanation,
+      }));
+      return { ...e, question_count: questions.length, questions };
+    });
+    const totalWords = fullRounds.reduce((sum, r) => sum + r.words.length, 0);
+    return { ...unit, rounds: fullRounds, exercises, totalWords };
+  });
 }
 
 // ---------- Baholar ----------

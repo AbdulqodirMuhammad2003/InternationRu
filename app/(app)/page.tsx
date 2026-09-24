@@ -45,10 +45,14 @@ const QUICK_LINKS = [
 
 export default async function HomePage() {
   const session = await getSession();
-  const user = (await getUserStats(session!.userId))!;
-  const unitsDetailed = await getAllUnitsDetailed(user.id);
-  const activity = await getActivityOverview(user.id);
-  const review = await getReviewSummary(user.id);
+  const userId = session!.userId;
+  const [userRow, unitsDetailed, activity, review] = await Promise.all([
+    getUserStats(userId),
+    getAllUnitsDetailed(userId),
+    getActivityOverview(userId),
+    getReviewSummary(userId),
+  ]);
+  const user = userRow!;
 
   const totalWords = unitsDetailed.reduce((s, u) => s + u.totalWords, 0);
   const learnedWords = unitsDetailed.reduce(

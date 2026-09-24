@@ -4,8 +4,10 @@ import { RankingTabs } from "@/components/RankingTabs";
 
 export default async function RankingPage() {
   const session = await getSession();
-  const branch = await getRanking("branch", session!.userId);
-  const group = await getRanking("group", session!.userId);
+  const [branch, group] = await Promise.all([
+    getRanking("branch", session!.userId),
+    getRanking("group", session!.userId),
+  ]);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
