@@ -734,6 +734,76 @@ function DefinitionStage({
 
 // ---------- 3-bosqich: Talaffuz ----------
 
+/** Ovoz tanish uchun normallashtirish: kichik harf, ё → е, urg'u belgisi
+ *  va tinish belgilari olib tashlanadi. */
+function speechNorm(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/́/g, "")
+    .replace(/[^a-zа-я\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Lug'atdagi yozuvdan talaffuzda kutiladigan shakllarni ajratadi:
+ *  "Родной(-ая, -ое, -ые)" → ["родной"] (qo'shimchalar tashlanadi),
+ *  "Немецкий (германский)" → ["немецкий", "германский"],
+ *  "Он / она" → ["он", "она"]. */
+function pronunciationTargets(word: string): string[] {
+  const targets: string[] = [];
+  const base = word.replace(/\([^)]*\)/g, " ");
+  targets.push(...base.split(/[,/]/));
+  for (const group of word.match(/\(([^)]*)\)/g) ?? []) {
+    const inner = group.slice(1, -1).trim();
+    if (!inner.startsWith("-")) targets.push(...inner.split(/[,/]/));
+  }
+  return targets.map(speechNorm).filter(Boolean);
+}
+
+function levenshtein(a: string, b: string) {
+  const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0];
+    row[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = row[j];
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return row[b.length];
+}
+
+/** Brauzer eshitgan matn kutilgan so'zga mosmi. Ovoz tanish ko'pincha bitta
+ *  harfda adashadi (масло/масла, ударение), shuning uchun 4+ harfli so'zlarda
+ *  ~75% o'xshashlik yetarli; qisqa so'zlar (он, да) aynan mos kelishi kerak. */
+function matchesPronunciation(heard: string, targets: string[]) {
+  const h = speechNorm(heard);
+  if (!h) return false;
+  const heardWords = h.split(" ");
+  return targets.some((t) => {
+    if (` ${h} `.includes(` ${t} `)) return true;
+    if (t.length < 4) return false;
+    const close = (x: string) => 1 - levenshtein(x, t) / Math.max(x.length, t.length) >= 0.75;
+    return close(h) || heardWords.some(close);
+  });
+}
+
+const SPEECH_ERRORS: Record<string, string> = {
+  "not-allowed":
+    "Mikrofonga ruxsat berilmagan. Manzil satridagi qulf belgisini bosib, mikrofonga ruxsat bering.",
+  "service-not-allowed":
+    "Brauzer ovozni tanish xizmatini bloklagan. Google Chrome yoki Microsoft Edge'da oching.",
+  "audio-capture": "Mikrofon topilmadi. Mikrofon ulanganini tekshiring.",
+  network:
+    "Ovozni tanish xizmatiga ulanib bo'lmadi. Internetni tekshiring yoki Chrome/Edge'dan foydalaning.",
+  "no-speech": "Ovoz eshitilmadi. Mikrofonga yaqinroq, balandroq gapiring.",
+  "language-not-supported": "Brauzeringiz rus tilidagi ovozni tanimaydi. Chrome yoki Edge'dan foydalaning.",
+};
+
+const MAX_PRONUNCIATION_ATTEMPTS = 3;
+
 function PronunciationStage({
   word,
   onResult,
@@ -745,8 +815,12 @@ function PronunciationStage({
   const [transcript, setTranscript] = useState("");
   const [checked, setChecked] = useState<boolean | null>(null);
   const [unsupported, setUnsupported] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
+  const gotResultRef = useRef(false);
+  const targets = useMemo(() => pronunciationTargets(word.word), [word.word]);
 
   useEffect(() => {
     const SR =
@@ -767,6 +841,11 @@ function PronunciationStage({
 
   function startListening() {
     if (checked !== null) return;
+    if (listening) {
+      // Ikkinchi bosish — yozishni to'xtatib, eshitilganini tekshirish.
+      recognitionRef.current?.stop?.();
+      return;
+    }
     const SR =
       (window as unknown as { SpeechRecognition?: new () => any }).SpeechRecognition ||
       (window as unknown as { webkitSpeechRecognition?: new () => any }).webkitSpeechRecognition;
@@ -774,29 +853,56 @@ function PronunciationStage({
       setUnsupported(true);
       return;
     }
+    // Namuna ovozi hali yangrayotgan bo'lsa, mikrofon uni ham eshitib qoladi.
+    window.speechSynthesis?.cancel();
+
     const recog = new SR();
     recog.lang = "ru-RU";
     recog.interimResults = false;
-    recog.maxAlternatives = 3;
+    recog.continuous = false;
+    recog.maxAlternatives = 5;
+    gotResultRef.current = false;
+    setError(null);
+    setTranscript("");
+
     recog.onresult = (e: any) => {
-      const alts: string[] = Array.from(e.results[0]).map((r: any) =>
-        String(r.transcript).toLowerCase().trim()
-      );
-      setTranscript(alts[0] || "");
-      const targetNorm = normalize(word.word);
-      const correct = alts.some((a) => {
-        const n = normalize(a);
-        return n === targetNorm || n.includes(targetNorm);
-      });
+      gotResultRef.current = true;
+      const alts: string[] = Array.from(e.results[0]).map((r: any) => String(r.transcript));
+      setTranscript(alts[0]?.trim() || "");
       setListening(false);
-      finish(correct);
+      if (alts.some((a) => matchesPronunciation(a, targets))) {
+        finish(true);
+        return;
+      }
+      const used = attempts + 1;
+      setAttempts(used);
+      if (used >= MAX_PRONUNCIATION_ATTEMPTS) finish(false);
     };
-    recog.onerror = () => setListening(false);
-    recog.onend = () => setListening(false);
+    recog.onerror = (e: any) => {
+      setListening(false);
+      if (e.error === "aborted") return;
+      setError(SPEECH_ERRORS[e.error] ?? "Ovozni tanib bo'lmadi. Qayta urinib ko'ring.");
+    };
+    recog.onend = () => {
+      setListening(false);
+      if (!gotResultRef.current) {
+        setError((prev) => prev ?? SPEECH_ERRORS["no-speech"]);
+      }
+    };
     recognitionRef.current = recog;
     setListening(true);
-    recog.start();
+    try {
+      recog.start();
+    } catch {
+      setListening(false);
+      setError("Mikrofonni ishga tushirib bo'lmadi. Sahifani yangilab, qayta urinib ko'ring.");
+    }
   }
+
+  const retriesLeft = MAX_PRONUNCIATION_ATTEMPTS - attempts;
+  // Texnik xato (ruxsat, tarmoq, brauzer) bo'lsa, o'quvchi to'xtab qolmasligi
+  // uchun natijani o'zi belgilash imkoni ham beriladi.
+  const showManual = unsupported || (error !== null && !error.startsWith("Ovoz eshitilmadi"));
 
   return (
     <div className="flex animate-pop-in flex-col items-center gap-5 rounded-3xl bg-white p-6 text-center shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
@@ -805,7 +911,7 @@ function PronunciationStage({
       </p>
 
       <button
-        onClick={() => speak(word.word)}
+        onClick={() => speak(targets[0] ?? word.word)}
         className="btn-press flex h-11 w-11 items-center justify-center rounded-full bg-gold-500 text-white shadow-sm shadow-gold-700/30 hover:bg-gold-400"
         aria-label="Namunani eshitish"
       >
@@ -819,41 +925,47 @@ function PronunciationStage({
         <p className="text-sm text-ink-700/60 dark:text-ink-300/60">[{word.transcription}]</p>
       </div>
 
-      {!unsupported ? (
+      {!unsupported && (
         <>
           <button
             onClick={startListening}
             disabled={checked !== null}
             className={`btn-press flex h-20 w-20 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200 ${
               checked === true
-                ? "bg-azure-600 shadow-azure-700/30"
+                ? "bg-mint-600 shadow-mint-700/30"
                 : checked === false
                 ? "bg-rose-600 shadow-rose-700/30"
                 : listening
                 ? "animate-pulse bg-gold-500 shadow-gold-600/40"
                 : "bg-gradient-to-b from-azure-600 to-azure-800 shadow-azure-900/30 hover:from-azure-500 hover:to-azure-700"
             }`}
-            aria-label="Yozib olish"
+            aria-label={listening ? "Yozishni to'xtatish" : "Yozib olish"}
           >
             {checked === true ? <Check size={30} /> : <Mic size={30} />}
           </button>
-          <p className="text-xs text-ink-500 dark:text-ink-400">
+          <p className="min-h-[2.5rem] max-w-xs text-xs text-ink-500 dark:text-ink-400">
             {listening
-              ? "Tinglanmoqda…"
-              : checked !== null
-              ? transcript
-                ? `Eshitildi: “${transcript}”`
-                : checked
-                ? "To'g'ri!"
-                : "Boshqacha eshitildi"
-              : "Mikrofon tugmasini bosib gapiring"}
+              ? "Tinglanmoqda… Gapirib bo'lgach, tugmani yana bossangiz ham bo'ladi."
+              : checked === true
+              ? `To'g'ri! ${transcript ? `Eshitildi: “${transcript}”` : ""}`
+              : checked === false
+              ? `Keyingi safar albatta chiqadi. Eshitildi: “${transcript}”`
+              : error
+              ? error
+              : transcript
+              ? `Eshitildi: “${transcript}”. Yana urinib ko'ring (${retriesLeft} ta imkoniyat qoldi).`
+              : "Mikrofon tugmasini bosib, so'zni aniq ayting"}
           </p>
         </>
-      ) : (
+      )}
+
+      {showManual && (
         <div className="flex flex-col items-center gap-2">
           <p className="max-w-xs text-xs text-ink-500 dark:text-ink-400">
-            Brauzeringiz ovozni tanib olishni qo'llab-quvvatlamaydi. So'zni ovoz chiqarib
-            talaffuz qiling, so'ng natijani o'zingiz belgilang.
+            {unsupported
+              ? "Brauzeringiz ovozni tanib olishni qo'llab-quvvatlamaydi (Chrome yoki Edge tavsiya etiladi). "
+              : ""}
+            So'zni ovoz chiqarib ayting, so'ng natijani o'zingiz belgilang.
           </p>
           <div className="flex gap-2">
             <button
@@ -873,10 +985,6 @@ function PronunciationStage({
           </div>
         </div>
       )}
-
-      <p className="text-[11px] text-ink-400 dark:text-ink-500">
-        Hozircha talaffuz brauzer orqali tekshiriladi — kelajakda AI-yordamchi ulanadi.
-      </p>
     </div>
   );
 }

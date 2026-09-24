@@ -9,6 +9,38 @@
  */
 import bcrypt from "bcryptjs";
 import { sql } from "./db";
+import { LESSON1_SECTION1, type SeedExercise, type SeedQuestion } from "./seed-exercises";
+
+/** Mashqlarni savollari bilan birga darsga qo'shadi (tartib raqami
+ *  darsdagi mavjud mashqlardan keyin davom etadi). Seed va bir martalik
+ *  migratsiya skriptlari ikkalasi ham ishlatadi. */
+export async function insertExercises(
+  db: typeof sql,
+  unitId: number,
+  exercises: SeedExercise[]
+) {
+  const [{ max }] = await db<{ max: number }[]>`
+    SELECT COALESCE(MAX(order_index), 0)::int AS max FROM exercises WHERE unit_id = ${unitId}
+  `;
+  for (const [i, ex] of exercises.entries()) {
+    const [row] = await db<{ id: number }[]>`
+      INSERT INTO exercises (unit_id, title, skill_label, order_index)
+      VALUES (${unitId}, ${ex.title}, ${ex.skill}, ${max + i + 1})
+      RETURNING id
+    `;
+    const rows = ex.questions.map((q, qi) => ({
+      exercise_id: row.id,
+      prompt: q.prompt,
+      options_json: JSON.stringify(q.options ?? []),
+      correct_index: q.correct ?? 0,
+      order_index: qi + 1,
+      audio_text: q.audio ?? null,
+      answer_text: q.answer ?? null,
+      explanation: q.explanation ?? null,
+    }));
+    await db`INSERT INTO exercise_questions ${db(rows)}`;
+  }
+}
 
 export async function resetDatabase() {
   const tables = [
@@ -112,8 +144,17 @@ export async function seedDatabase() {
       icon: "headphones",
       locked: 0,
       date: "11 avg",
-      // Mashqlar tugatilgach ochiladigan qisqa video dars (5-10 daqiqa).
-      video: "https://www.youtube.com/watch?v=tQzDp3nDKKs",
+      // "Ruscha tomosha" — mashqlar tugatilgach ochiladigan haqiqiy ruscha
+      // parcha (5-10 daqiqa). Faqat rasmiy kanallardan va O'zbekistonda
+      // ochiladiganlari tanlangan (Soyuzmultfilm klassikalari u yerda
+      // bloklangan — "владелец запретил просмотр в вашей стране").
+      clip: {
+        url: "https://www.youtube.com/watch?v=1V3ZY_TXKwU",
+        title: "Маша и Медведь — «Первая встреча»",
+        kind: "multfilm",
+        start: null,
+        end: null,
+      },
     },
     {
       code: "C1b",
@@ -124,7 +165,13 @@ export async function seedDatabase() {
       icon: "book",
       locked: 1,
       date: "",
-      video: "https://www.youtube.com/watch?v=QAMvCj4jh-Y",
+      clip: {
+        url: "https://www.youtube.com/watch?v=6U6_5G7FPew",
+        title: "Смешарики — первый сезон",
+        kind: "multfilm",
+        start: 0,
+        end: 540,
+      },
     },
     {
       code: "C1c",
@@ -135,7 +182,13 @@ export async function seedDatabase() {
       icon: "chart",
       locked: 1,
       date: "",
-      video: "https://www.youtube.com/watch?v=43BLcHcqKfo",
+      clip: {
+        url: "https://www.youtube.com/watch?v=VQLLqosmixY",
+        title: "Смешарики — самые весёлые серии",
+        kind: "multfilm",
+        start: 0,
+        end: 600,
+      },
     },
     {
       code: "C2",
@@ -146,7 +199,7 @@ export async function seedDatabase() {
       icon: "chat",
       locked: 1,
       date: "",
-      video: null,
+      clip: null,
     },
     {
       code: "C3",
@@ -157,7 +210,7 @@ export async function seedDatabase() {
       icon: "lock",
       locked: 1,
       date: "",
-      video: null,
+      clip: null,
     },
     {
       code: "C4",
@@ -168,7 +221,7 @@ export async function seedDatabase() {
       icon: "headphones",
       locked: 1,
       date: "",
-      video: null,
+      clip: null,
     },
     {
       code: "C5",
@@ -179,7 +232,7 @@ export async function seedDatabase() {
       icon: "book",
       locked: 1,
       date: "",
-      video: null,
+      clip: null,
     },
     {
       code: "C6",
@@ -190,7 +243,7 @@ export async function seedDatabase() {
       icon: "chart",
       locked: 1,
       date: "",
-      video: null,
+      clip: null,
     },
     {
       code: "C7",
@@ -201,7 +254,7 @@ export async function seedDatabase() {
       icon: "chat",
       locked: 1,
       date: "",
-      video: null,
+      clip: null,
     },
     {
       code: "C8",
@@ -212,7 +265,7 @@ export async function seedDatabase() {
       icon: "lock",
       locked: 1,
       date: "",
-      video: null,
+      clip: null,
     },
   ];
 
@@ -221,10 +274,13 @@ export async function seedDatabase() {
   for (const u of units) {
     unitOrderByLevel[u.level] = (unitOrderByLevel[u.level] || 0) + 1;
     const [row] = await sql<{ id: number }[]>`
-      INSERT INTO units (level_id, code, title, subtitle, color, icon, order_index, locked, date_label, video_url)
+      INSERT INTO units (level_id, code, title, subtitle, color, icon, order_index, locked, date_label,
+        clip_url, clip_title, clip_kind, clip_start, clip_end)
       VALUES (
         ${levelIds[u.level]}, ${u.code}, ${u.title}, ${u.subtitle}, ${u.color}, ${u.icon},
-        ${unitOrderByLevel[u.level]}, ${u.locked}, ${u.date}, ${u.video}
+        ${unitOrderByLevel[u.level]}, ${u.locked}, ${u.date},
+        ${u.clip?.url ?? null}, ${u.clip?.title ?? null}, ${u.clip?.kind ?? null},
+        ${u.clip?.start ?? null}, ${u.clip?.end ?? null}
       )
       RETURNING id
     `;
@@ -423,28 +479,15 @@ export async function seedDatabase() {
   await createRound(unitIds["C1c"], "4-bosqich", 4, dars3Round4);
 
   // ---------- Mashqlar (Exercises) ----------
+  await insertExercises(sql, unitIds["C1a"], LESSON1_SECTION1);
+
   async function addSimpleExercise(
     unitId: number,
     title: string,
     skill: string,
-    questions: { prompt: string; options: string[]; correct: number }[]
+    questions: SeedQuestion[]
   ) {
-    const [ex] = await sql<{ id: number }[]>`
-      INSERT INTO exercises (unit_id, title, skill_label, order_index) VALUES (${unitId}, ${title}, ${skill}, 1)
-      RETURNING id
-    `;
-    const exId = ex.id;
-
-    const rows = questions.map((q, qi) => ({
-      exercise_id: exId,
-      prompt: q.prompt,
-      options_json: JSON.stringify(q.options),
-      correct_index: q.correct,
-      order_index: qi + 1,
-    }));
-    await sql`INSERT INTO exercise_questions ${sql(rows)}`;
-
-    return exId;
+    await insertExercises(sql, unitId, [{ title, skill, questions }]);
   }
 
   await addSimpleExercise(unitIds["C1c"], "1-topshiriq", "Olmoshlar", [

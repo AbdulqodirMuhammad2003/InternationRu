@@ -9,19 +9,34 @@ import {
   Lock,
   LockKeyhole,
   CheckCircle2,
+  Clapperboard,
+  Delete,
   PlayCircle,
+  Trophy,
+  Volume2,
 } from "lucide-react";
-import type { LevelRecord, UnitDetail } from "@/lib/data";
+import type { ClipKind, LevelRecord, UnitDetail } from "@/lib/data";
 import { submitExerciseResult } from "@/app/actions";
 import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
 
-type View = "main" | "vocab-rounds" | "exercises" | "exercise-run" | "video";
+type View = "main" | "vocab-rounds" | "exercises" | "exercise-run" | "clip";
+
+const CLIP_KIND_LABELS: Record<ClipKind, string> = {
+  film: "Film",
+  multfilm: "Multfilm",
+  hujjatli: "Hujjatli film",
+  intervyu: "Intervyu",
+};
 
 /** Turli YouTube havola shakllarini (watch?v=, youtu.be/, shorts/) o'rnatib
- *  ko'rsatish uchun `/embed/VIDEO_ID` ko'rinishiga o'giradi. Havola
- *  tushunarsiz bo'lsa `null` qaytaradi (bunday holatda video ko'rsatilmaydi). */
-function toYouTubeEmbedUrl(url: string): string | null {
+ *  ko'rsatish uchun `/embed/VIDEO_ID` ko'rinishiga o'giradi, parchaning
+ *  boshi/oxirini (soniyalarda) qo'shadi. Havola tushunarsiz bo'lsa `null`. */
+function toYouTubeEmbedUrl(
+  url: string,
+  start: number | null,
+  end: number | null
+): string | null {
   try {
     const u = new URL(url);
     let id: string | null = null;
@@ -32,7 +47,11 @@ function toYouTubeEmbedUrl(url: string): string | null {
       else if (u.pathname.startsWith("/shorts/")) id = u.pathname.split("/")[2];
       else if (u.pathname.startsWith("/embed/")) id = u.pathname.split("/")[2];
     }
-    return id ? `https://www.youtube.com/embed/${id}` : null;
+    if (!id) return null;
+    const params = new URLSearchParams({ rel: "0", hl: "ru", cc_lang_pref: "ru" });
+    if (start) params.set("start", String(start));
+    if (end) params.set("end", String(end));
+    return `https://www.youtube-nocookie.com/embed/${id}?${params}`;
   } catch {
     return null;
   }
@@ -67,11 +86,10 @@ export function LessonsBoard({
   const [view, setView] = useState<View>("main");
   const [flowRoundId, setFlowRoundId] = useState<number | null>(null);
   const [activeExerciseId, setActiveExerciseId] = useState<number | null>(null);
-  const [qIndex, setQIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [exerciseResult, setExerciseResult] = useState<number | null>(null);
-  const [videoNotice, setVideoNotice] = useState(false);
+  // Har bir boshlashda oshadi — shu bilan bir xil mashqni qayta boshlaganda
+  // ExerciseRun o'z holatini noldan boshlaydi.
+  const [runKey, setRunKey] = useState(0);
+  const [clipNotice, setClipNotice] = useState(false);
 
   const visibleUnits = units.filter((u) => u.level_code === selectedLevelCode);
   const selectedLevel = levels.find((l) => l.code === selectedLevelCode);
@@ -86,14 +104,14 @@ export function LessonsBoard({
     setView("main");
     setFlowRoundId(null);
     setActiveExerciseId(null);
-    setVideoNotice(false);
+    setClipNotice(false);
   }
 
   function openUnitPanel(unit: UnitDetail) {
     if (unit.locked) return;
     setOpenUnitId(unit.id);
     setView("main");
-    setVideoNotice(false);
+    setClipNotice(false);
   }
 
   function roundPercent(round: UnitDetail["rounds"][number]) {
@@ -115,43 +133,22 @@ export function LessonsBoard({
     );
   }
 
-  /** Video dars faqat shu darsdagi barcha mashqlar kamida bir marta
+  /** "Ruscha tomosha" faqat shu darsdagi barcha mashqlar kamida bir marta
    *  yakunlangach (ball qanday bo'lishidan qat'iy nazar) ochiladi. */
-  function unitVideoUnlocked(unit: UnitDetail) {
+  function unitClipUnlocked(unit: UnitDetail) {
     return unit.exercises.length > 0 && unit.exercises.every((e) => e.attempted);
   }
 
-  function selectAnswer(index: number) {
-    setSelectedAnswer(index);
-  }
-
-  function nextQuestion() {
-    if (!activeExercise || selectedAnswer === null) return;
-    const question = activeExercise.questions[qIndex];
-    const isCorrect = selectedAnswer === question.correct_index;
-    const newCorrect = correctCount + (isCorrect ? 1 : 0);
-
-    if (qIndex + 1 < activeExercise.questions.length) {
-      setCorrectCount(newCorrect);
-      setQIndex(qIndex + 1);
-      setSelectedAnswer(null);
-    } else {
-      const pct = Math.round((newCorrect / activeExercise.questions.length) * 100);
-      setCorrectCount(newCorrect);
-      setExerciseResult(pct);
-      startTransition(async () => {
-        await submitExerciseResult(activeExercise.id, pct);
-        router.refresh();
-      });
-    }
+  function finishExercise(exerciseId: number, pct: number) {
+    startTransition(async () => {
+      await submitExerciseResult(exerciseId, pct);
+      router.refresh();
+    });
   }
 
   function startExercise(exerciseId: number) {
     setActiveExerciseId(exerciseId);
-    setQIndex(0);
-    setSelectedAnswer(null);
-    setCorrectCount(0);
-    setExerciseResult(null);
+    setRunKey((k) => k + 1);
     setView("exercise-run");
   }
 
@@ -394,31 +391,55 @@ export function LessonsBoard({
                     </p>
                   </button>
 
-                  {openUnit.video_url && (
+                  {openUnit.clip_url && (
                     <>
                       <button
                         onClick={() =>
-                          unitVideoUnlocked(openUnit) ? setView("video") : setVideoNotice(true)
+                          unitClipUnlocked(openUnit) ? setView("clip") : setClipNotice(true)
                         }
                         style={{ animationDelay: "60ms" }}
-                        className="flex animate-fade-up items-center gap-4 rounded-2xl bg-ink-50 p-4 text-left transition-colors hover:bg-ink-100/70 dark:bg-white/5 dark:hover:bg-white/10"
+                        className={`flex animate-fade-up items-center gap-4 rounded-2xl p-4 text-left transition-all duration-200 ${
+                          unitClipUnlocked(openUnit)
+                            ? "bg-gradient-to-br from-gold-400 to-gold-600 text-white shadow-md shadow-gold-700/20 hover:-translate-y-0.5"
+                            : "bg-ink-50 hover:bg-ink-100/70 dark:bg-white/5 dark:hover:bg-white/10"
+                        }`}
                       >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-ink-200 text-ink-600 dark:bg-white/10 dark:text-ink-300">
-                          {unitVideoUnlocked(openUnit) ? <PlayCircle size={20} /> : <Lock size={20} />}
+                        <div
+                          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+                            unitClipUnlocked(openUnit)
+                              ? "bg-white/20"
+                              : "bg-ink-200 text-ink-600 dark:bg-white/10 dark:text-ink-300"
+                          }`}
+                        >
+                          {unitClipUnlocked(openUnit) ? <Clapperboard size={22} /> : <Lock size={20} />}
                         </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-ink-800 dark:text-ink-100">Video dars</p>
-                          <p className="text-xs text-ink-600/70 dark:text-ink-300/60">
-                            Ruscha qisqa video (5-10 daqiqa)
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`text-xs ${
+                              unitClipUnlocked(openUnit) ? "text-white/75" : "text-ink-500 dark:text-ink-400"
+                            }`}
+                          >
+                            Ruscha tomosha
+                            {openUnit.clip_kind ? ` · ${CLIP_KIND_LABELS[openUnit.clip_kind]}` : ""}
+                          </p>
+                          <p
+                            className={`truncate font-semibold ${
+                              unitClipUnlocked(openUnit) ? "" : "text-ink-800 dark:text-ink-100"
+                            }`}
+                          >
+                            {openUnit.clip_title || "Ruscha parcha"}
                           </p>
                         </div>
-                        <span className="rounded-full bg-ink-200/70 px-2.5 py-1 text-xs font-semibold text-ink-600 dark:bg-white/10 dark:text-ink-300">
-                          {unitVideoUnlocked(openUnit) ? "Ochiq" : "Yopiq"}
-                        </span>
+                        {!unitClipUnlocked(openUnit) && (
+                          <span className="rounded-full bg-ink-200/70 px-2.5 py-1 text-xs font-semibold text-ink-600 dark:bg-white/10 dark:text-ink-300">
+                            Yopiq
+                          </span>
+                        )}
                       </button>
-                      {videoNotice && !unitVideoUnlocked(openUnit) && (
+                      {clipNotice && !unitClipUnlocked(openUnit) && (
                         <p className="-mt-2 animate-fade-up rounded-xl bg-gold-50 px-3 py-2 text-xs text-gold-700 dark:bg-gold-950/40 dark:text-gold-300">
-                          Video dars mashqlarni bajarib tugatgach ochiladi.
+                          Mashqlarni bajarib bo'lgach, darsni ruscha film yoki multfilmdan parcha
+                          bilan yakunlaysiz.
                         </p>
                       )}
                     </>
@@ -512,22 +533,33 @@ export function LessonsBoard({
               {view === "exercise-run" && activeExercise && (
                 <div className="mx-auto w-full max-w-xl py-4">
                   <ExerciseRun
+                    key={runKey}
                     exercise={activeExercise}
-                    qIndex={qIndex}
-                    selectedAnswer={selectedAnswer}
-                    correctCount={correctCount}
-                    exerciseResult={exerciseResult}
-                    onSelect={selectAnswer}
-                    onNext={nextQuestion}
+                    onFinish={(pct) => finishExercise(activeExercise.id, pct)}
+                    onRetry={() => startExercise(activeExercise.id)}
                     onDone={() => setView("exercises")}
                   />
                 </div>
               )}
 
-              {view === "video" && openUnit.video_url && (
+              {view === "clip" && openUnit.clip_url && (
                 <div className="flex flex-col gap-3">
+                  <div>
+                    {openUnit.clip_kind && (
+                      <span className="mb-1 inline-block rounded-full bg-gold-100 px-2 py-0.5 text-[10px] font-bold uppercase text-gold-700 dark:bg-gold-950/40 dark:text-gold-300">
+                        {CLIP_KIND_LABELS[openUnit.clip_kind]}
+                      </span>
+                    )}
+                    <p className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
+                      {openUnit.clip_title}
+                    </p>
+                  </div>
                   {(() => {
-                    const embedUrl = toYouTubeEmbedUrl(openUnit.video_url!);
+                    const embedUrl = toYouTubeEmbedUrl(
+                      openUnit.clip_url!,
+                      openUnit.clip_start,
+                      openUnit.clip_end
+                    );
                     if (!embedUrl) {
                       return (
                         <p className="text-sm text-ink-600/70 dark:text-ink-300/60">
@@ -539,7 +571,7 @@ export function LessonsBoard({
                       <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-md">
                         <iframe
                           src={embedUrl}
-                          title={`${openUnit.title} — video dars`}
+                          title={openUnit.clip_title || `${openUnit.title} — ruscha parcha`}
                           className="h-full w-full"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
@@ -547,8 +579,9 @@ export function LessonsBoard({
                       </div>
                     );
                   })()}
-                  <p className="text-xs text-ink-600/70 dark:text-ink-300/60">
-                    Bu darsda o'rgangan so'zlaringizni ruscha nutqda tanib olishga harakat qiling.
+                  <p className="rounded-xl bg-ink-50 px-3 py-2 text-xs text-ink-600 dark:bg-white/5 dark:text-ink-300">
+                    Hamma so'zni tushunish shart emas. Bu darsda o'rgangan so'zlaringizni jonli
+                    ruscha nutqda eshitishga harakat qiling.
                   </p>
                 </div>
               )}
@@ -571,72 +604,277 @@ export function LessonsBoard({
   );
 }
 
+function speakRu(text: string) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "ru-RU";
+  utter.rate = 0.85;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+/** Yozma javobni solishtirish uchun: kichik harf, ё → е, urg'u belgisi va
+ *  tinish belgilari olib tashlanadi. */
+function normalizeAnswer(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/́/g, "")
+    .replace(/[.,!?;:«»"'—-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Ko'p o'quvchilarda rus klaviaturasi o'rnatilmagan — yozish savollari
+// uchun ekrandagi kichik klaviatura.
+const RU_KEYBOARD = ["йцукенгшщзхъ", "фывапролджэ", "ячсмитьбюё"];
+
+function RussianKeyboard({
+  onKey,
+  onBackspace,
+  disabled,
+}: {
+  onKey: (ch: string) => void;
+  onBackspace: () => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      {RU_KEYBOARD.map((row, ri) => (
+        <div key={ri} className="flex gap-1">
+          {row.split("").map((ch) => (
+            <button
+              key={ch}
+              type="button"
+              disabled={disabled}
+              onClick={() => onKey(ch)}
+              className="h-9 w-7 rounded-lg bg-ink-100 text-sm font-semibold text-ink-800 transition-colors hover:bg-azure-100 active:bg-azure-200 disabled:opacity-40 sm:w-8 dark:bg-white/10 dark:text-ink-100 dark:hover:bg-azure-900/50"
+            >
+              {ch}
+            </button>
+          ))}
+          {ri === RU_KEYBOARD.length - 1 && (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={onBackspace}
+              aria-label="O'chirish"
+              className="flex h-9 w-12 items-center justify-center rounded-lg bg-ink-200 text-ink-700 hover:bg-ink-300 disabled:opacity-40 dark:bg-white/15 dark:text-ink-100"
+            >
+              <Delete size={16} />
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function ExerciseRun({
   exercise,
-  qIndex,
-  selectedAnswer,
-  correctCount,
-  exerciseResult,
-  onSelect,
-  onNext,
+  onFinish,
+  onRetry,
   onDone,
 }: {
   exercise: UnitDetail["exercises"][number];
-  qIndex: number;
-  selectedAnswer: number | null;
-  correctCount: number;
-  exerciseResult: number | null;
-  onSelect: (i: number) => void;
-  onNext: () => void;
+  /** Oxirgi savoldan keyin natija foizi bilan bir marta chaqiriladi. */
+  onFinish: (pct: number) => void;
+  onRetry: () => void;
   onDone: () => void;
 }) {
-  if (exerciseResult !== null) {
+  const [qIndex, setQIndex] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [typed, setTyped] = useState("");
+  const [checked, setChecked] = useState<boolean | null>(null);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [result, setResult] = useState<number | null>(null);
+
+  const question = exercise.questions[qIndex];
+  const isTyping = !!question?.answer_text;
+  const total = exercise.questions.length;
+
+  // Tinglash savoli ochilishi bilan so'z bir marta avtomatik o'qiladi.
+  useEffect(() => {
+    if (question?.audio_text) speakRu(question.audio_text);
+  }, [question?.audio_text, qIndex]);
+
+  if (result !== null) {
+    const great = result >= 80;
     return (
       <div className="flex animate-pop-in flex-col items-center gap-4 py-10 text-center">
-        <PlayCircle size={48} className="text-gold-500" />
-        <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">{exerciseResult}%</p>
-        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">
-          To'g'ri javoblar: {correctCount} / {exercise.questions.length}
-        </p>
-        <button
-          onClick={onDone}
-          className="btn-press mt-2 rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
+        <div
+          className={`flex h-24 w-24 items-center justify-center rounded-full text-white shadow-lg ${
+            great
+              ? "bg-gradient-to-br from-mint-400 to-mint-700 shadow-mint-700/30"
+              : "bg-gradient-to-br from-gold-400 to-gold-600 shadow-gold-700/30"
+          }`}
         >
-          Tayyor
-        </button>
+          {great ? <Trophy size={40} /> : <PlayCircle size={40} />}
+        </div>
+        <p className="font-display text-4xl font-bold text-ink-950 dark:text-ink-50">{result}%</p>
+        <p className="text-sm text-ink-600 dark:text-ink-300">
+          {great ? "Ajoyib natija!" : "Yaxshi urinish! Yana bir marta ishlab ko'ring."}{" "}
+          To'g'ri javoblar: {correctCount} / {total}
+        </p>
+        <div className="mt-2 flex gap-2">
+          <button
+            onClick={onRetry}
+            className="btn-press rounded-full bg-ink-100 px-5 py-2.5 text-sm font-bold text-ink-800 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-100"
+          >
+            Qayta ishlash
+          </button>
+          <button
+            onClick={onDone}
+            className="btn-press rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
+          >
+            Tayyor
+          </button>
+        </div>
       </div>
     );
   }
 
-  const question = exercise.questions[qIndex];
+  const acceptedAnswers = (question.answer_text ?? "").split("|").map(normalizeAnswer);
+  const canCheck = isTyping ? typed.trim() !== "" : selected !== null;
+
+  function check() {
+    if (!canCheck || checked !== null) return;
+    const ok = isTyping
+      ? acceptedAnswers.includes(normalizeAnswer(typed))
+      : selected === question.correct_index;
+    setChecked(ok);
+    if (ok) setCorrectCount((c) => c + 1);
+    if (question.audio_text && isTyping) speakRu(question.audio_text);
+  }
+
+  function next() {
+    if (qIndex + 1 < total) {
+      setQIndex(qIndex + 1);
+      setSelected(null);
+      setTyped("");
+      setChecked(null);
+    } else {
+      const pct = Math.round((correctCount / total) * 100);
+      setResult(pct);
+      onFinish(pct);
+    }
+  }
 
   return (
     <div key={qIndex} className="flex animate-fade-up flex-col gap-4">
-      <p className="text-xs font-semibold text-ink-500 dark:text-ink-400">
-        Savol {qIndex + 1} / {exercise.questions.length}
-      </p>
-      <p className="text-base font-semibold leading-snug text-ink-950 dark:text-ink-50">{question.prompt}</p>
-      <div className="flex flex-col gap-2">
-        {question.options.map((opt, i) => (
-          <button
-            key={i}
-            onClick={() => onSelect(i)}
-            className={`rounded-xl border px-4 py-3 text-left text-sm transition-all duration-150 ${
-              selectedAnswer === i
-                ? "border-ink-500 bg-ink-50 font-semibold text-ink-900 dark:bg-ink-900/40 dark:text-ink-50"
-                : "border-ink-100 bg-white hover:bg-ink-50/60 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
-            }`}
-          >
-            {opt}
-          </button>
-        ))}
+      <div className="flex items-center gap-3">
+        <div className="h-2 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
+          <div
+            className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
+            style={{ width: `${(qIndex / total) * 100}%` }}
+          />
+        </div>
+        <span className="text-xs font-semibold text-ink-500 dark:text-ink-400">
+          {qIndex + 1} / {total}
+        </span>
       </div>
+
+      <p className="whitespace-pre-line text-lg font-semibold leading-snug text-ink-950 dark:text-ink-50">
+        {question.prompt}
+      </p>
+
+      {question.audio_text && (
+        <button
+          onClick={() => speakRu(question.audio_text!)}
+          className="btn-press flex items-center gap-2 self-center rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-gold-700/30 hover:bg-gold-400"
+        >
+          <Volume2 size={18} /> Yana eshitish
+        </button>
+      )}
+
+      {isTyping ? (
+        <div className="flex flex-col gap-3">
+          <input
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (checked === null ? check : next)();
+            }}
+            disabled={checked !== null}
+            lang="ru"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            placeholder="Javobni ruscha yozing"
+            className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-lg font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-300 dark:bg-white/5 dark:text-ink-50 ${
+              checked === true
+                ? "border-mint-500"
+                : checked === false
+                ? "border-rose-400"
+                : "border-ink-200 focus:border-azure-500 dark:border-white/10"
+            }`}
+          />
+          <RussianKeyboard
+            disabled={checked !== null}
+            onKey={(ch) => setTyped((t) => t + ch)}
+            onBackspace={() => setTyped((t) => t.slice(0, -1))}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {question.options.map((opt, i) => {
+            const isRight = i === question.correct_index;
+            const state =
+              checked === null
+                ? selected === i
+                  ? "selected"
+                  : "idle"
+                : isRight
+                ? "right"
+                : selected === i
+                ? "wrong"
+                : "idle";
+            return (
+              <button
+                key={i}
+                onClick={() => checked === null && setSelected(i)}
+                className={`rounded-xl border-2 px-4 py-3 text-left text-base transition-all duration-150 ${
+                  state === "right"
+                    ? "border-mint-500 bg-mint-50 font-semibold text-mint-900 dark:bg-mint-950/40 dark:text-mint-100"
+                    : state === "wrong"
+                    ? "border-rose-400 bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200"
+                    : state === "selected"
+                    ? "border-azure-500 bg-azure-50 font-semibold text-azure-900 dark:bg-azure-950/40 dark:text-azure-100"
+                    : "border-ink-100 bg-white hover:border-ink-200 hover:bg-ink-50/60 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
+                }`}
+              >
+                {opt}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {checked !== null && (
+        <div
+          className={`animate-fade-up rounded-2xl px-4 py-3 text-sm ${
+            checked
+              ? "bg-mint-50 text-mint-900 dark:bg-mint-950/40 dark:text-mint-100"
+              : "bg-rose-50 text-rose-900 dark:bg-rose-950/40 dark:text-rose-100"
+          }`}
+        >
+          <p className="font-bold">
+            {checked
+              ? "To'g'ri!"
+              : isTyping
+              ? `To'g'ri javob: ${question.answer_text!.split("|")[0]}`
+              : `To'g'ri javob: ${question.options[question.correct_index]}`}
+          </p>
+          {question.explanation && <p className="mt-1 opacity-90">{question.explanation}</p>}
+        </div>
+      )}
+
       <button
-        onClick={onNext}
-        disabled={selectedAnswer === null}
-        className="btn-press mt-2 rounded-full bg-azure-600 py-2.5 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-40"
+        onClick={checked === null ? check : next}
+        disabled={checked === null && !canCheck}
+        className="btn-press mt-1 rounded-full bg-azure-600 py-3 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-40"
       >
-        {qIndex + 1 < exercise.questions.length ? "Keyingisi" : "Yakunlash"}
+        {checked === null ? "Tekshirish" : qIndex + 1 < total ? "Keyingisi" : "Natijani ko'rish"}
       </button>
     </div>
   );

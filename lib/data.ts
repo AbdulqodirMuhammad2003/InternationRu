@@ -31,6 +31,8 @@ export interface LevelRecord {
   locked: number;
 }
 
+export type ClipKind = "film" | "multfilm" | "hujjatli" | "intervyu";
+
 export interface UnitRecord {
   id: number;
   level_id: number;
@@ -44,9 +46,16 @@ export interface UnitRecord {
   locked: number;
   date_label: string;
   percent: number;
-  /** Mashqlar tugatilgach ochiladigan qisqa video darsning YouTube
-   *  havolasi. Bunday video hali tayyorlanmagan darslar uchun `null`. */
-  video_url: string | null;
+  /** Mashqlar tugatilgach ochiladigan "Ruscha tomosha" — haqiqiy ruscha
+   *  film, multfilm, hujjatli film yoki intervyudan 5-10 daqiqalik parcha
+   *  (YouTube). Parcha tanlanmagan darslar uchun `clip_url` — `null`. */
+  clip_url: string | null;
+  clip_title: string | null;
+  clip_kind: ClipKind | null;
+  /** Parchaning boshlanishi va oxiri (soniyalarda); `null` — videoning
+   *  o'z boshi/oxiri. */
+  clip_start: number | null;
+  clip_end: number | null;
 }
 
 export interface VocabWord {
@@ -82,6 +91,11 @@ export interface ExerciseQuestion {
   options: string[];
   correct_index: number;
   order_index: number;
+  /** Tinglash savoli — ochilganda shu matn ovoz chiqarib o'qiladi. */
+  audio_text: string | null;
+  /** Yozish savoli — to'g'ri javob(lar), "|" bilan ajratilgan. */
+  answer_text: string | null;
+  explanation: string | null;
 }
 
 export interface ExerciseRecord {
@@ -142,7 +156,8 @@ export async function getLevels(): Promise<LevelRecord[]> {
 export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
   return sql<UnitRecord[]>`
     SELECT u.id, u.level_id, l.code as level_code, u.code, u.title, u.subtitle, u.color, u.icon,
-           u.order_index, u.locked, u.date_label, u.video_url,
+           u.order_index, u.locked, u.date_label,
+           u.clip_url, u.clip_title, u.clip_kind, u.clip_start, u.clip_end,
            COALESCE(p.percent, 0) as percent
     FROM units u
     JOIN levels l ON l.id = u.level_id
@@ -154,7 +169,8 @@ export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
 export async function getUnitDetail(unitId: number, userId: number): Promise<UnitDetail | undefined> {
   const unitRows = await sql<UnitRecord[]>`
     SELECT u.id, u.level_id, l.code as level_code, u.code, u.title, u.subtitle, u.color, u.icon,
-           u.order_index, u.locked, u.date_label, u.video_url,
+           u.order_index, u.locked, u.date_label,
+           u.clip_url, u.clip_title, u.clip_kind, u.clip_start, u.clip_end,
            COALESCE(p.percent, 0) as percent
     FROM units u
     JOIN levels l ON l.id = u.level_id
@@ -217,9 +233,18 @@ export async function getUnitDetail(unitId: number, userId: number): Promise<Uni
   const exercises: ExerciseRecord[] = [];
   for (const e of exerciseRows) {
     const questionRows = await sql<
-      { id: number; prompt: string; options_json: string; correct_index: number; order_index: number }[]
+      {
+        id: number;
+        prompt: string;
+        options_json: string;
+        correct_index: number;
+        order_index: number;
+        audio_text: string | null;
+        answer_text: string | null;
+        explanation: string | null;
+      }[]
     >`
-      SELECT id, prompt, options_json, correct_index, order_index
+      SELECT id, prompt, options_json, correct_index, order_index, audio_text, answer_text, explanation
       FROM exercise_questions WHERE exercise_id = ${e.id} ORDER BY order_index ASC
     `;
     const questions: ExerciseQuestion[] = questionRows.map((q) => ({
@@ -228,6 +253,9 @@ export async function getUnitDetail(unitId: number, userId: number): Promise<Uni
       options: JSON.parse(q.options_json) as string[],
       correct_index: q.correct_index,
       order_index: q.order_index,
+      audio_text: q.audio_text,
+      answer_text: q.answer_text,
+      explanation: q.explanation,
     }));
     exercises.push({ ...e, question_count: questions.length, questions });
   }

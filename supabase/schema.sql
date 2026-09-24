@@ -49,9 +49,15 @@ CREATE TABLE IF NOT EXISTS units (
   order_index INTEGER NOT NULL,
   locked INTEGER NOT NULL DEFAULT 0,
   date_label TEXT,
-  -- Mashqlar tugatilgach ochiladigan qisqa (5-10 daqiqalik) ruscha video
-  -- darsning YouTube havolasi. NULL bo'lsa, "Video dars" bo'limi ko'rsatilmaydi.
-  video_url TEXT
+  -- "Ruscha tomosha": mashqlar tugatilgach ochiladigan haqiqiy ruscha film,
+  -- multfilm, hujjatli film yoki intervyudan 5-10 daqiqalik parcha (YouTube).
+  -- clip_url NULL bo'lsa, bu bo'lim ko'rsatilmaydi. clip_start/clip_end —
+  -- parchaning boshi va oxiri (soniyalarda).
+  clip_url TEXT,
+  clip_title TEXT,
+  clip_kind TEXT CHECK (clip_kind IN ('film', 'multfilm', 'hujjatli', 'intervyu')),
+  clip_start INTEGER,
+  clip_end INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS vocabulary_rounds (
@@ -109,7 +115,14 @@ CREATE TABLE IF NOT EXISTS exercise_questions (
   prompt TEXT NOT NULL,
   options_json TEXT NOT NULL,
   correct_index INTEGER NOT NULL,
-  order_index INTEGER NOT NULL
+  order_index INTEGER NOT NULL,
+  -- Tinglash savoli: ochilganda shu matn ovoz chiqarib o'qiladi.
+  audio_text TEXT,
+  -- Yozish savoli: to'g'ri javob(lar), "|" bilan ajratilgan. Bunda
+  -- options_json bo'sh massiv bo'ladi.
+  answer_text TEXT,
+  -- Javobdan keyin ko'rsatiladigan qisqa izoh.
+  explanation TEXT
 );
 
 CREATE TABLE IF NOT EXISTS user_exercise_progress (
