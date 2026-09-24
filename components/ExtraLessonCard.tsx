@@ -41,7 +41,7 @@ export function ExtraLessonCard({ lesson }: { lesson: ExtraLessonRecord }) {
           <button
             onClick={book}
             disabled={full || isPending}
-            className="btn-press rounded-full bg-olive-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-olive-500 disabled:opacity-40"
+            className="btn-press rounded-full bg-azure-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-azure-500 disabled:opacity-40"
           >
             {full ? "O'rin yo'q" : isPending ? "Yozilmoqda..." : "Yozilish"}
           </button>

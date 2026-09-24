@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
@@ -16,7 +16,27 @@ import { submitExerciseResult } from "@/app/actions";
 import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
 
-type View = "main" | "vocab-rounds" | "exercises" | "exercise-run";
+type View = "main" | "vocab-rounds" | "exercises" | "exercise-run" | "video";
+
+/** Turli YouTube havola shakllarini (watch?v=, youtu.be/, shorts/) o'rnatib
+ *  ko'rsatish uchun `/embed/VIDEO_ID` ko'rinishiga o'giradi. Havola
+ *  tushunarsiz bo'lsa `null` qaytaradi (bunday holatda video ko'rsatilmaydi). */
+function toYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    let id: string | null = null;
+    if (u.hostname.includes("youtu.be")) {
+      id = u.pathname.slice(1);
+    } else if (u.hostname.includes("youtube.com")) {
+      if (u.pathname === "/watch") id = u.searchParams.get("v");
+      else if (u.pathname.startsWith("/shorts/")) id = u.pathname.split("/")[2];
+      else if (u.pathname.startsWith("/embed/")) id = u.pathname.split("/")[2];
+    }
+    return id ? `https://www.youtube.com/embed/${id}` : null;
+  } catch {
+    return null;
+  }
+}
 
 export function LessonsBoard({
   units,
@@ -95,6 +115,12 @@ export function LessonsBoard({
     );
   }
 
+  /** Video dars faqat shu darsdagi barcha mashqlar kamida bir marta
+   *  yakunlangach (ball qanday bo'lishidan qat'iy nazar) ochiladi. */
+  function unitVideoUnlocked(unit: UnitDetail) {
+    return unit.exercises.length > 0 && unit.exercises.every((e) => e.attempted);
+  }
+
   function selectAnswer(index: number) {
     setSelectedAnswer(index);
   }
@@ -129,9 +155,53 @@ export function LessonsBoard({
     setView("exercise-run");
   }
 
-  function scrollCarousel(dir: 1 | -1) {
-    scrollerRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+  // Karusel markazidagi (faol) karta — u kattaroq ko'rsatiladi va faqat
+  // shu karta bosilganda dars ochiladi; qolganlari bosilsa markazga keladi.
+  const [activeCard, setActiveCard] = useState(0);
+
+  function cardElements() {
+    return Array.from(
+      scrollerRef.current?.querySelectorAll<HTMLElement>("[data-card]") ?? []
+    );
   }
+
+  function scrollToCard(index: number, behavior: ScrollBehavior = "smooth") {
+    const scroller = scrollerRef.current;
+    const card = cardElements()[index];
+    if (!scroller || !card) return;
+    scroller.scrollTo({
+      left: card.offsetLeft - (scroller.clientWidth - card.offsetWidth) / 2,
+      behavior,
+    });
+  }
+
+  function syncActiveCard() {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const center = scroller.scrollLeft + scroller.clientWidth / 2;
+    let best = 0;
+    let bestDist = Infinity;
+    cardElements().forEach((card, i) => {
+      const dist = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    });
+    setActiveCard(best);
+  }
+
+  // Daraja almashganda (yoki birinchi ochilganda) o'quvchining joriy
+  // darsini — oxirgi ochiq darsni — markazga olib kelamiz.
+  useEffect(() => {
+    let current = 0;
+    visibleUnits.forEach((u, i) => {
+      if (!u.locked) current = i;
+    });
+    setActiveCard(current);
+    scrollToCard(current, "instant");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLevelCode]);
 
   return (
     <div className="relative">
@@ -145,7 +215,7 @@ export function LessonsBoard({
               onClick={() => setSelectedLevelCode(level.code)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                 active
-                  ? "bg-gradient-to-br from-olive-700 to-olive-950 text-white shadow-sm shadow-olive-900/30"
+                  ? "bg-gradient-to-br from-azure-700 to-azure-950 text-white shadow-sm shadow-azure-900/30"
                   : level.locked
                   ? "bg-white text-olive-300 hover:bg-olive-50 dark:bg-[#1f2115] dark:text-olive-700 dark:hover:bg-white/10"
                   : "bg-white text-olive-700 shadow-sm hover:-translate-y-0.5 hover:bg-olive-50 dark:bg-[#1f2115] dark:text-olive-200 dark:hover:bg-white/10"
@@ -171,80 +241,103 @@ export function LessonsBoard({
           </p>
         </div>
       ) : (
-        <div className="flex min-w-0 items-center gap-2">
-          <button
-            onClick={() => scrollCarousel(-1)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-olive-700 shadow transition-colors hover:bg-olive-50 dark:bg-[#1f2115] dark:text-olive-200 dark:hover:bg-white/10"
-            aria-label="Chapga aylantirish"
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <div
-            ref={scrollerRef}
-            className="no-scrollbar flex min-w-0 flex-1 gap-4 overflow-x-auto scroll-smooth py-2"
-          >
-            {visibleUnits.map((unit, i) => {
-              const gradient = UNIT_GRADIENTS[unit.color] || UNIT_GRADIENTS.green;
-              return (
-                <button
-                  key={unit.id}
-                  onClick={() => openUnitPanel(unit)}
-                  disabled={!!unit.locked}
-                  style={{ animationDelay: `${i * 70}ms` }}
-                  className={`relative flex h-64 w-56 shrink-0 animate-fade-up flex-col justify-between rounded-3xl bg-gradient-to-br p-5 text-left text-white shadow-md transition-all duration-300 ${gradient} ${
-                    unit.locked ? "cursor-not-allowed opacity-70" : "hover:-translate-y-1.5 hover:shadow-xl"
-                  }`}
-                >
-                  <div>
-                    <p className="font-display text-lg font-bold">{unit.title}</p>
-                    <p className="mt-1 text-sm leading-snug text-white/85 line-clamp-4">
+        <div>
+          <div className="relative">
+            <div
+              ref={scrollerRef}
+              onScroll={syncActiveCard}
+              className="no-scrollbar flex min-w-0 snap-x snap-mandatory items-center gap-5 overflow-x-auto scroll-smooth px-[calc(50%-7.5rem)] py-8"
+            >
+              {visibleUnits.map((unit, i) => {
+                const gradient = UNIT_GRADIENTS[unit.color] || UNIT_GRADIENTS.green;
+                const active = i === activeCard;
+                return (
+                  <button
+                    key={unit.id}
+                    data-card
+                    onClick={() => (active ? openUnitPanel(unit) : scrollToCard(i))}
+                    aria-disabled={!!unit.locked}
+                    style={{ animationDelay: `${i * 70}ms` }}
+                    className={`group relative flex h-72 w-60 shrink-0 snap-center animate-fade-up flex-col items-center overflow-hidden rounded-[2rem] bg-gradient-to-br px-5 pb-6 pt-7 text-center text-white ring-1 ring-inset ring-white/10 transition-all duration-500 ease-out ${gradient} ${
+                      active
+                        ? "z-10 scale-110 shadow-2xl shadow-black/30"
+                        : "scale-95 opacity-60 shadow-md hover:opacity-90"
+                    } ${active && unit.locked ? "cursor-not-allowed" : ""}`}
+                  >
+                    {/* Dekorativ pufakchalar va yorug'lik — kartaga chuqurlik beradi */}
+                    <span className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
+                    <span className="pointer-events-none absolute -bottom-6 -right-4 h-24 w-24 rounded-full bg-black/10" />
+                    <span className="pointer-events-none absolute bottom-16 right-10 h-8 w-8 rounded-full bg-black/10" />
+                    <span className="pointer-events-none absolute -left-6 top-24 h-16 w-16 rounded-full bg-white/5" />
+
+                    <span className="relative rounded-full bg-white/15 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
+                      {unit.level_code}
+                    </span>
+                    <p className="font-display relative mt-3 text-3xl font-bold tracking-tight">
+                      {unit.title}
+                    </p>
+                    <p className="relative mt-2 text-sm leading-snug text-white/80 line-clamp-3">
                       {unit.subtitle}
                     </p>
-                  </div>
-                  {unit.locked ? (
-                    <div className="flex items-end justify-between">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm">
-                        <LockKeyhole size={28} strokeWidth={2.2} />
-                      </div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-white/70">
-                        Yopiq
+
+                    <div className="relative mt-auto flex w-full flex-col items-center gap-2">
+                      {unit.locked ? (
+                        <span className="flex h-12 items-center gap-2 rounded-full bg-rose-500 px-6 text-base font-bold shadow-lg shadow-rose-900/40">
+                          <LockKeyhole size={20} strokeWidth={2.4} /> Yopiq
+                        </span>
+                      ) : (
+                        <div className="relative h-12 w-full overflow-hidden rounded-full bg-white/90 shadow-lg shadow-black/20">
+                          <div
+                            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-gold-300 to-gold-500 transition-[width] duration-700"
+                            style={{ width: `${unit.percent}%` }}
+                          />
+                          <span className="relative flex h-full items-center justify-center text-lg font-extrabold text-olive-950">
+                            {unit.percent}%
+                          </span>
+                        </div>
+                      )}
+                      <span className="h-5 text-sm font-semibold text-white/85">
+                        {unit.date_label}
                       </span>
                     </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-wider text-white/60">
-                            Uy vazifasi
-                          </p>
-                          <p className="font-display text-4xl font-bold leading-none">
-                            {unit.percent}
-                            <span className="text-xl">%</span>
-                          </p>
-                        </div>
-                        {unit.date_label && (
-                          <span className="text-[11px] text-white/70">{unit.date_label}</span>
-                        )}
-                      </div>
-                      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/20">
-                        <div
-                          className="h-full rounded-full bg-gold-400 transition-[width] duration-500"
-                          style={{ width: `${unit.percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => scrollToCard(activeCard - 1)}
+              disabled={activeCard === 0}
+              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-olive-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#1f2115]/90 dark:text-olive-100"
+              aria-label="Chapga aylantirish"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={() => scrollToCard(activeCard + 1)}
+              disabled={activeCard === visibleUnits.length - 1}
+              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-olive-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#1f2115]/90 dark:text-olive-100"
+              aria-label="O’ngga aylantirish"
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
-          <button
-            onClick={() => scrollCarousel(1)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-olive-700 shadow transition-colors hover:bg-olive-50 dark:bg-[#1f2115] dark:text-olive-200 dark:hover:bg-white/10"
-            aria-label="O’ngga aylantirish"
-          >
-            <ChevronRight size={18} />
-          </button>
+
+          {/* Sahifa nuqtalari */}
+          <div className="mt-2 flex items-center justify-center gap-1.5">
+            {visibleUnits.map((unit, i) => (
+              <button
+                key={unit.id}
+                onClick={() => scrollToCard(i)}
+                aria-label={unit.title}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === activeCard
+                    ? "w-6 bg-gold-400"
+                    : "w-2 bg-olive-200 hover:bg-olive-300 dark:bg-white/15"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -286,7 +379,7 @@ export function LessonsBoard({
                   <button
                     onClick={() => setView("vocab-rounds")}
                     disabled={openUnit.totalWords === 0}
-                    className="animate-fade-up rounded-2xl bg-gradient-to-br from-olive-700 to-olive-950 p-5 text-left text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+                    className="animate-fade-up rounded-2xl bg-gradient-to-br from-azure-600 to-azure-900 p-5 text-left text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
                   >
                     <p className="text-sm text-white/60">Lug'at</p>
                     <p className="font-display mb-3 text-xl font-bold">{openUnit.totalWords} ta so'z</p>
@@ -301,33 +394,41 @@ export function LessonsBoard({
                     </p>
                   </button>
 
-                  <button
-                    onClick={() => setVideoNotice(true)}
-                    style={{ animationDelay: "60ms" }}
-                    className="flex animate-fade-up items-center gap-4 rounded-2xl bg-olive-50 p-4 text-left transition-colors hover:bg-olive-100/70 dark:bg-white/5 dark:hover:bg-white/10"
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-olive-200 text-olive-600 dark:bg-white/10 dark:text-olive-300">
-                      <Lock size={20} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-olive-800 dark:text-olive-100">Video dars</p>
-                      <p className="text-xs text-olive-600/70 dark:text-olive-300/60">Nazariya + test</p>
-                    </div>
-                    <span className="rounded-full bg-olive-200/70 px-2.5 py-1 text-xs font-semibold text-olive-600 dark:bg-white/10 dark:text-olive-300">
-                      Yopiq
-                    </span>
-                  </button>
-                  {videoNotice && (
-                    <p className="-mt-2 animate-fade-up rounded-xl bg-gold-50 px-3 py-2 text-xs text-gold-700 dark:bg-gold-950/40 dark:text-gold-300">
-                      Video dars lug'at va mashqlarni tugatgach ochiladi.
-                    </p>
+                  {openUnit.video_url && (
+                    <>
+                      <button
+                        onClick={() =>
+                          unitVideoUnlocked(openUnit) ? setView("video") : setVideoNotice(true)
+                        }
+                        style={{ animationDelay: "60ms" }}
+                        className="flex animate-fade-up items-center gap-4 rounded-2xl bg-olive-50 p-4 text-left transition-colors hover:bg-olive-100/70 dark:bg-white/5 dark:hover:bg-white/10"
+                      >
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-olive-200 text-olive-600 dark:bg-white/10 dark:text-olive-300">
+                          {unitVideoUnlocked(openUnit) ? <PlayCircle size={20} /> : <Lock size={20} />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-olive-800 dark:text-olive-100">Video dars</p>
+                          <p className="text-xs text-olive-600/70 dark:text-olive-300/60">
+                            Ruscha qisqa video (5-10 daqiqa)
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-olive-200/70 px-2.5 py-1 text-xs font-semibold text-olive-600 dark:bg-white/10 dark:text-olive-300">
+                          {unitVideoUnlocked(openUnit) ? "Ochiq" : "Yopiq"}
+                        </span>
+                      </button>
+                      {videoNotice && !unitVideoUnlocked(openUnit) && (
+                        <p className="-mt-2 animate-fade-up rounded-xl bg-gold-50 px-3 py-2 text-xs text-gold-700 dark:bg-gold-950/40 dark:text-gold-300">
+                          Video dars mashqlarni bajarib tugatgach ochiladi.
+                        </p>
+                      )}
+                    </>
                   )}
 
                   <button
                     onClick={() => setView("exercises")}
                     disabled={openUnit.exercises.length === 0}
                     style={{ animationDelay: "120ms" }}
-                    className="animate-fade-up rounded-2xl bg-gradient-to-br from-wine-700 to-wine-950 p-5 text-left text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+                    className="animate-fade-up rounded-2xl bg-gradient-to-br from-mint-600 to-mint-900 p-5 text-left text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
                   >
                     <p className="text-sm text-white/60">Mashqlar</p>
                     <p className="font-display mb-3 text-xl font-bold">
@@ -373,7 +474,7 @@ export function LessonsBoard({
                         <p className="mb-2 text-xs text-olive-700/60 dark:text-olive-300/60">{round.words.length} ta so’z</p>
                         <div className="h-1.5 w-full overflow-hidden rounded-full bg-olive-100 dark:bg-white/10">
                           <div
-                            className="h-full rounded-full bg-olive-500 transition-[width] duration-500"
+                            className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -420,6 +521,35 @@ export function LessonsBoard({
                     onNext={nextQuestion}
                     onDone={() => setView("exercises")}
                   />
+                </div>
+              )}
+
+              {view === "video" && openUnit.video_url && (
+                <div className="flex flex-col gap-3">
+                  {(() => {
+                    const embedUrl = toYouTubeEmbedUrl(openUnit.video_url!);
+                    if (!embedUrl) {
+                      return (
+                        <p className="text-sm text-olive-600/70 dark:text-olive-300/60">
+                          Video havolasi noto'g'ri formatda.
+                        </p>
+                      );
+                    }
+                    return (
+                      <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-md">
+                        <iframe
+                          src={embedUrl}
+                          title={`${openUnit.title} — video dars`}
+                          className="h-full w-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    );
+                  })()}
+                  <p className="text-xs text-olive-600/70 dark:text-olive-300/60">
+                    Bu darsda o'rgangan so'zlaringizni ruscha nutqda tanib olishga harakat qiling.
+                  </p>
                 </div>
               )}
             </div>
@@ -470,7 +600,7 @@ export function ExerciseRun({
         </p>
         <button
           onClick={onDone}
-          className="btn-press mt-2 rounded-full bg-olive-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-olive-500"
+          className="btn-press mt-2 rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
         >
           Tayyor
         </button>
@@ -504,7 +634,7 @@ export function ExerciseRun({
       <button
         onClick={onNext}
         disabled={selectedAnswer === null}
-        className="btn-press mt-2 rounded-full bg-olive-600 py-2.5 text-sm font-bold text-white hover:bg-olive-500 disabled:opacity-40"
+        className="btn-press mt-2 rounded-full bg-azure-600 py-2.5 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-40"
       >
         {qIndex + 1 < exercise.questions.length ? "Keyingisi" : "Yakunlash"}
       </button>

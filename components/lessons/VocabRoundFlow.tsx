@@ -241,7 +241,7 @@ export function VocabRoundFlow({
               key={s.key}
               className={`h-1.5 flex-1 max-w-[6rem] rounded-full transition-colors duration-300 ${
                 i < stageIdx
-                  ? "bg-olive-500"
+                  ? "bg-mint-500"
                   : i === stageIdx
                   ? "bg-gold-500"
                   : "bg-olive-900/10 dark:bg-white/10"
@@ -293,7 +293,7 @@ export function VocabRoundFlow({
               </button>
               <button
                 onClick={startChecking}
-                className="btn-press flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-olive-600 to-olive-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-olive-900/30 hover:from-olive-500 hover:to-olive-600"
+                className="btn-press flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
               >
                 Tekshiruvni boshlash <ArrowRight size={16} />
               </button>
@@ -342,7 +342,7 @@ export function VocabRoundFlow({
 
         {phase === "mistakes-done" && (
           <div className="flex animate-pop-in flex-col items-center gap-4 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-olive-600 to-olive-800 text-white shadow-lg shadow-olive-900/30">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-mint-600 to-mint-800 text-white shadow-lg shadow-mint-900/30">
               <Trophy size={34} />
             </div>
             <div>
@@ -358,7 +358,7 @@ export function VocabRoundFlow({
             </div>
             <button
               onClick={onClose}
-              className="btn-press rounded-full bg-gradient-to-b from-olive-600 to-olive-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-olive-900/30 hover:from-olive-500 hover:to-olive-600"
+              className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
             >
               Tugatish
             </button>
@@ -437,7 +437,7 @@ function LearnCard({
       </div>
       <button
         onClick={onNext}
-        className="btn-press flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-olive-600 to-olive-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-olive-900/30 hover:from-olive-500 hover:to-olive-600"
+        className="btn-press flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
       >
         {index + 1 < total ? "Keyingisi" : "Tayyor"} <ArrowRight size={16} />
       </button>
@@ -460,7 +460,7 @@ function RoundSummary({
 }) {
   return (
     <div className="flex animate-pop-in flex-col items-center gap-4 text-center">
-      <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-olive-600 to-olive-900 text-white shadow-lg shadow-olive-900/30">
+      <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-mint-600 to-mint-900 text-white shadow-lg shadow-mint-900/30">
         <span className="font-display text-3xl font-bold">{percent}%</span>
       </div>
       <div>
@@ -826,12 +826,12 @@ function PronunciationStage({
             disabled={checked !== null}
             className={`btn-press flex h-20 w-20 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200 ${
               checked === true
-                ? "bg-olive-600 shadow-olive-700/30"
+                ? "bg-azure-600 shadow-azure-700/30"
                 : checked === false
                 ? "bg-wine-600 shadow-wine-700/30"
                 : listening
                 ? "animate-pulse bg-gold-500 shadow-gold-600/40"
-                : "bg-gradient-to-b from-olive-600 to-olive-800 shadow-olive-900/30 hover:from-olive-500 hover:to-olive-700"
+                : "bg-gradient-to-b from-azure-600 to-azure-800 shadow-azure-900/30 hover:from-azure-500 hover:to-azure-700"
             }`}
             aria-label="Yozib olish"
           >
@@ -859,7 +859,7 @@ function PronunciationStage({
             <button
               onClick={() => finish(true)}
               disabled={checked !== null}
-              className="btn-press rounded-full bg-olive-600 px-4 py-2 text-xs font-bold text-white hover:bg-olive-500"
+              className="btn-press rounded-full bg-azure-600 px-4 py-2 text-xs font-bold text-white hover:bg-azure-500"
             >
               To'g'ri aytdim
             </button>
@@ -945,7 +945,7 @@ function SentenceStage({
       <button
         onClick={submit}
         disabled={checked !== null || !value.trim()}
-        className="btn-press rounded-full bg-gradient-to-b from-olive-600 to-olive-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-olive-900/30 hover:from-olive-500 hover:to-olive-600 disabled:opacity-40"
+        className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-40"
       >
         Tekshirish
       </button>

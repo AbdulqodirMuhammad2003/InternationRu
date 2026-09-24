@@ -48,7 +48,10 @@ CREATE TABLE IF NOT EXISTS units (
   icon TEXT NOT NULL DEFAULT 'book',
   order_index INTEGER NOT NULL,
   locked INTEGER NOT NULL DEFAULT 0,
-  date_label TEXT
+  date_label TEXT,
+  -- Mashqlar tugatilgach ochiladigan qisqa (5-10 daqiqalik) ruscha video
+  -- darsning YouTube havolasi. NULL bo'lsa, "Video dars" bo'limi ko'rsatilmaydi.
+  video_url TEXT
 );
 
 CREATE TABLE IF NOT EXISTS vocabulary_rounds (

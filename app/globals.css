@@ -66,6 +66,33 @@
   --color-wine-900: #49242b;
   --color-wine-950: #281114;
 
+  /* Diqqatni jamlash uchun sovuq ranglar: azure (asosiy tugmalar,
+     harakatlar) va mint (progress, "o'rganildi" holatlari). Olive brend
+     (logo, sarlavhalar, yon panel) sifatida qoladi. */
+  --color-azure-50: #edf2ff;
+  --color-azure-100: #dbe4ff;
+  --color-azure-200: #bac8ff;
+  --color-azure-300: #91a7ff;
+  --color-azure-400: #748ffc;
+  --color-azure-500: #5c7cfa;
+  --color-azure-600: #4263eb;
+  --color-azure-700: #3b5bdb;
+  --color-azure-800: #364fc7;
+  --color-azure-900: #2b3d9c;
+  --color-azure-950: #1a2463;
+
+  --color-mint-50: #e6fcf5;
+  --color-mint-100: #c3fae8;
+  --color-mint-200: #96f2d7;
+  --color-mint-300: #63e6be;
+  --color-mint-400: #38d9a9;
+  --color-mint-500: #20c997;
+  --color-mint-600: #12b886;
+  --color-mint-700: #0ca678;
+  --color-mint-800: #099268;
+  --color-mint-900: #087f5b;
+  --color-mint-950: #04402e;
+
   --font-display: var(--font-lora), Georgia, "Times New Roman", serif;
 
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;

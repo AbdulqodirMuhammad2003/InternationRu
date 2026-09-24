@@ -133,7 +133,7 @@ export function EditableAvatar({
           <button
             type="submit"
             disabled={pending}
-            className="btn-press mt-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-olive-600 to-olive-700 py-2.5 text-sm font-semibold text-white shadow-sm shadow-olive-900/30 transition-colors hover:from-olive-500 hover:to-olive-600 disabled:opacity-60"
+            className="btn-press mt-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-semibold text-white shadow-sm shadow-azure-900/30 transition-colors hover:from-azure-500 hover:to-azure-600 disabled:opacity-60"
           >
             {pending && <Loader2 size={16} className="animate-spin" />}
             {pending ? "Saqlanmoqda..." : "Saqlash"}

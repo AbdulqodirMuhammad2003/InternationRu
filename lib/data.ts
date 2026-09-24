@@ -44,6 +44,9 @@ export interface UnitRecord {
   locked: number;
   date_label: string;
   percent: number;
+  /** Mashqlar tugatilgach ochiladigan qisqa video darsning YouTube
+   *  havolasi. Bunday video hali tayyorlanmagan darslar uchun `null`. */
+  video_url: string | null;
 }
 
 export interface VocabWord {
@@ -88,6 +91,10 @@ export interface ExerciseRecord {
   order_index: number;
   question_count: number;
   score_pct: number;
+  /** Foydalanuvchi bu mashqni kamida bir marta yakunlab, natija
+   *  yuborganmi (score_pct === 0 bilan adashtirmaslik uchun alohida
+   *  belgi — masalan, 0% bilan tugatilgan mashq ham "urinilgan"). */
+  attempted: boolean;
   questions: ExerciseQuestion[];
 }
 
@@ -135,7 +142,7 @@ export async function getLevels(): Promise<LevelRecord[]> {
 export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
   return sql<UnitRecord[]>`
     SELECT u.id, u.level_id, l.code as level_code, u.code, u.title, u.subtitle, u.color, u.icon,
-           u.order_index, u.locked, u.date_label,
+           u.order_index, u.locked, u.date_label, u.video_url,
            COALESCE(p.percent, 0) as percent
     FROM units u
     JOIN levels l ON l.id = u.level_id
@@ -147,7 +154,7 @@ export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
 export async function getUnitDetail(unitId: number, userId: number): Promise<UnitDetail | undefined> {
   const unitRows = await sql<UnitRecord[]>`
     SELECT u.id, u.level_id, l.code as level_code, u.code, u.title, u.subtitle, u.color, u.icon,
-           u.order_index, u.locked, u.date_label,
+           u.order_index, u.locked, u.date_label, u.video_url,
            COALESCE(p.percent, 0) as percent
     FROM units u
     JOIN levels l ON l.id = u.level_id
@@ -191,9 +198,17 @@ export async function getUnitDetail(unitId: number, userId: number): Promise<Uni
   const totalWords = fullRounds.reduce((sum, r) => sum + r.words.length, 0);
 
   const exerciseRows = await sql<
-    { id: number; title: string; skill_label: string; order_index: number; score_pct: number }[]
+    {
+      id: number;
+      title: string;
+      skill_label: string;
+      order_index: number;
+      score_pct: number;
+      attempted: boolean;
+    }[]
   >`
-    SELECT e.id, e.title, e.skill_label, e.order_index, COALESCE(p.score_pct, 0) as score_pct
+    SELECT e.id, e.title, e.skill_label, e.order_index, COALESCE(p.score_pct, 0) as score_pct,
+           (p.exercise_id IS NOT NULL) as attempted
     FROM exercises e
     LEFT JOIN user_exercise_progress p ON p.exercise_id = e.id AND p.user_id = ${userId}
     WHERE e.unit_id = ${unitId} ORDER BY e.order_index ASC

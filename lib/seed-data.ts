@@ -112,6 +112,8 @@ export async function seedDatabase() {
       icon: "headphones",
       locked: 0,
       date: "11 avg",
+      // Mashqlar tugatilgach ochiladigan qisqa video dars (5-10 daqiqa).
+      video: "https://www.youtube.com/watch?v=tQzDp3nDKKs",
     },
     {
       code: "C1b",
@@ -122,6 +124,7 @@ export async function seedDatabase() {
       icon: "book",
       locked: 1,
       date: "",
+      video: "https://www.youtube.com/watch?v=QAMvCj4jh-Y",
     },
     {
       code: "C1c",
@@ -132,6 +135,7 @@ export async function seedDatabase() {
       icon: "chart",
       locked: 1,
       date: "",
+      video: "https://www.youtube.com/watch?v=43BLcHcqKfo",
     },
     {
       code: "C2",
@@ -142,6 +146,7 @@ export async function seedDatabase() {
       icon: "chat",
       locked: 1,
       date: "",
+      video: null,
     },
     {
       code: "C3",
@@ -152,6 +157,7 @@ export async function seedDatabase() {
       icon: "lock",
       locked: 1,
       date: "",
+      video: null,
     },
     {
       code: "C4",
@@ -162,6 +168,7 @@ export async function seedDatabase() {
       icon: "headphones",
       locked: 1,
       date: "",
+      video: null,
     },
     {
       code: "C5",
@@ -172,6 +179,7 @@ export async function seedDatabase() {
       icon: "book",
       locked: 1,
       date: "",
+      video: null,
     },
     {
       code: "C6",
@@ -182,6 +190,7 @@ export async function seedDatabase() {
       icon: "chart",
       locked: 1,
       date: "",
+      video: null,
     },
     {
       code: "C7",
@@ -192,6 +201,7 @@ export async function seedDatabase() {
       icon: "chat",
       locked: 1,
       date: "",
+      video: null,
     },
     {
       code: "C8",
@@ -202,6 +212,7 @@ export async function seedDatabase() {
       icon: "lock",
       locked: 1,
       date: "",
+      video: null,
     },
   ];
 
@@ -210,10 +221,10 @@ export async function seedDatabase() {
   for (const u of units) {
     unitOrderByLevel[u.level] = (unitOrderByLevel[u.level] || 0) + 1;
     const [row] = await sql<{ id: number }[]>`
-      INSERT INTO units (level_id, code, title, subtitle, color, icon, order_index, locked, date_label)
+      INSERT INTO units (level_id, code, title, subtitle, color, icon, order_index, locked, date_label, video_url)
       VALUES (
         ${levelIds[u.level]}, ${u.code}, ${u.title}, ${u.subtitle}, ${u.color}, ${u.icon},
-        ${unitOrderByLevel[u.level]}, ${u.locked}, ${u.date}
+        ${unitOrderByLevel[u.level]}, ${u.locked}, ${u.date}, ${u.video}
       )
       RETURNING id
     `;
