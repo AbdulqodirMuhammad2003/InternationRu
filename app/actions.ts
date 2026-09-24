@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
-import { getUserByEmail } from "@/lib/data";
+import { getUserByEmail, REVIEW_INTERVAL_DAYS, MAX_REVIEW_BOX } from "@/lib/data";
 import {
   AUTH_COOKIE,
   createSessionToken,
@@ -177,10 +177,35 @@ export async function setWordStagePassed(
         VALUES (${userId}, ${wordId}, 1, now())
         ON CONFLICT (user_id, word_id) DO UPDATE SET learned = 1, updated_at = now()
       `;
+      // O'rganilgan so'z ertaga birinchi marta takrorlashga chiqadi.
+      await sql`
+        INSERT INTO user_word_review (user_id, word_id, box, due_at)
+        VALUES (${userId}, ${wordId}, 1, now() + make_interval(days => ${REVIEW_INTERVAL_DAYS[1]}))
+        ON CONFLICT (user_id, word_id) DO NOTHING
+      `;
     }
   }
 
   revalidatePath("/lessons");
+}
+
+/** Takrorlashdagi bitta javob: to'g'ri bo'lsa so'z keyingi qutichaga o'tadi
+ *  (keyingi safar kechroq so'raladi), xato bo'lsa 1-qutichaga qaytadi. */
+export async function submitReviewAnswer(wordId: number, correct: boolean) {
+  const userId = await requireUserId();
+  const [row] = await sql<{ box: number }[]>`
+    SELECT box FROM user_word_review WHERE user_id = ${userId} AND word_id = ${wordId}
+  `;
+  if (!row) return;
+  const box = correct ? Math.min(row.box + 1, MAX_REVIEW_BOX) : 1;
+  await sql`
+    UPDATE user_word_review
+    SET box = ${box},
+        due_at = now() + make_interval(days => ${REVIEW_INTERVAL_DAYS[box]}),
+        last_reviewed_at = now()
+    WHERE user_id = ${userId} AND word_id = ${wordId}
+  `;
+  if (correct) await recordActivity(userId, 1);
 }
 
 export interface ProfileState {

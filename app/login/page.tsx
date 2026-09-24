@@ -27,7 +27,7 @@ export default async function LoginPage() {
       />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(207,162,73,0.08),transparent_60%)]" />
 
-      <div className="relative w-full max-w-md animate-fade-up rounded-3xl bg-white/95 p-8 text-ink-950 shadow-2xl shadow-black/40 backdrop-blur-sm">
+      <div className="relative w-full max-w-md animate-fade-up rounded-3xl bg-white/95 p-6 text-ink-950 sm:p-8 shadow-2xl shadow-black/40 backdrop-blur-sm">
         <div className="mb-8 flex items-center gap-3">
           <LogoMark size={46} className="shrink-0 drop-shadow-[0_2px_8px_rgba(30,32,18,0.35)]" />
           <div>

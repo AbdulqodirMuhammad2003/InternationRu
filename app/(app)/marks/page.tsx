@@ -22,10 +22,10 @@ export default async function MarksPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-ink-100 text-left text-xs uppercase text-ink-400 dark:border-white/10 dark:text-ink-500">
-              <th className="px-6 py-3 font-semibold">Fan</th>
-              <th className="px-6 py-3 font-semibold">Dars</th>
-              <th className="px-6 py-3 font-semibold">Sana</th>
-              <th className="px-6 py-3 text-right font-semibold">Natija</th>
+              <th className="px-3 py-3 sm:px-6 font-semibold">Fan</th>
+              <th className="hidden px-3 py-3 font-semibold sm:table-cell sm:px-6">Dars</th>
+              <th className="px-3 py-3 sm:px-6 font-semibold">Sana</th>
+              <th className="px-3 py-3 sm:px-6 text-right font-semibold">Natija</th>
             </tr>
           </thead>
           <tbody>
@@ -37,15 +37,15 @@ export default async function MarksPage() {
                   style={{ animationDelay: `${i * 30}ms` }}
                   className="animate-fade-up border-b border-ink-50 transition-colors last:border-0 hover:bg-ink-50/40 dark:border-white/5 dark:hover:bg-white/5"
                 >
-                  <td className="px-6 py-4 font-medium text-ink-950 dark:text-ink-50">{m.subject}</td>
-                  <td className="px-6 py-4 text-ink-700/60 dark:text-ink-300/60">{m.unit_title || "—"}</td>
-                  <td className="px-6 py-4 text-ink-700/60 dark:text-ink-300/60">
+                  <td className="px-3 py-3.5 sm:px-6 sm:py-4 font-medium text-ink-950 dark:text-ink-50">{m.subject}</td>
+                  <td className="hidden px-3 py-3.5 text-ink-700/60 sm:table-cell sm:px-6 sm:py-4 dark:text-ink-300/60">{m.unit_title || "—"}</td>
+                  <td className="px-3 py-3.5 sm:px-6 sm:py-4 text-ink-700/60 dark:text-ink-300/60">
                     {new Date(m.date).toLocaleDateString("uz-UZ", {
                       day: "2-digit",
                       month: "long",
                     })}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-3 py-3.5 sm:px-6 sm:py-4 text-right">
                     <span className={`rounded-full px-3 py-1 text-xs font-bold ${scoreColor(pct)}`}>
                       {m.score}/{m.max_score}
                     </span>
@@ -55,7 +55,7 @@ export default async function MarksPage() {
             })}
             {marks.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-ink-400 dark:text-ink-600">
+                <td colSpan={4} className="px-3 py-8 sm:px-6 text-center text-ink-400 dark:text-ink-600">
                   Hozircha baholar yo'q.
                 </td>
               </tr>

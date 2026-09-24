@@ -53,6 +53,7 @@ export async function resetDatabase() {
     "exercise_questions",
     "exercises",
     "user_daily_activity",
+    "user_word_review",
     "user_word_stage_progress",
     "user_word_progress",
     "vocabulary_words",

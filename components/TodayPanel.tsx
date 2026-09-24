@@ -1,6 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, BookOpenCheck, CircleCheck, Flame, PartyPopper } from "lucide-react";
-import { DAILY_GOAL, type ActivityOverview, type UnitDetail, type UserRecord } from "@/lib/data";
+import { ArrowRight, ChevronRight, CircleCheck, Flame, PartyPopper, RefreshCw } from "lucide-react";
+import {
+  DAILY_GOAL,
+  type ActivityOverview,
+  type ReviewSummary,
+  type UnitDetail,
+  type UserRecord,
+} from "@/lib/data";
 import { EditableAvatar } from "./EditableAvatar";
 
 interface NextStep {
@@ -66,10 +72,12 @@ export function TodayPanel({
   user,
   units,
   activity,
+  review,
 }: {
   user: UserRecord;
   units: UnitDetail[];
   activity: ActivityOverview;
+  review: ReviewSummary;
 }) {
   const next = findNextStep(units);
   const learned = units.reduce(
@@ -142,16 +150,27 @@ export function TodayPanel({
             </div>
           </div>
           <Link
-            href="/lessons"
-            className="flex items-center gap-3 rounded-2xl bg-ink-50 p-4 transition-colors hover:bg-ink-100 dark:bg-white/5 dark:hover:bg-white/10"
+            href="/review"
+            className={`group flex items-center gap-3 rounded-2xl p-4 transition-colors ${
+              review.due > 0
+                ? "bg-gold-100 hover:bg-gold-200/70 dark:bg-gold-950/50 dark:hover:bg-gold-950/70"
+                : "bg-ink-50 hover:bg-ink-100 dark:bg-white/5 dark:hover:bg-white/10"
+            }`}
           >
-            <BookOpenCheck size={24} className="shrink-0 text-mint-600 dark:text-mint-400" />
-            <div>
-              <p className="text-xs text-ink-500 dark:text-ink-400">O'rganilgan so'zlar</p>
+            <RefreshCw
+              size={24}
+              className={`shrink-0 ${review.due > 0 ? "text-gold-600 dark:text-gold-300" : "text-ink-400"}`}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-ink-500 dark:text-ink-400">Takrorlash vaqti</p>
               <p className="font-bold text-ink-950 dark:text-ink-50">
-                {learned} / {totalWords}
+                {review.due > 0 ? `${review.due} ta so'z` : "Hozircha yo'q"}
+              </p>
+              <p className="text-[11px] text-ink-400 dark:text-ink-500">
+                O'rganilgan: {learned} / {totalWords}
               </p>
             </div>
+            <ChevronRight size={18} className="shrink-0 text-ink-300 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
       </div>

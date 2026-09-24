@@ -202,6 +202,55 @@ export async function getActivityOverview(userId: number): Promise<ActivityOverv
   };
 }
 
+// ---------- So'zlarni takrorlash (Leitner tizimi) ----------
+
+/** Qutichaga qarab keyingi takrorlashgacha necha kun: 1-quticha — ertaga,
+ *  5-quticha — bir oydan keyin. */
+export const REVIEW_INTERVAL_DAYS: Record<number, number> = { 1: 1, 2: 3, 3: 7, 4: 14, 5: 30 };
+export const MAX_REVIEW_BOX = 5;
+/** Bir takrorlash seansidagi eng ko'p so'z soni. */
+export const REVIEW_SESSION_SIZE = 15;
+
+export interface ReviewSummary {
+  due: number;
+  /** Hozir takrorlanadigan so'z bo'lmasa — keyingisi qachon. */
+  nextDueAt: string | null;
+}
+
+export async function getReviewSummary(userId: number): Promise<ReviewSummary> {
+  const [row] = await sql<{ due: number; next_due_at: Date | null }[]>`
+    SELECT count(*) FILTER (WHERE due_at <= now())::int AS due,
+           min(due_at) FILTER (WHERE due_at > now()) AS next_due_at
+    FROM user_word_review WHERE user_id = ${userId}
+  `;
+  return { due: row?.due ?? 0, nextDueAt: row?.next_due_at ? row.next_due_at.toISOString() : null };
+}
+
+export interface ReviewWord {
+  id: number;
+  word: string;
+  transcription: string;
+  translation_uz: string;
+  emoji: string;
+  box: number;
+}
+
+export async function getDueReviewWords(userId: number): Promise<ReviewWord[]> {
+  return sql<ReviewWord[]>`
+    SELECT w.id, w.word, w.transcription, w.translation_uz, w.emoji, r.box
+    FROM user_word_review r
+    JOIN vocabulary_words w ON w.id = r.word_id
+    WHERE r.user_id = ${userId} AND r.due_at <= now()
+    ORDER BY r.box ASC, r.due_at ASC
+    LIMIT ${REVIEW_SESSION_SIZE}
+  `;
+}
+
+/** Noto'g'ri variantlar (distraktorlar) uchun barcha so'zlar. */
+export async function getWordPool(): Promise<{ id: number; word: string; translation_uz: string }[]> {
+  return sql`SELECT id, word, translation_uz FROM vocabulary_words`;
+}
+
 // ---------- Darajalar (A1, A2, B1, B2) ----------
 
 export async function getLevels(): Promise<LevelRecord[]> {

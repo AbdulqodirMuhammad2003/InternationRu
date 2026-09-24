@@ -8,7 +8,9 @@ import {
   X,
   Lock,
   LockKeyhole,
-  CheckCircle2,
+  BookOpen,
+  ChevronDown,
+  Medal,
   Clapperboard,
   Delete,
   Headphones,
@@ -29,7 +31,8 @@ import { submitExerciseResult } from "@/app/actions";
 import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
 
-type View = "main" | "vocab-rounds" | "exercises" | "exercise-run" | "clip";
+type View = "main" | "exercise-run" | "clip";
+type Section = "vocab" | "exercises";
 
 const EXERCISE_KIND_ICONS: Record<ExerciseKind, LucideIcon> = {
   listen: Headphones,
@@ -108,6 +111,8 @@ export function LessonsBoard({
   // ExerciseRun o'z holatini noldan boshlaydi.
   const [runKey, setRunKey] = useState(0);
   const [clipNotice, setClipNotice] = useState(false);
+  // Dars panelida qaysi yig'ma bo'lim ochiq (lug'at yoki mashqlar).
+  const [openSection, setOpenSection] = useState<Section | null>("vocab");
 
   const visibleUnits = units.filter((u) => u.level_code === selectedLevelCode);
   const selectedLevel = levels.find((l) => l.code === selectedLevelCode);
@@ -129,6 +134,8 @@ export function LessonsBoard({
     if (unit.locked) return;
     setOpenUnitId(unit.id);
     setView("main");
+    // Lug'at tugallangan bo'lsa, to'g'ridan-to'g'ri mashqlar ochiladi.
+    setOpenSection(unitVocabPercent(unit) < 100 || unit.exercises.length === 0 ? "vocab" : "exercises");
     setClipNotice(false);
   }
 
@@ -391,23 +398,52 @@ export function LessonsBoard({
             >
               {view === "main" && (
                 <div className="flex flex-col gap-4">
-                  <button
-                    onClick={() => setView("vocab-rounds")}
+                  <LessonSection
+                    title="Lug'at"
+                    subtitle={`${openUnit.totalWords} ta so'z`}
+                    percent={unitVocabPercent(openUnit)}
+                    icon={<BookOpen size={22} />}
+                    gradient="from-azure-500 to-azure-900"
+                    open={openSection === "vocab"}
                     disabled={openUnit.totalWords === 0}
-                    className="animate-fade-up rounded-2xl bg-gradient-to-br from-azure-600 to-azure-900 p-5 text-left text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+                    onToggle={() => setOpenSection(openSection === "vocab" ? null : "vocab")}
                   >
-                    <p className="text-sm text-white/60">Lug'at</p>
-                    <p className="font-display mb-3 text-xl font-bold">{openUnit.totalWords} ta so'z</p>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/20">
-                      <div
-                        className="h-full rounded-full bg-gold-400 transition-[width] duration-500"
-                        style={{ width: `${unitVocabPercent(openUnit)}%` }}
-                      />
-                    </div>
-                    <p className="mt-1 text-right text-xs text-white/70">
-                      {unitVocabPercent(openUnit)}%
-                    </p>
-                  </button>
+                    {openUnit.rounds.map((round, i) => {
+                      const pct = roundPercent(round);
+                      return (
+                        <button
+                          key={round.id}
+                          onClick={() => setFlowRoundId(round.id)}
+                          style={{ animationDelay: `${i * 50}ms` }}
+                          className="relative flex w-40 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10"
+                        >
+                          <span
+                            className={`absolute left-0 top-0 rounded-br-xl rounded-tl-2xl px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${
+                              pct === 100 ? "bg-gold-500" : "bg-mint-500"
+                            }`}
+                          >
+                            {pct === 100 ? "Tugallandi" : "Faol"}
+                          </span>
+                          {pct === 100 && (
+                            <Medal size={26} className="absolute right-2.5 top-2 text-gold-500" />
+                          )}
+                          <p className="font-semibold text-ink-950 dark:text-ink-50">{round.title}</p>
+                          <p className="mb-3 mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                            {round.words.length} ta so'z
+                          </p>
+                          <div className="mt-auto flex items-center gap-2">
+                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
+                              <div
+                                className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">{pct}%</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </LessonSection>
 
                   {openUnit.clip_url && (
                     <>
@@ -463,101 +499,55 @@ export function LessonsBoard({
                     </>
                   )}
 
-                  <button
-                    onClick={() => setView("exercises")}
+                  <LessonSection
+                    title="Mashqlar"
+                    subtitle={`${openUnit.exercises.length} ta mashq`}
+                    percent={unitExercisePercent(openUnit)}
+                    icon={<ListChecks size={22} />}
+                    gradient="from-mint-500 to-mint-900"
+                    open={openSection === "exercises"}
                     disabled={openUnit.exercises.length === 0}
-                    style={{ animationDelay: "120ms" }}
-                    className="animate-fade-up rounded-2xl bg-gradient-to-br from-mint-600 to-mint-900 p-5 text-left text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+                    onToggle={() => setOpenSection(openSection === "exercises" ? null : "exercises")}
+                    delay={120}
                   >
-                    <p className="text-sm text-white/60">Mashqlar</p>
-                    <p className="font-display mb-3 text-xl font-bold">
-                      {openUnit.exercises.length} ta mashq
-                    </p>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/20">
-                      <div
-                        className="h-full rounded-full bg-gold-400 transition-[width] duration-500"
-                        style={{ width: `${unitExercisePercent(openUnit)}%` }}
-                      />
-                    </div>
-                    <p className="mt-1 text-right text-xs text-white/70">
-                      {unitExercisePercent(openUnit)}%
-                    </p>
-                  </button>
-                </div>
-              )}
-
-              {view === "vocab-rounds" && (
-                <div className="flex flex-col gap-3">
-                  {openUnit.rounds.map((round, i) => {
-                    const pct = roundPercent(round);
-                    return (
-                      <button
-                        key={round.id}
-                        onClick={() => setFlowRoundId(round.id)}
-                        style={{ animationDelay: `${i * 50}ms` }}
-                        className="animate-fade-up rounded-2xl border border-ink-100 bg-white p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:shadow-none"
-                      >
-                        <div className="mb-2 flex items-center justify-between">
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                              pct === 100
-                                ? "bg-ink-100 text-ink-700 dark:bg-white/10 dark:text-ink-200"
-                                : "bg-ink-50 text-ink-600 dark:bg-white/5 dark:text-ink-300"
-                            }`}
-                          >
-                            {pct === 100 ? "Tugallangan" : "Faol"}
+                    {openUnit.exercises.map((ex, i) => {
+                      const KindIcon = EXERCISE_KIND_ICONS[ex.kind] ?? ListChecks;
+                      return (
+                        <button
+                          key={ex.id}
+                          onClick={() => startExercise(ex.id)}
+                          style={{ animationDelay: `${i * 50}ms` }}
+                          className="relative flex w-40 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10"
+                        >
+                          <span className="absolute left-0 top-0 rounded-br-xl rounded-tl-2xl bg-mint-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                            {ex.skill_label}
                           </span>
-                          {pct === 100 && <CheckCircle2 size={18} className="text-ink-600 dark:text-ink-300" />}
-                        </div>
-                        <p className="font-semibold text-ink-950 dark:text-ink-50">{round.title}</p>
-                        <p className="mb-2 text-xs text-ink-700/60 dark:text-ink-300/60">{round.words.length} ta so’z</p>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
-                          <div
-                            className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {view === "exercises" && (
-                <div className="grid grid-cols-2 gap-3">
-                  {openUnit.exercises.map((ex, i) => {
-                    const KindIcon = EXERCISE_KIND_ICONS[ex.kind] ?? ListChecks;
-                    return (
-                      <button
-                        key={ex.id}
-                        onClick={() => startExercise(ex.id)}
-                        style={{ animationDelay: `${i * 50}ms` }}
-                        className="relative flex animate-fade-up flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10"
-                      >
-                        <span className="absolute left-0 top-0 rounded-br-xl rounded-tl-2xl bg-mint-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-                          {ex.skill_label}
-                        </span>
-                        <KindIcon size={22} className="absolute right-3 top-2.5 text-ink-400 dark:text-ink-500" />
-                        <p className="font-semibold leading-snug text-ink-950 dark:text-ink-50">
-                          {i + 1}. {ex.title}
-                        </p>
-                        <p className="mb-3 mt-0.5 text-xs text-ink-500 dark:text-ink-400">
-                          {ex.question_count} ta savol
-                        </p>
-                        <div className="mt-auto flex items-center gap-2">
-                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
-                            <div
-                              className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
-                              style={{ width: `${ex.score_pct}%` }}
-                            />
+                          {ex.score_pct === 100 ? (
+                            <Medal size={26} className="absolute right-2.5 top-2 text-gold-500" />
+                          ) : (
+                            <KindIcon size={22} className="absolute right-3 top-2.5 text-ink-400 dark:text-ink-500" />
+                          )}
+                          <p className="font-semibold leading-snug text-ink-950 dark:text-ink-50">
+                            {i + 1}. {ex.title}
+                          </p>
+                          <p className="mb-3 mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                            {ex.question_count} ta savol
+                          </p>
+                          <div className="mt-auto flex items-center gap-2">
+                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
+                              <div
+                                className="h-full rounded-full bg-mint-500 transition-[width] duration-500"
+                                style={{ width: `${ex.score_pct}%` }}
+                              />
+                            </div>
+                            <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">
+                              {ex.score_pct}%
+                            </span>
                           </div>
-                          <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">
-                            {ex.score_pct}%
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                        </button>
+                      );
+                    })}
+                  </LessonSection>
                 </div>
               )}
 
@@ -568,7 +558,7 @@ export function LessonsBoard({
                     exercise={activeExercise}
                     onFinish={(pct) => finishExercise(activeExercise.id, pct)}
                     onRetry={() => startExercise(activeExercise.id)}
-                    onDone={() => setView("exercises")}
+                    onDone={() => setView("main")}
                   />
                 </div>
               )}
@@ -635,6 +625,80 @@ export function LessonsBoard({
   );
 }
 
+/** Dars panelidagi yig'ma bo'lim: sarlavha kartasi bosilganda ostida
+ *  kartalar qatori (lug'at bosqichlari yoki mashqlar) ochiladi. */
+function LessonSection({
+  title,
+  subtitle,
+  percent,
+  icon,
+  gradient,
+  open,
+  disabled,
+  onToggle,
+  delay = 0,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  percent: number;
+  icon: React.ReactNode;
+  gradient: string;
+  open: boolean;
+  disabled: boolean;
+  onToggle: () => void;
+  delay?: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{ animationDelay: `${delay}ms` }}
+      className={`animate-fade-up rounded-3xl transition-colors duration-300 ${
+        open ? "bg-ink-50 dark:bg-white/5" : ""
+      }`}
+    >
+      <button
+        onClick={onToggle}
+        disabled={disabled}
+        aria-expanded={open}
+        className={`relative flex w-full items-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br p-5 text-left text-white shadow-md transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50 ${gradient}`}
+      >
+        <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+        <span className="pointer-events-none absolute -bottom-8 right-16 h-20 w-20 rounded-full bg-black/10" />
+        <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-gold-500 shadow-sm">
+          {icon}
+        </span>
+        <span className="relative min-w-0 flex-1">
+          <span className="font-display block text-xl font-bold">{title}</span>
+          <span className="block text-sm text-white/80">{subtitle}</span>
+          <span className="mt-2 flex items-center gap-2">
+            <span className="h-2 flex-1 overflow-hidden rounded-full bg-white/25">
+              <span
+                className="block h-full rounded-full bg-white transition-[width] duration-500"
+                style={{ width: `${percent}%` }}
+              />
+            </span>
+            <span className="text-xs font-bold">{percent}%</span>
+          </span>
+        </span>
+        <ChevronDown
+          size={22}
+          className={`relative shrink-0 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto px-4 pb-4 pt-4">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function speakRu(text: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   const utter = new SpeechSynthesisUtterance(text);
@@ -670,16 +734,16 @@ function RussianKeyboard({
   disabled: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex w-full flex-col items-center gap-1">
       {RU_KEYBOARD.map((row, ri) => (
-        <div key={ri} className="flex gap-1">
+        <div key={ri} className="flex w-full justify-center gap-1">
           {row.split("").map((ch) => (
             <button
               key={ch}
               type="button"
               disabled={disabled}
               onClick={() => onKey(ch)}
-              className="h-9 w-7 rounded-lg bg-ink-100 text-sm font-semibold text-ink-800 transition-colors hover:bg-azure-100 active:bg-azure-200 disabled:opacity-40 sm:w-8 dark:bg-white/10 dark:text-ink-100 dark:hover:bg-azure-900/50"
+              className="h-10 min-w-0 max-w-9 flex-1 rounded-lg bg-ink-100 text-sm font-semibold text-ink-800 transition-colors hover:bg-azure-100 active:bg-azure-200 disabled:opacity-40 dark:bg-white/10 dark:text-ink-100 dark:hover:bg-azure-900/50"
             >
               {ch}
             </button>
@@ -690,7 +754,7 @@ function RussianKeyboard({
               disabled={disabled}
               onClick={onBackspace}
               aria-label="O'chirish"
-              className="flex h-9 w-12 items-center justify-center rounded-lg bg-ink-200 text-ink-700 hover:bg-ink-300 disabled:opacity-40 dark:bg-white/15 dark:text-ink-100"
+              className="flex h-10 w-12 shrink-0 items-center justify-center rounded-lg bg-ink-200 text-ink-700 hover:bg-ink-300 disabled:opacity-40 dark:bg-white/15 dark:text-ink-100"
             >
               <Delete size={16} />
             </button>

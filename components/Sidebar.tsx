@@ -12,7 +12,7 @@ import {
 import { logoutAction } from "@/app/actions";
 import { LogoMark } from "./Logo";
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   { href: "/", label: "Bosh sahifa", icon: Home },
   { href: "/lessons", label: "Darslar", icon: GraduationCap },
   { href: "/marks", label: "Baholar", icon: ListChecks },
@@ -24,7 +24,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="relative flex h-screen w-64 shrink-0 flex-col overflow-hidden bg-gradient-to-b from-[#1a2030] via-[#141925] to-[#0f131c] px-4 py-6 text-white"
+      className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col lg:flex overflow-hidden bg-gradient-to-b from-[#1a2030] via-[#141925] to-[#0f131c] px-4 py-6 text-white"
       style={{ backgroundColor: "#0f131c" }}
     >
       {/* Nozik oltin nur — orqa fonda */}

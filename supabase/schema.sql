@@ -92,6 +92,18 @@ CREATE TABLE IF NOT EXISTS user_word_progress (
 -- So'zni tekshirishning 4 bosqichi: imlo (spelling), ta'rif (definition),
 -- talaffuz (pronunciation), gap ichida (sentence). Har biri alohida
 -- o'tilgan/o'tilmaganligi shu yerda saqlanadi.
+-- So'zlarni takrorlash (Leitner tizimi): o'rganilgan so'z 1-qutichadan
+-- boshlaydi; to'g'ri javob — keyingi qutichaga (keyingi takrorlash uzoqroq),
+-- xato — 1-qutichaga qaytadi. Oraliqlar lib/data.ts dagi REVIEW_INTERVAL_DAYS.
+CREATE TABLE IF NOT EXISTS user_word_review (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  word_id INTEGER NOT NULL REFERENCES vocabulary_words(id) ON DELETE CASCADE,
+  box INTEGER NOT NULL DEFAULT 1,
+  due_at TIMESTAMPTZ NOT NULL,
+  last_reviewed_at TIMESTAMPTZ,
+  PRIMARY KEY (user_id, word_id)
+);
+
 -- O'quvchining har kungi faolligi (Toshkent vaqti bo'yicha kun): streak,
 -- haftalik belgilar va kunlik maqsad shu yerdan hisoblanadi.
 CREATE TABLE IF NOT EXISTS user_daily_activity (
