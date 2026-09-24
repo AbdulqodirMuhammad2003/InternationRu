@@ -97,6 +97,16 @@ export function VocabRoundFlow({
   const [phase, setPhase] = useState<Phase>("learn");
   const [learnIndex, setLearnIndex] = useState(0);
 
+  // Bosqich qisman o'tilgan bo'lsa (masalan 80%), boshidan boshlamasdan faqat
+  // hali o'rganilmagan so'zlar qayta ko'rsatiladi; tekshiruv ham faqat ularning
+  // o'tilmagan bosqichlarini so'raydi (buildQueueForStage). Bosqich ochilgandagi
+  // ro'yxat saqlab qolinadi — tekshiruv paytida progress yangilansa ham o'zgarmaydi.
+  const [learnWords] = useState(() => {
+    const pending = round.words.filter((w) => !w.learned);
+    return pending.length > 0 ? pending : round.words;
+  });
+  const resuming = learnWords.length < round.words.length;
+
   const [stageIdx, setStageIdx] = useState(0);
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [score, setScore] = useState({ correctFirst: 0, totalFirst: 0 });
@@ -218,7 +228,9 @@ export function VocabRoundFlow({
           </p>
           <p className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
             {phase === "learn" || phase === "learn-summary"
-              ? "So'zlarni o'rganish"
+              ? resuming
+                ? `Qolgan so'zlar (${learnWords.length} ta)`
+                : "So'zlarni o'rganish"
               : phase === "check"
               ? STAGES[stageIdx].label + " bosqichi"
               : "Natija"}
@@ -254,11 +266,11 @@ export function VocabRoundFlow({
       <div className="flex flex-1 items-center justify-center overflow-y-auto px-4 py-6 sm:px-8">
         {phase === "learn" && (
           <LearnCard
-            word={round.words[learnIndex]}
+            word={learnWords[learnIndex]}
             index={learnIndex}
-            total={round.words.length}
+            total={learnWords.length}
             onNext={() => {
-              if (learnIndex + 1 < round.words.length) {
+              if (learnIndex + 1 < learnWords.length) {
                 setLearnIndex(learnIndex + 1);
               } else {
                 setPhase("learn-summary");
@@ -277,8 +289,9 @@ export function VocabRoundFlow({
                 Ajoyib!
               </p>
               <p className="mt-1 text-sm text-ink-700/70 dark:text-ink-300/60">
-                Siz {round.words.length} ta so'zni ko'rib chiqdingiz. Endi bilimingizni
-                tekshirib ko'ramizmi?
+                {resuming
+                  ? `Siz hali o'rganilmagan ${learnWords.length} ta so'zni qayta ko'rib chiqdingiz. Endi faqat shularni tekshiramiz.`
+                  : `Siz ${learnWords.length} ta so'zni ko'rib chiqdingiz. Endi bilimingizni tekshirib ko'ramizmi?`}
               </p>
             </div>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">

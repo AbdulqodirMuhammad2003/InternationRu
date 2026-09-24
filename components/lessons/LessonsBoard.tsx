@@ -43,6 +43,15 @@ const EXERCISE_KIND_ICONS: Record<ExerciseKind, LucideIcon> = {
   type: PenLine,
 };
 
+/** Darajalarning ruscha rasmiy nomlari (ТРКИ — rus tili bo'yicha davlat
+ *  test tizimi shkalasi). */
+const LEVEL_NAMES_RU: Record<string, string> = {
+  A1: "Элементарный уровень",
+  A2: "Базовый уровень",
+  B1: "Первый уровень",
+  B2: "Второй уровень",
+};
+
 const CLIP_KIND_LABELS: Record<ClipKind, string> = {
   film: "Film",
   multfilm: "Multfilm",
@@ -98,10 +107,10 @@ export function LessonsBoard({
     ? units.find((u) => u.id === Number(unitParam) && !u.locked) || null
     : null;
 
-  const firstAvailable = levels.find((l) => !l.locked) || levels[0];
-  const [selectedLevelCode, setSelectedLevelCode] = useState<string>(
-    linkedUnit?.level_code || firstAvailable?.code || "A1"
-  );
+  // Faqat ochilgan darajalarning darslari ko'rsatiladi; sarlavhada esa
+  // o'quvchining joriy (oxirgi ochilgan) darajasi turadi.
+  const openLevels = levels.filter((l) => !l.locked);
+  const currentLevel = openLevels[openLevels.length - 1] ?? levels[0];
 
   const [openUnitId, setOpenUnitId] = useState<number | null>(linkedUnit?.id ?? null);
   const [view, setView] = useState<View>("main");
@@ -114,8 +123,7 @@ export function LessonsBoard({
   // Dars panelida qaysi yig'ma bo'lim ochiq (lug'at yoki mashqlar).
   const [openSection, setOpenSection] = useState<Section | null>("vocab");
 
-  const visibleUnits = units.filter((u) => u.level_code === selectedLevelCode);
-  const selectedLevel = levels.find((l) => l.code === selectedLevelCode);
+  const visibleUnits = units.filter((u) => openLevels.some((l) => l.code === u.level_code));
 
   const openUnit = units.find((u) => u.id === openUnitId) || null;
   const flowRound = openUnit?.rounds.find((r) => r.id === flowRoundId) || null;
@@ -213,8 +221,8 @@ export function LessonsBoard({
     setActiveCard(best);
   }
 
-  // Daraja almashganda (yoki birinchi ochilganda) o'quvchining joriy
-  // darsini — oxirgi ochiq darsni — markazga olib kelamiz.
+  // Sahifa ochilganda o'quvchining joriy darsini — oxirgi ochiq darsni —
+  // markazga olib kelamiz.
   useEffect(() => {
     let current = 0;
     visibleUnits.forEach((u, i) => {
@@ -223,44 +231,29 @@ export function LessonsBoard({
     setActiveCard(current);
     scrollToCard(current, "instant");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLevelCode]);
+  }, []);
 
   return (
     <div className="relative">
-      {/* Daraja tanlash (A1, A2, B1, B2) */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        {levels.map((level) => {
-          const active = level.code === selectedLevelCode;
-          return (
-            <button
-              key={level.code}
-              onClick={() => setSelectedLevelCode(level.code)}
-              className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-                active
-                  ? "bg-gradient-to-br from-azure-700 to-azure-950 text-white shadow-sm shadow-azure-900/30"
-                  : level.locked
-                  ? "bg-white text-ink-300 hover:bg-ink-50 dark:bg-[#161b26] dark:text-ink-700 dark:hover:bg-white/10"
-                  : "bg-white text-ink-700 shadow-sm hover:-translate-y-0.5 hover:bg-ink-50 dark:bg-[#161b26] dark:text-ink-200 dark:hover:bg-white/10"
-              }`}
-            >
-              {level.locked ? <Lock size={13} /> : null}
-              {level.code}
-            </button>
-          );
-        })}
-      </div>
-
-      {selectedLevel && (
-        <p className="mb-4 text-sm text-ink-700/60 dark:text-ink-300/60">{selectedLevel.description}</p>
+      {/* Joriy daraja — ruscha rasmiy nomi bilan (ТРКИ shkalasi) */}
+      {currentLevel && (
+        <div className="mb-4 flex items-center gap-3">
+          <span className="font-display rounded-2xl bg-gradient-to-br from-azure-600 to-azure-900 px-3.5 py-2 text-lg font-bold text-white shadow-sm shadow-azure-900/30">
+            {currentLevel.code}
+          </span>
+          <div className="min-w-0">
+            <p lang="ru" className="font-display text-lg font-bold leading-tight text-ink-950 dark:text-ink-50">
+              {LEVEL_NAMES_RU[currentLevel.code] ?? currentLevel.title}
+            </p>
+            <p className="text-sm text-ink-500 dark:text-ink-400">{currentLevel.description}</p>
+          </div>
+        </div>
       )}
 
       {visibleUnits.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-3xl bg-white p-12 text-center shadow-sm dark:bg-[#161b26] dark:shadow-none">
           <Lock size={28} className="text-ink-200 dark:text-ink-700" />
-          <p className="font-semibold text-ink-700 dark:text-ink-200">Bu daraja hali ochilmagan</p>
-          <p className="text-sm text-ink-400 dark:text-ink-500">
-            {selectedLevel?.code} darajasi avvalgi darajani tugatgach ochiladi.
-          </p>
+          <p className="font-semibold text-ink-700 dark:text-ink-200">Hozircha ochiq darslar yo'q</p>
         </div>
       ) : (
         <div>
