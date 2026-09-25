@@ -266,6 +266,15 @@ export async function finishExam(userId: number, attemptId: number, answers: Exa
     `;
   }
 
+  // O'tgan o'quvchi keyingi darajaga ko'tariladi — keyingi daraja ochiladi.
+  if (passed) {
+    await sql`
+      UPDATE users SET level = next.code
+      FROM levels cur JOIN levels next ON next.order_index = cur.order_index + 1
+      WHERE users.id = ${userId} AND users.level = ${EXAM_LEVEL} AND cur.code = ${EXAM_LEVEL}
+    `;
+  }
+
   // 3-urinishda ham o'tolmasa — daraja qayta o'qiladi.
   const levelReset = !passed && attemptNumber >= EXAM_MAX_ATTEMPTS;
   if (levelReset) await resetLevelProgress(userId, EXAM_LEVEL);
@@ -424,4 +433,29 @@ export async function saveExamAnswers(userId: number, attemptId: number, answers
     UPDATE exam_attempts SET answers_json = ${JSON.stringify(answers)}
     WHERE id = ${attemptId} AND user_id = ${userId} AND finished_at IS NULL
   `;
+}
+
+export interface Certificate {
+  level: string;
+  /** Sertifikat raqami, masalan AVG-A1-000012. */
+  number: string;
+  pct: number;
+  date: string;
+}
+
+/** O'quvchi o'tgan har bir daraja imtihoni uchun sertifikat (birinchi
+ *  muvaffaqiyatli urinish bo'yicha). */
+export async function getCertificates(userId: number): Promise<Certificate[]> {
+  const rows = await sql<{ id: number; level_code: string; score: number; total: number; finished_at: Date }[]>`
+    SELECT DISTINCT ON (level_code) id, level_code, score, total, finished_at
+    FROM exam_attempts
+    WHERE user_id = ${userId} AND passed = 1
+    ORDER BY level_code, finished_at
+  `;
+  return rows.map((r) => ({
+    level: r.level_code,
+    number: `AVG-${r.level_code}-${String(r.id).padStart(6, "0")}`,
+    pct: Math.round((r.score / r.total) * 100),
+    date: r.finished_at.toISOString(),
+  }));
 }

@@ -267,10 +267,16 @@ export async function getWordPool(): Promise<{ id: number; word: string; transla
 
 // ---------- Darajalar (A1, A2, B1, B2) ----------
 
-export async function getLevels(): Promise<LevelRecord[]> {
+/** Darajalar o'quvchi uchun: uning joriy darajasi va undan oldingilari
+ *  ochiq, keyingilari yopiq. Keyingi daraja yakuniy imtihondan o'tganda
+ *  ochiladi (lib/exam.ts o'quvchining darajasini ko'taradi). */
+export async function getLevels(userId: number): Promise<LevelRecord[]> {
   return sql<LevelRecord[]>`
-    SELECT id, code, title, description, order_index, locked
-    FROM levels ORDER BY order_index ASC
+    SELECT l.id, l.code, l.title, l.description, l.order_index,
+           (l.order_index > COALESCE(
+              (SELECT lv.order_index FROM users u JOIN levels lv ON lv.code = u.level WHERE u.id = ${userId}), 1
+           ))::int AS locked
+    FROM levels l ORDER BY l.order_index ASC
   `;
 }
 

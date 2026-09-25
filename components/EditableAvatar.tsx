@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Camera, X, Loader2 } from "lucide-react";
+import { Award, Camera, Download, X, Loader2 } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { updateProfileAction, type ProfileState } from "@/app/actions";
+import type { Certificate } from "@/lib/exam";
+import { downloadCertificate } from "@/lib/certificate";
 
 const initialState: ProfileState = {};
 
@@ -16,6 +18,7 @@ export function EditableAvatar({
   size = 44,
   children,
   triggerClassName = "",
+  certificates,
 }: {
   name: string;
   avatarUrl?: string | null;
@@ -26,6 +29,8 @@ export function EditableAvatar({
   /** Trigger tugmasining joylashuvini moslashtirish uchun (masalan,
    *  header'da qator, profil kartasida ustun ko'rinishida). */
   triggerClassName?: string;
+  /** O'quvchi o'tgan daraja imtihonlari sertifikatlari; berilmasa, bo'lim ko'rsatilmaydi. */
+  certificates?: Certificate[];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -33,6 +38,16 @@ export function EditableAvatar({
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [state, formAction, pending] = useActionState(updateProfileAction, initialState);
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  async function download(cert: Certificate) {
+    setDownloading(cert.level);
+    try {
+      await downloadCertificate(cert, name);
+    } finally {
+      setDownloading(null);
+    }
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -72,7 +87,7 @@ export function EditableAvatar({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">
-          <h3 className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">Profilni tahrirlash</h3>
+          <h3 className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">Profil</h3>
           <button
             onClick={() => setOpen(false)}
             className="rounded-full p-1.5 text-ink-500 transition-colors hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-white/10"
@@ -139,6 +154,44 @@ export function EditableAvatar({
             {pending ? "Saqlanmoqda..." : "Saqlash"}
           </button>
         </form>
+
+        {certificates && (
+        <div className="mt-6 border-t border-ink-100 pt-5 dark:border-white/10">
+          <h4 className="flex items-center gap-2 font-display text-base font-bold text-ink-950 dark:text-ink-50">
+            <Award size={18} className="text-gold-500" /> Sertifikatlar
+          </h4>
+          {certificates.length === 0 ? (
+            <p className="mt-2 text-sm text-ink-500 dark:text-ink-400">
+              Daraja imtihonidan o'tganingizdan keyin sertifikatni shu yerdan yuklab olishingiz mumkin.
+            </p>
+          ) : (
+            <div className="mt-3 flex flex-col gap-2">
+              {certificates.map((cert) => (
+                <div
+                  key={cert.level}
+                  className="flex items-center justify-between gap-3 rounded-2xl bg-gold-50 px-4 py-3 dark:bg-gold-950/30"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-ink-950 dark:text-ink-50">{cert.level} daraja sertifikati</p>
+                    <p className="text-xs text-ink-500 dark:text-ink-400">
+                      {cert.pct}% · {cert.number}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => download(cert)}
+                    disabled={downloading !== null}
+                    className="btn-press flex shrink-0 items-center gap-1.5 rounded-full bg-azure-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-azure-500 disabled:opacity-60"
+                  >
+                    {downloading === cert.level ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                    Yuklab olish
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        )}
       </div>
     </div>
   );

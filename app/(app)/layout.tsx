@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { getUserStats } from "@/lib/data";
+import { getCertificates } from "@/lib/exam";
 import { Sidebar } from "@/components/Sidebar";
 import { EditableAvatar } from "@/components/EditableAvatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -14,7 +15,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const user = await getUserStats(session.userId);
+  const [user, certificates] = await Promise.all([
+    getUserStats(session.userId),
+    getCertificates(session.userId),
+  ]);
   if (!user) redirect("/login");
 
   return (
@@ -37,6 +41,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               avatarUrl={user.avatar_url}
               size={38}
               triggerClassName="gap-3"
+              certificates={certificates}
             >
               <div className="hidden leading-tight sm:block">
                 <p className="text-sm font-semibold text-ink-950 dark:text-ink-50">{user.name}</p>

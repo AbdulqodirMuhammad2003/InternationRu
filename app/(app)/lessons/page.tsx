@@ -11,7 +11,7 @@ export default async function LessonsPage() {
   const [user, units, levels, activity, review, exam] = await Promise.all([
     getUserStats(userId),
     getAllUnitsDetailed(userId),
-    getLevels(),
+    getLevels(userId),
     getActivityOverview(userId),
     getReviewSummary(userId),
     getExamStatus(userId),
@@ -22,7 +22,7 @@ export default async function LessonsPage() {
       <h1 className="font-display animate-fade-up text-2xl font-bold text-ink-950 dark:text-ink-50">Darslar</h1>
       <TodayPanel user={user!} units={units} activity={activity} review={review} />
       <LessonsBoard units={units} levels={levels} />
-      <ExamCard status={exam} />
+      {(exam.level === user!.level || exam.passed) && <ExamCard status={exam} />}
     </div>
   );
 }
