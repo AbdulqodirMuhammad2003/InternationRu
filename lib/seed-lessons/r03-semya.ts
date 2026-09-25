@@ -1,0 +1,412 @@
+/**
+ * 4-dars — «Моя семья» (Liden & Denz, «Я ❤ Русский Язык», 3-urok asosida):
+ * oila, egalik olmoshlari, чей?, у меня есть, harakat fe'llari, soat.
+ * Kitobdagi bu dars boshqalaridan ikki barobar katta, shuning uchun lug'at
+ * 5 bosqich (50 so'z) va 16 ta mashq. Gap, matn va mashqlar o'zimizniki.
+ */
+import { scramble, type SeedExercise, type SeedQuestion } from "../seed-exercises";
+import type { VocabSeed } from "./types";
+
+const w = (
+  emoji: string,
+  word: string,
+  transcription: string,
+  pos: string,
+  uz: string,
+  def: string,
+  ex: string,
+  exUz: string
+): VocabSeed => ({ emoji, word, transcription, pos, uz, def, ex, exUz });
+
+export const R03_ROUNDS: { title: string; words: VocabSeed[] }[] = [
+  {
+    title: "1-bosqich",
+    words: [
+      w("👵", "Бабушка", "bábushka", "ot", "Buvi", "Мама мамы или папы.", "Это моя бабушка.", "Bu mening buvim."),
+      w("👴", "Дедушка", "dyédushka", "ot", "Bobo", "Папа мамы или папы. Слово мужского рода: мой дедушка.", "Мой дедушка уже не работает.", "Bobom endi ishlamaydi."),
+      w("🧑", "Брат", "brat", "ot", "Aka, uka", "Сын тех же родителей.", "У меня есть брат.", "Mening akam (ukam) bor."),
+      w("👱‍♀️", "Сестра", "sistrá", "ot", "Opa, singil", "Дочь тех же родителей.", "Это моя сестра.", "Bu mening opam (singlim)."),
+      w("🧒", "Сын", "sin", "ot", "O'g'il", "Мальчик по отношению к своим родителям.", "Их сын — школьник.", "Ularning o'g'li — maktab o'quvchisi."),
+      w("🙋‍♀️", "Дочь", "doch'", "ot", "Qiz (farzand)", "Девочка по отношению к своим родителям. Слово женского рода: моя дочь.", "Моя дочь — студентка.", "Qizim — talaba."),
+      w("👨‍💼", "Муж", "mush", "ot", "Er (turmush o'rtog'i)", "Мужчина по отношению к своей жене.", "Это мой муж.", "Bu mening erim."),
+      w("👰", "Жена", "zhiná", "ot", "Xotin (turmush o'rtog'i)", "Женщина по отношению к своему мужу.", "Моя жена — врач.", "Xotinim — shifokor."),
+      w("👨‍👩‍👧", "Родители", "radítili", "ot", "Ota-ona", "Мама и папа.", "Мои родители отдыхают.", "Ota-onam dam olishyapti."),
+      w("👨‍👧‍👦", "Дети", "dyéti", "ot", "Bolalar (farzandlar)", "Сыновья и дочери. Одного называют «ребёнок».", "Это наши дети.", "Bular bizning farzandlarimiz."),
+    ],
+  },
+  {
+    title: "2-bosqich",
+    words: [
+      w("🧑‍🦱", "Внук", "vnuk", "ot", "Nabira (o'g'il)", "Сын сына или дочери.", "У бабушки есть внук.", "Buvining nabirasi bor."),
+      w("👧🏼", "Внучка", "vnúchka", "ot", "Nabira (qiz)", "Дочь сына или дочери.", "Это моя внучка.", "Bu mening nabiram."),
+      w("🧔‍♂️", "Отец", "atyéts", "ot", "Ota", "Папа.", "Мой отец — инженер.", "Otam — muhandis."),
+      w("👩‍🍼", "Мать", "mat'", "ot", "Ona", "Мама. Слово женского рода: моя мать.", "Моя мать — преподаватель.", "Onam — o'qituvchi."),
+      w("👨‍👩‍👧‍👦", "Семья", "simyá", "ot", "Oila", "Родители и дети.", "Это моя семья.", "Bu mening oilam."),
+      w("👶", "Ребёнок", "ribyónak", "ot", "Bola (go'dak)", "Маленький человек.", "У неё есть ребёнок.", "Uning bolasi bor."),
+      w("🧑‍🤝‍🧑", "Друг", "druk", "ot", "Do'st", "Близкий человек, но не родственник.", "Это мой друг Олег.", "Bu mening do'stim Oleg."),
+      w("👭", "Подруга", "padrúga", "ot", "Dugona", "Близкая девушка или женщина, но не родственница.", "Это моя подруга.", "Bu mening dugonam."),
+      w("📝", "Школьник", "shkól'nik", "ot", "Maktab o'quvchisi", "Мальчик, который учится в школе.", "Мой брат — школьник.", "Ukam — maktab o'quvchisi."),
+      w("🐈‍⬛", "Кошка", "kóshka", "ot", "Mushuk", "Домашнее животное, которое говорит «мяу».", "У нас есть кошка.", "Bizning mushugimiz bor."),
+    ],
+  },
+  {
+    title: "3-bosqich",
+    words: [
+      w("🚗", "Машина", "mashína", "ot", "Mashina", "На ней ездят по дороге.", "Это машина Андрея.", "Bu Andreyning mashinasi."),
+      w("🚲", "Велосипед", "vilasipyét", "ot", "Velosiped", "Транспорт с двумя колёсами.", "У него есть велосипед.", "Uning velosipedi bor."),
+      w("🎸", "Гитара", "gitára", "ot", "Gitara", "Музыкальный инструмент со струнами.", "У меня есть гитара.", "Mening gitaram bor."),
+      w("🎼", "Пианино", "pianína", "ot", "Pianino", "Большой музыкальный инструмент с клавишами. Не изменяется: моё пианино.", "Это пианино.", "Bu pianino."),
+      w("💻", "Ноутбук", "nautbúk", "ot", "Noutbuk", "Маленький компьютер.", "Это мой ноутбук.", "Bu mening noutbukim."),
+      w("🎒", "Рюкзак", "ryukzák", "ot", "Ryukzak", "Сумка, которую носят на спине.", "Это рюкзак школьника.", "Bu maktab o'quvchisining ryukzagi."),
+      w("📗", "Учебник", "uchyébnik", "ot", "Darslik", "Книга, по которой учатся.", "Чей это учебник?", "Bu kimning darsligi?"),
+      w("📺", "Телевизор", "tilivízar", "ot", "Televizor", "По нему смотрят фильмы и новости.", "Тут телевизор.", "Shu yerda televizor."),
+      w("🖼️", "Фотография", "fatagráfiya", "ot", "Fotosurat", "Картинка, которую делают камерой.", "Это фотография моей семьи.", "Bu mening oilamning fotosurati."),
+      w("💐", "Цветы", "tsvití", "ot", "Gullar", "Их дарят; они красивые.", "Это цветы Елены.", "Bu Yelenaning gullari."),
+    ],
+  },
+  {
+    title: "4-bosqich",
+    words: [
+      w("🛠️", "Работать", "rabótat'", "fe'l", "Ishlamoq", "Делать работу. Я работаю, ты работаешь, они работают.", "Работать много — это трудно.", "Ko'p ishlash — qiyin."),
+      w("🏖️", "Отдыхать", "addikhát'", "fe'l", "Dam olmoq", "Не работать, а отдыхать. Я отдыхаю, они отдыхают.", "Отдыхать — это хорошо.", "Dam olish — yaxshi."),
+      w("🧐", "Читать", "chitát'", "fe'l", "O'qimoq", "Читать книгу, журнал. Я читаю, они читают.", "Читать — это интересно.", "O'qish — qiziqarli."),
+      w("🎧", "Слушать", "slúshat'", "fe'l", "Tinglamoq", "Слушать музыку, радио. Я слушаю, они слушают.", "Слушать музыку — это хорошо.", "Musiqa tinglash — yaxshi."),
+      w("🎮", "Играть", "igrát'", "fe'l", "O'ynamoq", "Играть в футбол, в теннис. Я играю, они играют.", "Играть в футбол — это интересно.", "Futbol o'ynash — qiziqarli."),
+      w("🚶", "Гулять", "gulyát'", "fe'l", "Sayr qilmoq", "Ходить в парке, по городу. Я гуляю, они гуляют.", "Гулять в парке — хорошо.", "Parkda sayr qilish — yaxshi."),
+      w("📐", "Изучать", "izuchát'", "fe'l", "O'rganmoq", "Изучать русский язык. Я изучаю, они изучают.", "Изучать русский язык — интересно.", "Rus tilini o'rganish — qiziqarli."),
+      w("🏋️", "Заниматься", "zanimát'sa", "fe'l", "Shug'ullanmoq", "Заниматься спортом, музыкой. Я занимаюсь, они занимаются.", "Заниматься спортом — это хорошо.", "Sport bilan shug'ullanish — yaxshi."),
+      w("🙂", "Понимать", "panimát'", "fe'l", "Tushunmoq", "Понимать по-русски. Я понимаю, они понимают.", "Понимать по-русски — это хорошо.", "Ruschani tushunish — yaxshi."),
+      w("🔧", "Делать", "dyélat'", "fe'l", "Qilmoq", "Что ты делаешь? Я делаю, они делают.", "Что делать?", "Nima qilish kerak?"),
+    ],
+  },
+  {
+    title: "5-bosqich",
+    words: [
+      w("✅", "Уже", "uzhé", "ravish", "Allaqachon; endi", "Уже не — раньше да, а сейчас нет.", "Я уже не работаю.", "Men endi ishlamayman."),
+      w("⏳", "Ещё", "ishchó", "ravish", "Hali; yana", "Ещё не — сейчас нет, но потом да.", "Я ещё не работаю. Я студентка.", "Men hali ishlamayman. Men talabaman."),
+      w("➕", "Много", "mnóga", "ravish", "Ko'p", "Противоположность слову «мало».", "Он много работает.", "U ko'p ishlaydi."),
+      w("➖", "Мало", "mála", "ravish", "Kam", "Противоположность слову «много».", "Она мало работает.", "U kam ishlaydi."),
+      w("⏰", "Сейчас", "sichás", "ravish", "Hozir", "В этот момент.", "Сейчас три часа.", "Hozir soat uch."),
+      w("🕐", "Час", "chas", "ot", "Soat (vaqt)", "60 минут. 1 час, 2 часа, 5 часов.", "Сейчас один час.", "Hozir soat bir."),
+      w("⏱️", "Минута", "minúta", "ot", "Daqiqa", "60 секунд. 1 минута, 2 минуты, 5 минут.", "Одна минута!", "Bir daqiqa!"),
+      w("❓", "Почему", "pachimú", "so'roq", "Nega? Nima uchun?", "Вопрос о причине. Ответ: потому что…", "Почему ты не работаешь?", "Nega ishlamayapsan?"),
+      w("💭", "Потому что", "patamú shta", "bog'lovchi", "Chunki", "Ответ на вопрос «почему?».", "Потому что я студент.", "Chunki men talabaman."),
+      w("📅", "Когда", "kagdá", "so'roq", "Qachon?", "Вопрос о времени.", "Когда ты гуляешь?", "Qachon sayr qilasan?"),
+    ],
+  },
+];
+
+const pick = (prompt: string, options: string[], correct: number, explanation?: string): SeedQuestion => ({
+  prompt,
+  options,
+  correct,
+  explanation,
+});
+const listen = (audio: string, options: string[], explanation?: string): SeedQuestion => ({
+  prompt: "Eshitgan gapingizni toping",
+  audio,
+  options,
+  correct: options.indexOf(audio),
+  explanation,
+});
+
+const MOY = ["мой", "моя", "моё", "мои"];
+const CHEY = ["чей", "чья", "чьё", "чьи"];
+const EGO = ["его", "её", "их"];
+const U_KOGO = ["у меня", "у тебя", "у него", "у неё", "у нас", "у вас", "у них"];
+const CHAS = ["час", "часа", "часов"];
+const FAMILY = ["бабушка", "дедушка", "брат", "сестра"];
+const TF = ["To'g'ri", "Noto'g'ri"];
+const TEXT =
+  "Меня зовут Тимур. Мне 30 лет. Я инженер. Это моя семья. Моя жена Мадина — врач. У нас есть сын и дочь. Сыну 5 лет, а дочери 3 года. Мои родители уже не работают. Они много гуляют и читают. У нас есть кошка.";
+const tf = (statement: string, isTrue: boolean, explanation?: string): SeedQuestion => ({
+  prompt: `${TEXT}||${statement}`,
+  options: TF,
+  correct: isTrue ? 0 : 1,
+  explanation,
+});
+
+export const R03_EXERCISES: SeedExercise[] = [
+  {
+    title: "Tinglang va toping",
+    skill: "Tinglash",
+    kind: "listen",
+    instructions: "Gap ovoz chiqarib o'qiladi. Eshitgan gapingizni toping.",
+    questions: [
+      listen("Это мой брат.", ["Это мой брат.", "Это моя сестра.", "Это мой сын.", "Это мои дети."]),
+      listen("Это моя бабушка.", ["Это моя бабушка.", "Это мой дедушка.", "Это моя мама.", "Это моя дочь."]),
+      listen("У меня есть сестра.", ["У меня есть брат.", "У меня есть сестра.", "У него есть сестра.", "У неё есть сестра."]),
+      listen("Сейчас три часа.", ["Сейчас два часа.", "Сейчас три часа.", "Сейчас час.", "Сейчас пять часов."]),
+      listen("Я читаю журнал.", ["Я читаю журнал.", "Я слушаю музыку.", "Я играю в футбол.", "Я изучаю русский язык."]),
+      listen("Мои родители отдыхают.", ["Мои родители работают.", "Мои родители отдыхают.", "Мои дети отдыхают.", "Мои родители гуляют."]),
+      listen("Чей это телефон?", ["Чей это телефон?", "Чья это машина?", "Чьё это пианино?", "Чьи это цветы?"]),
+      listen("Они гуляют в парке.", ["Они гуляют в парке.", "Они играют в парке.", "Мы гуляем в парке.", "Она гуляет в парке."]),
+      listen("У нас есть кошка.", ["У нас есть собака.", "У нас есть кошка.", "У вас есть кошка.", "У них есть кошка."]),
+      listen("Он ещё не работает.", ["Он уже не работает.", "Он ещё не работает.", "Он много работает.", "Он мало работает."], "ещё не — hali …maydi; уже не — endi …maydi."),
+    ],
+  },
+  {
+    title: "Kim bo'ladi?",
+    skill: "Oila",
+    kind: "situation",
+    instructions: "Oila a'zolari o'rtasidagi bog'liqlikni toping.",
+    questions: [
+      pick("Mamamning onasi — bu mening …", FAMILY, 0),
+      pick("Otamning otasi — bu mening …", FAMILY, 1),
+      pick("Ota-onamning o'g'li — bu mening …", FAMILY, 2),
+      pick("Ota-onamning qizi — bu mening …", FAMILY, 3),
+      pick("Bobomning nazarida men (o'g'il) — …", ["внук", "внучка", "сын", "брат"], 0),
+      pick("Buvimning nazarida men (qiz) — …", ["внук", "внучка", "дочь", "сестра"], 1),
+      pick("Мама и папа — это …", ["дети", "родители", "бабушка", "внуки"], 1),
+      pick("Сын и дочь — это …", ["родители", "дети", "дедушка", "муж"], 1),
+      pick("Mamamning eri — bu mening …", ["брат", "папа", "дедушка", "сын"], 1),
+      pick("Men — erkakman. Turmush o'rtog'im — mening …", ["жена", "сестра", "мать", "дочь"], 0),
+    ],
+  },
+  {
+    title: "Bu nima?",
+    skill: "Rasm",
+    kind: "picture",
+    instructions: "Rasmga qarang va uning ruscha nomini toping.",
+    questions: [
+      pick("👵", ["дедушка", "бабушка", "внучка", "мать"], 1),
+      pick("👴", ["дедушка", "отец", "сын", "брат"], 0),
+      pick("👶", ["ребёнок", "школьник", "внук", "друг"], 0),
+      pick("🐈", ["собака", "кошка", "кот", "цветы"], 1, "Кот — erkak mushuk, кошка — umuman mushuk yoki urg'ochi."),
+      pick("🚗", ["машина", "велосипед", "пианино", "гитара"], 0),
+      pick("🚲", ["гитара", "машина", "велосипед", "рюкзак"], 2),
+      pick("🎸", ["пианино", "гитара", "картина", "телевизор"], 1),
+      pick("💻", ["телевизор", "ноутбук", "телефон", "учебник"], 1),
+      pick("🎒", ["рюкзак", "сумка", "учебник", "карта"], 0),
+      pick("💐", ["картина", "фотография", "цветы", "игрушка"], 2),
+    ],
+  },
+  {
+    title: "Мой, моя, моё или мои?",
+    skill: "Egalik",
+    kind: "choice",
+    instructions: "он → мой, она → моя, оно → моё, они → мои. So'zga mos shaklni tanlang.",
+    questions: [
+      pick("… брат", MOY, 0),
+      pick("… сестра", MOY, 1),
+      pick("… дети", MOY, 3),
+      pick("… родители", MOY, 3),
+      pick("… дочь", MOY, 1, "Дочь -ь bilan tugasa ham ayol — моя дочь."),
+      pick("… кошка", MOY, 1),
+      pick("… велосипед", MOY, 0),
+      pick("… пианино", MOY, 2),
+      pick("… фотографии", MOY, 3),
+      pick("… муж", MOY, 0),
+    ],
+  },
+  {
+    title: "Чей? Чья? Чьё? Чьи?",
+    skill: "Savol",
+    kind: "choice",
+    instructions: "он → чей, она → чья, оно → чьё, они → чьи. To'g'ri savol so'zini tanlang.",
+    questions: [
+      pick("… это брат?", CHEY, 0),
+      pick("… это сестра?", CHEY, 1),
+      pick("… это вино?", CHEY, 2),
+      pick("… это дети?", CHEY, 3),
+      pick("… это машина?", CHEY, 1),
+      pick("… это велосипед?", CHEY, 0),
+      pick("… это пианино?", CHEY, 2),
+      pick("… это цветы?", CHEY, 3),
+      pick("… это фото?", CHEY, 2),
+      pick("… это учебник?", CHEY, 0),
+    ],
+  },
+  {
+    title: "Его, её или их?",
+    skill: "Egalik",
+    kind: "choice",
+    instructions:
+      "Uning (erkak) — его, uning (ayol) — её, ularning — их. Bu so'zlar o'zgarmaydi: его брат, его сестра, его дети.",
+    questions: [
+      pick("Это Андрей. Это … машина.", EGO, 0),
+      pick("Это Лена. Это … цветы.", EGO, 1),
+      pick("Это Иван и Анна. Это … дети.", EGO, 2),
+      pick("Это Денис. Это … игрушка.", EGO, 0),
+      pick("Это Юля. Это … телефон.", EGO, 1),
+      pick("Это бабушка и дедушка. Это … дом.", EGO, 2),
+      pick("Это мой брат. … зовут Олег.", EGO, 0),
+      pick("Это моя сестра. … зовут Катя.", EGO, 1),
+      pick("Это мои родители. … зовут Ольга и Михаил.", EGO, 2),
+      pick("Это Мадина. Это … муж.", EGO, 1),
+    ],
+  },
+  {
+    title: "У кого есть?",
+    skill: "Grammatika",
+    kind: "choice",
+    instructions:
+      "«Menda bor» — у меня есть: я → у меня, ты → у тебя, он → у него, она → у неё, мы → у нас, вы → у вас, они → у них.",
+    questions: [
+      pick("Я — Артём. … есть гитара.", U_KOGO, 0),
+      pick("Ты — Света? … есть кошка?", U_KOGO, 1),
+      pick("Это Денис. … есть велосипед.", U_KOGO, 2),
+      pick("Это Света. … есть ребёнок.", U_KOGO, 3),
+      pick("Мы студенты. … есть учебники.", U_KOGO, 4),
+      pick("Анна Петровна, … есть внуки?", U_KOGO, 5),
+      pick("Это Алёша и Серёжа. … есть собака.", U_KOGO, 6),
+      pick("Это мой дедушка. … есть машина.", U_KOGO, 2),
+      pick("Это моя бабушка. … есть внучка.", U_KOGO, 3),
+      pick("Это наша семья. … есть дом и дача.", U_KOGO, 4),
+    ],
+  },
+  {
+    title: "Fe'lni to'ldiring",
+    skill: "Fe'llar",
+    kind: "fill",
+    instructions:
+      "работать: я работаю, ты работаешь, он работает, мы работаем, вы работаете, они работают. заниматься: я занимаюсь, они занимаются. Fe'lni to'g'ri shaklda yozing.",
+    questions: [
+      ["Я много ___. (работать)", "работаю"],
+      ["Ты уже ___? (работать)", "работаешь"],
+      ["Он ___ журнал. (читать)", "читает"],
+      ["Мы ___ в футбол. (играть)", "играем"],
+      ["Вы ___ русский язык? (изучать)", "изучаете"],
+      ["Они ___ в парке. (гулять)", "гуляют"],
+      ["Я ___ спортом. (заниматься)", "занимаюсь", "-ся fe'l: я занимаюсь, ты занимаешься."],
+      ["Она ___ музыку. (слушать)", "слушает"],
+      ["Вы ___? (отдыхать)", "отдыхаете"],
+      ["Они ___ спортом. (заниматься)", "занимаются"],
+    ].map(([prompt, answer, explanation]) => ({ prompt, answer, explanation })),
+  },
+  {
+    title: "час, часа или часов?",
+    skill: "Vaqt",
+    kind: "choice",
+    instructions: "1, 21 → час; 2–4, 22–24 → часа; 5–20 → часов. Masalan: Сейчас 3 часа.",
+    questions: [
+      pick("Сейчас 1 …", CHAS, 0),
+      pick("Сейчас 2 …", CHAS, 1),
+      pick("Сейчас 5 …", CHAS, 2),
+      pick("Сейчас 3 …", CHAS, 1),
+      pick("Сейчас 11 …", CHAS, 2),
+      pick("Сейчас 21 …", CHAS, 0),
+      pick("Сейчас 22 …", CHAS, 1),
+      pick("Сейчас 12 …", CHAS, 2),
+      pick("Сейчас 4 …", CHAS, 1),
+      pick("Сейчас 15 …", CHAS, 2),
+    ],
+  },
+  {
+    title: "Soat nechchi?",
+    skill: "Vaqt",
+    kind: "number",
+    instructions: "Vaqt ruscha o'qiladi. Soatni raqam bilan yozing (masalan: 9).",
+    questions: [
+      ["Сейчас девять часов.", "9"],
+      ["Сейчас час.", "1", "«час» — bu soat bir."],
+      ["Сейчас три часа.", "3"],
+      ["Сейчас десять часов.", "10"],
+      ["Сейчас семнадцать часов.", "17"],
+      ["Сейчас двенадцать часов.", "12"],
+      ["Сейчас двадцать один час.", "21"],
+      ["Сейчас четыре часа.", "4"],
+      ["Сейчас двадцать два часа.", "22"],
+      ["Сейчас восемь часов.", "8"],
+    ].map(([audio, answer, explanation]) => ({ prompt: "Soatni yozing", audio, answer, explanation })),
+  },
+  {
+    title: "Juftini toping",
+    skill: "Juftlik",
+    kind: "match",
+    instructions: "Juftlarni ulang: oila a'zolari (erkak — ayol) yoki ruscha so'z va tarjimasi.",
+    questions: [
+      ["муж|жена", "брат|сестра", "сын|дочь", "дедушка|бабушка"],
+      ["внук|внучка", "отец|мать", "мальчик|девочка", "друг|подруга"],
+      ["бабушка|buvi", "дедушка|bobo", "внук|nabira (o'g'il)", "внучка|nabira (qiz)"],
+      ["родители|ota-ona", "дети|bolalar", "семья|oila", "ребёнок|bola"],
+      ["машина|mashina", "велосипед|velosiped", "рюкзак|ryukzak", "учебник|darslik"],
+      ["работать|ishlamoq", "отдыхать|dam olmoq", "читать|o'qimoq", "гулять|sayr qilmoq"],
+      ["играть|o'ynamoq", "слушать|tinglamoq", "изучать|o'rganmoq", "понимать|tushunmoq"],
+      ["уже|allaqachon", "ещё|hali", "много|ko'p", "мало|kam"],
+      ["час|soat", "минута|daqiqa", "сейчас|hozir", "почему?|nega?"],
+      ["я|у меня", "он|у него", "она|у неё", "они|у них"],
+    ].map((options) => ({ prompt: "Juftlarni ulang", options })),
+  },
+  {
+    title: "Suhbatni davom ettiring",
+    skill: "Dialog",
+    kind: "dialog",
+    instructions: "Suhbatdoshingiz savol berdi. Mos javobni tanlang.",
+    questions: [
+      pick("У тебя есть брат?", ["Да, у меня есть брат.", "Да, я есть брат.", "Да, мой есть брат.", "Да, меня брат."], 0),
+      pick("Чей это учебник?", ["Это мой учебник.", "Это моя учебник.", "Это меня учебник.", "У меня учебник."], 0),
+      pick("Что ты делаешь?", ["Я читаю журнал.", "Я журнал.", "Мне 20 лет.", "Это журнал."], 0),
+      pick("Сколько сейчас времени?", ["Сейчас три часа.", "Сейчас три часов.", "Мне три года.", "В три."], 0),
+      pick("Почему ты не работаешь?", ["Потому что я студент.", "Почему я студент.", "Да, я студент.", "Я работаю студент."], 0),
+      pick("Кто это?", ["Это моя бабушка.", "Это мой бабушка.", "Это моё бабушка.", "Это мои бабушка."], 0),
+      pick("Твои родители работают?", ["Нет, они уже не работают.", "Нет, он уже не работает.", "Да, мы работаем.", "Нет, мои родители."], 0),
+      pick("Когда ты гуляешь?", ["В шесть часов.", "Шесть часов.", "Сейчас шесть.", "Мне шесть лет."], 0),
+      pick("Ты понимаешь по-русски?", ["Да, немного понимаю.", "Да, по-русски.", "Да, я русский язык.", "Да, изучаю."], 0),
+      pick("У вас есть дети?", ["Да, у нас есть сын и дочь.", "Да, у вас есть дети.", "Да, нас дети.", "Да, мы дети."], 0),
+    ],
+  },
+  {
+    title: "To'g'ri yoki noto'g'ri?",
+    skill: "O'qish",
+    kind: "truefalse",
+    instructions: "Matnni o'qing va gap to'g'ri yoki noto'g'ri ekanini belgilang.",
+    questions: [
+      tf("Тимуру 30 лет.", true),
+      tf("Тимур — врач.", false, "Тимур — инженер, а Мадина — врач."),
+      tf("Мадина — жена Тимура.", true),
+      tf("У них есть два сына.", false, "У них есть сын и дочь."),
+      tf("Дочери 3 года.", true),
+      tf("Сыну 3 года.", false, "Сыну 5 лет."),
+      tf("Родители Тимура ещё работают.", false, "Они уже не работают."),
+      tf("Родители много гуляют.", true),
+      tf("У них есть собака.", false, "У них есть кошка."),
+      tf("Мадина — мать двух детей.", true),
+    ],
+  },
+  {
+    title: "Harflardan so'z",
+    skill: "Harflar",
+    kind: "anagram",
+    instructions: "Harflar aralashib ketgan. Ularni to'g'ri tartibda bosib, so'zni yig'ing.",
+    questions: ["бабушка", "дедушка", "сестра", "родители", "внучка", "машина", "велосипед", "гитара", "учебник", "фотография"].map(
+      (word) => ({ prompt: scramble(word), answer: word })
+    ),
+  },
+  {
+    title: "Gap tuzing",
+    skill: "Gap tuzish",
+    kind: "order",
+    instructions: "So'zlarni to'g'ri tartibda bosib, gap tuzing.",
+    questions: [
+      "У меня есть брат.",
+      "Это моя семья.",
+      "Чей это телефон?",
+      "Мои родители уже не работают.",
+      "Сейчас десять часов.",
+      "Я слушаю музыку.",
+      "Мы играем в футбол.",
+      "У неё есть машина.",
+      "Почему ты не работаешь?",
+      "Это машина Андрея.",
+    ].map((answer) => ({ prompt: "Gap tuzing", answer })),
+  },
+  {
+    title: "Ayting",
+    skill: "Talaffuz",
+    kind: "speak",
+    instructions: "Gapni eshiting, keyin mikrofon tugmasini bosib o'zingiz ayting.",
+    questions: [
+      "Это моя семья.",
+      "У меня есть брат и сестра.",
+      "Моя мама — врач.",
+      "Сколько сейчас времени?",
+      "Сейчас три часа.",
+      "Чей это велосипед?",
+      "Я занимаюсь спортом.",
+      "Мои родители уже не работают.",
+      "У вас есть дети?",
+      "Я слушаю музыку.",
+    ].map((phrase) => ({ prompt: phrase, answer: phrase })),
+  },
+];
