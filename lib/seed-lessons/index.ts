@@ -15,6 +15,7 @@ import { R09_EXERCISES, R09_ROUNDS } from "./r09-kino";
 import { R10_EXERCISES, R10_ROUNDS } from "./r10-dom";
 import { R11_EXERCISES, R11_ROUNDS } from "./r11-universitet";
 import { R12_EXERCISES, R12_ROUNDS } from "./r12-den-rozhdeniya";
+import { R13_EXERCISES, R13_ROUNDS } from "./r13-v-gorode";
 
 export interface LessonContent {
   code: string;
@@ -56,6 +57,7 @@ const LESSONS: LessonContent[] = [
   { code: "R10", rounds: R10_ROUNDS, exercises: R10_EXERCISES },
   { code: "R11", rounds: R11_ROUNDS, exercises: R11_EXERCISES },
   { code: "R12", rounds: R12_ROUNDS, exercises: R12_EXERCISES },
+  { code: "R13", rounds: R13_ROUNDS, exercises: R13_EXERCISES },
 ];
 
 export const LESSON_CONTENT: LessonContent[] = LESSONS.map((l) => ({
