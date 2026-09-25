@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Delete, Info, MapPin, Mic, PlayCircle, Trophy, Volume2 } from "lucide-react";
+import { BookOpen, Delete, Info, MapPin, Mic, PlayCircle, Trophy, Volume2 } from "lucide-react";
 import type { UnitDetail } from "@/lib/data";
 import { matchesPronunciation, speechNorm, SPEECH_ERRORS } from "@/lib/russian-speech";
 
@@ -308,8 +308,14 @@ export function ExerciseRun({
       className={`grid gap-2 ${
         kind === "choice" || kind === "ending"
           ? shortOptions
-            ? "grid-cols-4"
+            ? question.options.length === 2
+              ? "grid-cols-2"
+              : question.options.length === 3
+              ? "grid-cols-3"
+              : "grid-cols-4"
             : "grid-cols-1 sm:grid-cols-2"
+          : kind === "truefalse"
+          ? "grid-cols-2"
           : "grid-cols-1 sm:grid-cols-2"
       }`}
     >
@@ -479,6 +485,21 @@ export function ExerciseRun({
           <>
             <p className="py-2 text-center text-7xl" aria-hidden="true">
               {question.prompt}
+            </p>
+            {optionGrid()}
+          </>
+        )}
+
+        {kind === "truefalse" && (
+          <>
+            <div className="rounded-2xl border border-ink-100 bg-white px-4 py-3 text-base leading-relaxed text-ink-900 dark:border-white/10 dark:bg-white/5 dark:text-ink-50">
+              <p className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ink-400">
+                <BookOpen size={14} /> Matn
+              </p>
+              <p lang="ru">{question.prompt.split("||")[0]}</p>
+            </div>
+            <p lang="ru" className="text-center text-xl font-semibold text-ink-950 dark:text-ink-50">
+              {question.prompt.split("||")[1]}
             </p>
             {optionGrid()}
           </>

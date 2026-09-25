@@ -28,6 +28,7 @@ import {
   TextCursorInput,
   Mic,
   Ear,
+  BookOpenCheck,
   type LucideIcon,
 } from "lucide-react";
 import type { ClipKind, ExerciseKind, LevelRecord, UnitDetail } from "@/lib/data";
@@ -55,6 +56,7 @@ const EXERCISE_KIND_ICONS: Record<ExerciseKind, LucideIcon> = {
   fill: TextCursorInput,
   speak: Mic,
   dictation: Ear,
+  truefalse: BookOpenCheck,
 };
 
 /** Darajalarning ruscha rasmiy nomlari (ТРКИ — rus tili bo'yicha davlat

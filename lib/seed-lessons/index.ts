@@ -4,6 +4,7 @@ import type { SeedExercise } from "../seed-exercises";
 import type { VocabSeed } from "./types";
 import { R00_EXERCISES, R00_ROUNDS } from "./r00-alifbo";
 import { R01_EXERCISES, R01_ROUNDS } from "./r01-privet";
+import { R02_EXERCISES, R02_ROUNDS } from "./r02-kto-vy";
 
 export interface LessonContent {
   code: string;
@@ -14,4 +15,5 @@ export interface LessonContent {
 export const LESSON_CONTENT: LessonContent[] = [
   { code: "R00", rounds: R00_ROUNDS, exercises: R00_EXERCISES },
   { code: "R01", rounds: R01_ROUNDS, exercises: R01_EXERCISES },
+  { code: "R02", rounds: R02_ROUNDS, exercises: R02_EXERCISES },
 ];

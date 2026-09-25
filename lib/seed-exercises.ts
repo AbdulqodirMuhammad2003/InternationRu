@@ -20,7 +20,8 @@ export type ExerciseKind =
   | "order" // `answer` — gap, o'quvchi so'z plitkalaridan yig'adi
   | "fill" // `prompt` — "___" bo'sh joyli gap/so'z, `answer` — tushgan qism
   | "speak" // `prompt` — ibora, o'quvchi mikrofonga aytadi
-  | "dictation"; // `audio` — so'z (ko'rsatilmaydi), `answer` — o'quvchi yozadi
+  | "dictation" // `audio` — so'z (ko'rsatilmaydi), `answer` — o'quvchi yozadi
+  | "truefalse"; // `prompt` — "matn||gap", variantlar: To'g'ri / Noto'g'ri
 
 export interface SeedQuestion {
   prompt: string;

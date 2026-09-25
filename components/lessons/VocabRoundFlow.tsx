@@ -636,7 +636,7 @@ function SpellingStage({
               disabled={checked !== null}
               className={`flex h-11 w-9 items-center justify-center rounded-xl border-2 text-lg font-bold uppercase transition-colors ${
                 checked === true
-                  ? "border-ink-500 bg-ink-50 text-ink-700 dark:bg-ink-900/40 dark:text-ink-200"
+                  ? "border-mint-500 bg-mint-50 text-mint-800 dark:bg-mint-950/40 dark:text-mint-200"
                   : checked === false
                   ? "border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
                   : letter
@@ -731,7 +731,7 @@ function DefinitionStage({
               disabled={checked !== null}
               className={`rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-all duration-150 ${
                 showState && isCorrectOpt
-                  ? "border-ink-500 bg-ink-50 text-ink-800 dark:bg-ink-900/40 dark:text-ink-100"
+                  ? "border-mint-500 bg-mint-50 text-mint-900 dark:bg-mint-950/40 dark:text-mint-100"
                   : showState && isSelected
                   ? "border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
                   : "border-ink-100 bg-white hover:bg-ink-50/60 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
@@ -990,7 +990,7 @@ function SentenceStage({
         placeholder="So'zni yozing…"
         className={`w-full rounded-xl border-2 px-4 py-2.5 text-center text-sm font-semibold outline-none transition-colors ${
           checked === true
-            ? "border-ink-500 bg-ink-50 text-ink-700 dark:bg-ink-900/40 dark:text-ink-200"
+            ? "border-mint-500 bg-mint-50 text-mint-800 dark:bg-mint-950/40 dark:text-mint-200"
             : checked === false
             ? "border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
             : "border-ink-200 bg-white text-ink-900 focus:border-ink-500 dark:border-white/10 dark:bg-white/5 dark:text-ink-50"
