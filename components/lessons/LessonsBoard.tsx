@@ -629,6 +629,7 @@ export function LessonsBoard({
         <VocabRoundFlow
           round={flowRound}
           allWords={flowAllWords}
+          showPictures={(openUnit?.order_index ?? 0) <= 10}
           onClose={() => {
             setFlowRoundId(null);
             router.refresh();

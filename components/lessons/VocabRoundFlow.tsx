@@ -86,10 +86,14 @@ type Phase =
 export function VocabRoundFlow({
   round,
   allWords,
+  showPictures = false,
   onClose,
 }: {
   round: VocabRound;
   allWords: VocabWord[];
+  /** Boshlang'ich darslarda gap bosqichida ham so'zning rasmi ko'rsatiladi
+   *  (misollar ko'pincha «Это …» bo'lgani uchun rasm yordam beradi). */
+  showPictures?: boolean;
   onClose: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -102,9 +106,10 @@ export function VocabRoundFlow({
   // hali o'rganilmagan so'zlar qayta ko'rsatiladi; tekshiruv ham faqat ularning
   // o'tilmagan bosqichlarini so'raydi (buildQueueForStage). Bosqich ochilgandagi
   // ro'yxat saqlab qolinadi — tekshiruv paytida progress yangilansa ham o'zgarmaydi.
+  // Har safar bosqichga kirilganda so'zlar yangi tartibda chiqadi.
   const [learnWords] = useState(() => {
     const pending = round.words.filter((w) => !w.learned);
-    return pending.length > 0 ? pending : round.words;
+    return shuffle(pending.length > 0 ? pending : round.words);
   });
   const resuming = learnWords.length < round.words.length;
 
@@ -140,9 +145,10 @@ export function VocabRoundFlow({
   }
 
   function buildQueueForStage(stage: VocabStage): QueueItem[] {
-    return round.words
-      .filter((w) => !stagePassed(w, stage))
-      .map((w) => ({ word: w, attempt: 0 }));
+    return shuffle(round.words.filter((w) => !stagePassed(w, stage))).map((w) => ({
+      word: w,
+      attempt: 0,
+    }));
   }
 
   function startChecking() {
@@ -322,6 +328,7 @@ export function VocabRoundFlow({
             word={queue[0].word}
             allWords={allWords}
             remaining={queue.length}
+            showPicture={showPictures}
             onResult={handleStageAnswer}
           />
         )}
@@ -349,6 +356,7 @@ export function VocabRoundFlow({
               word={mistakes[mistakeIdx].word}
               allWords={allWords}
               remaining={mistakes.length - mistakeIdx}
+              showPicture={showPictures}
               onResult={handleMistakeAnswer}
             />
           </div>
@@ -514,12 +522,14 @@ function StageQuestion({
   word,
   allWords,
   remaining,
+  showPicture,
   onResult,
 }: {
   stage: VocabStage;
   word: VocabWord;
   allWords: VocabWord[];
   remaining: number;
+  showPicture: boolean;
   onResult: (correct: boolean) => void;
 }) {
   return (
@@ -532,7 +542,9 @@ function StageQuestion({
         <DefinitionStage word={word} allWords={allWords} onResult={onResult} />
       )}
       {stage === "pronunciation" && <PronunciationStage word={word} onResult={onResult} />}
-      {stage === "sentence" && <SentenceStage word={word} onResult={onResult} />}
+      {stage === "sentence" && (
+        <SentenceStage word={word} showPicture={showPicture} onResult={onResult} />
+      )}
     </div>
   );
 }
@@ -668,7 +680,7 @@ function SpellingStage({
         disabled={checked !== null}
         className="mx-auto flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-700 disabled:opacity-40 dark:text-ink-400 dark:hover:text-ink-200"
       >
-        <Eraser size={14} /> Tozalash
+        <Eraser size={14} /> Очистить
       </button>
     </div>
   );
@@ -943,9 +955,11 @@ function PronunciationStage({
 
 function SentenceStage({
   word,
+  showPicture,
   onResult,
 }: {
   word: VocabWord;
+  showPicture: boolean;
   onResult: (correct: boolean) => void;
 }) {
   const { before, after, found } = useMemo(
@@ -967,6 +981,11 @@ function SentenceStage({
       <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         Bo'sh joyga mos so'zni yozing
       </p>
+      {showPicture && (
+        <div className="flex h-24 items-center justify-center rounded-2xl bg-gradient-to-br from-ink-50 to-gold-50 text-5xl dark:from-white/5 dark:to-gold-950/30">
+          {word.emoji}
+        </div>
+      )}
       <p className="rounded-2xl bg-ink-50/70 p-4 text-center text-base leading-relaxed text-ink-900 dark:bg-white/5 dark:text-ink-50">
         {found ? (
           <>
