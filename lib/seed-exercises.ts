@@ -53,3 +53,23 @@ export function scramble(word: string) {
   }
   return a.join("") === word ? a.reverse().join("") : a.join("");
 }
+
+/** To'g'ri javobni har bir savolda boshqa o'ringa qo'yadi (mualliflik
+ *  qulayligi uchun to'g'ri javob ro'yxatda birinchi yozilganda ham u doim
+ *  birinchi turmasligi uchun). Tartib qat'iy — seed har safar bir xil. */
+export function mixAnswers(questions: SeedQuestion[]): SeedQuestion[] {
+  // Variantlar soniga qarab o'rinlar teng taqsimlanadigan naqsh.
+  const patterns: Record<number, number[]> = {
+    2: [1, 0, 0, 1, 1, 0, 1, 0, 0, 1],
+    3: [2, 0, 1, 1, 2, 0, 0, 2, 1, 1],
+    4: [2, 0, 3, 1, 1, 3, 0, 2, 3, 1],
+  };
+  return questions.map((q, i) => {
+    if (!q.options || q.correct === undefined) return q;
+    const pattern = patterns[q.options.length];
+    const target = pattern ? pattern[i % pattern.length] : i % q.options.length;
+    const rest = q.options.filter((_, j) => j !== q.correct);
+    rest.splice(target, 0, q.options[q.correct]);
+    return { ...q, options: rest, correct: target };
+  });
+}

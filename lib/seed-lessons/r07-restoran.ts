@@ -1,0 +1,413 @@
+/**
+ * 8-dars — «Ресторан» (Liden & Denz, «Я ❤ Русский Язык», 7-urok asosida):
+ * taomlar (завтрак, обед, ужин), есть/пить/хотеть/любить/готовить fe'llari,
+ * tushum kelishigi (кашу, рыбу; его/её/их), один/одну/одно/одни, 100–1000
+ * sonlari va narxlar (рубль/рубля/рублей), restoranda buyurtma berish.
+ * Lug'at 5 bosqich (50 so'z), 16 ta mashq.
+ */
+import { scramble, type SeedExercise, type SeedQuestion } from "../seed-exercises";
+import type { VocabSeed } from "./types";
+
+const w = (
+  emoji: string,
+  word: string,
+  transcription: string,
+  pos: string,
+  uz: string,
+  def: string,
+  ex: string,
+  exUz: string
+): VocabSeed => ({ emoji, word, transcription, pos, uz, def, ex, exUz });
+
+export const R07_ROUNDS: { title: string; words: VocabSeed[] }[] = [
+  {
+    title: "1-bosqich",
+    words: [
+      w("🥐", "Завтрак", "záftrak", "ot", "Nonushta", "Утренняя еда. Когда? — на завтрак.", "Завтрак съешь сам, обед раздели с другом, а ужин отдай врагу.", "Nonushtani o'zing ye, tushlikni do'sting bilan bo'lish, kechki ovqatni dushmaningga ber (maqol)."),
+      w("🥪", "Бутерброд", "butirbrót", "ot", "Buterbrod", "Хлеб, а на нём масло, сыр или колбаса.", "Бутерброд всегда падает маслом вниз!", "Buterbrod doim yog'li tomoni bilan yerga tushadi!"),
+      w("🥓", "Колбаса", "kalbasá", "ot", "Kolbasa", "Мясной продукт, его едят с хлебом.", "Колбаса — любимая еда нашего кота.", "Kolbasa — mushugimizning sevimli taomi."),
+      w("🧈", "Масло", "másla", "ot", "Sariyog' / moy", "Его кладут на хлеб или в кашу.", "Хлеб и масло — самый простой завтрак.", "Non va sariyog' — eng oddiy nonushta."),
+      w("🥛", "Молоко", "malakó", "ot", "Sut", "Белый напиток, его дают корова и коза.", "Молоко с мёдом — лучшее лекарство от простуды.", "Asalli sut — shamollashga eng yaxshi dori."),
+      w("🥣", "Каша", "kásha", "ot", "Bo'tqa", "Еда из крупы и молока, часто на завтрак.", "Щи да каша — пища наша.", "Shchi va bo'tqa — bizning taomimiz (rus maqoli)."),
+      w("🥚", "Яйцо", "yitsó", "ot", "Tuxum", "Его дают курица и другие птицы.", "Что было раньше: курица или яйцо?", "Qaysi biri avval paydo bo'lgan: tovuqmi yoki tuxum?"),
+      w("🍪", "Печенье", "pichén'ye", "ot", "Pechenye", "Маленький сладкий десерт к чаю.", "Печенье и молоко — для Деда Мороза.", "Pechenye va sut — Qor bobo uchun."),
+      w("🍵", "Чай", "chay", "ot", "Choy", "Горячий напиток: зелёный или чёрный.", "Чай не пьёшь — откуда силы возьмёшь?", "Choy ichmasang, kuchni qayerdan olasan? (rus hazil iborasi)"),
+      w("🍬", "Сахар", "sákhar", "ot", "Shakar", "Сладкий белый продукт, его кладут в чай.", "Сахар и соль похожи, но вкус разный!", "Shakar va tuz o'xshash, lekin ta'mi har xil!"),
+    ],
+  },
+  {
+    title: "2-bosqich",
+    words: [
+      w("🍽️", "Обед", "abyét", "ot", "Tushlik", "Дневная еда. Когда? — на обед.", "Обед по расписанию!", "Tushlik — jadval bo'yicha! (mashhur ibora)"),
+      w("🕯️", "Ужин", "úzhin", "ot", "Kechki ovqat", "Вечерняя еда. Когда? — на ужин.", "Ужин при свечах — это очень романтично.", "Sham yorug'ida kechki ovqat — juda romantik."),
+      w("🍲", "Суп", "sup", "ot", "Sho'rva", "Горячее жидкое блюдо: борщ, щи, шурпа.", "Мама говорит: суп — это обязательно!", "Onam aytadi: sho'rva — majburiy!"),
+      w("🥩", "Мясо", "myása", "ot", "Go'sht", "Продукт из говядины, баранины и т. д.", "Мясо на мангале — это праздник!", "Mangaldagi go'sht — bu bayram!"),
+      w("🍗", "Курица", "kúritsa", "ot", "Tovuq", "Птица и её мясо.", "Курица-гриль — хит нашего кафе.", "Grill tovuq — kafemizning xiti."),
+      w("🌭", "Сосиски", "sasíski", "ot", "Sosiskalar", "Маленькие колбаски, их варят или жарят.", "Сосиски в тесте — любимый перекус студентов.", "Xamirdagi sosiskalar — talabalarning sevimli yengil taomi."),
+      w("🥔", "Картошка", "kartóshka", "ot", "Kartoshka", "Популярный овощ: картофель.", "Картошка — второй хлеб в России.", "Kartoshka — Rossiyada ikkinchi non."),
+      w("🐟", "Рыба", "ríba", "ot", "Baliq", "Живёт в воде. Её тоже едят.", "Рыба ищет где глубже, а человек — где лучше.", "Baliq chuqurroq joyni, inson esa yaxshiroq joyni izlaydi (maqol)."),
+      w("🍚", "Рис", "ris", "ot", "Guruch", "Белая крупа, из неё готовят плов.", "Рис — главный продукт для плова.", "Guruch — palov uchun asosiy mahsulot."),
+      w("🥗", "Салат", "salát", "ot", "Salat", "Блюдо из овощей, мяса или рыбы.", "Салат «Оливье» — символ Нового года в России.", "«Olivye» salati — Rossiyada Yangi yil ramzi."),
+    ],
+  },
+  {
+    title: "3-bosqich",
+    words: [
+      w("🍓", "Фрукты", "frúkti", "ot", "Mevalar", "Яблоки, груши, апельсины и т. д.", "Узбекские фрукты — самые сладкие!", "O'zbek mevalari — eng shirini!"),
+      w("🍊", "Апельсин", "apil'sín", "ot", "Apelsin", "Оранжевый фрукт с витамином C.", "Апельсин — это витамин C в кожуре.", "Apelsin — bu po'stdagi C vitamini."),
+      w("🍒", "Вишня", "víshnya", "ot", "Olcha", "Маленькая красная ягода.", "Вишня цветёт весной — это очень красиво.", "Olcha bahorda gullaydi — bu juda chiroyli."),
+      w("🍐", "Груша", "grúsha", "ot", "Nok", "Сладкий фрукт, похожий на лампочку.", "Груша — фрукт, похожий на лампочку!", "Nok — lampochkaga o'xshash meva!"),
+      w("🍇", "Виноград", "vinagrát", "ot", "Uzum", "Маленькие сладкие ягоды на ветке.", "Виноград из Самарканда знают во всём мире.", "Samarqand uzumini butun dunyo biladi."),
+      w("🥦", "Овощи", "óvashchi", "ot", "Sabzavotlar", "Морковь, огурцы, помидоры, лук и т. д.", "Овощи — лучшие друзья здоровья.", "Sabzavotlar — sog'liqning eng yaxshi do'stlari."),
+      w("🥕", "Морковь", "markóf'", "ot", "Sabzi", "Оранжевый овощ.", "Морковь — главный секрет вкусного плова.", "Sabzi — mazali palovning asosiy siri."),
+      w("🥒", "Огурец", "aguryéts", "ot", "Bodring", "Зелёный овощ для салата.", "Свежий огурец хрустит: хрум-хрум!", "Yangi bodring qarsillaydi: qars-qurs!"),
+      w("🍅", "Помидор", "pamidór", "ot", "Pomidor", "Красный овощ для салата.", "Помидор — это фрукт или овощ?", "Pomidor — mevami yoki sabzavot?"),
+      w("🍦", "Мороженое", "marózhinaye", "ot", "Muzqaymoq", "Холодный сладкий десерт.", "Мороженое в России едят даже зимой!", "Rossiyada muzqaymoqni hatto qishda ham yeyishadi!"),
+    ],
+  },
+  {
+    title: "4-bosqich",
+    words: [
+      w("📋", "Меню", "minyú", "ot", "Menyu", "Список блюд и цен в ресторане.", "Меню на русском? Не проблема!", "Menyu ruschami? Muammo emas!"),
+      w("🍛", "Блюдо", "blyúda", "ot", "Taom", "Готовая еда: суп, салат, плов.", "Плов — главное блюдо узбекской кухни.", "Palov — o'zbek oshxonasining bosh taomi."),
+      w("👨‍🍳", "Повар", "póvar", "ot", "Oshpaz", "Человек, который готовит еду.", "Повар попробовал суп и добавил соль.", "Oshpaz sho'rvani tatib ko'rib, tuz qo'shdi."),
+      w("🧾", "Счёт", "shchyot", "ot", "Hisob (chek)", "Бумага, где написано, сколько платить.", "Счёт? Сегодня плачу я!", "Hisobmi? Bugun men to'layman!"),
+      w("💵", "Рубль", "rubl'", "ot", "Rubl", "Деньги России. 1 рубль, 2 рубля, 5 рублей.", "Копейка рубль бережёт.", "Tiyin so'mni asraydi (rus maqoli)."),
+      w("🏷️", "Цена", "tsiná", "ot", "Narx", "Сколько стоит вещь или блюдо.", "Цена хорошая — беру!", "Narxi yaxshi — olaman!"),
+      w("🥞", "Блины", "bliní", "ot", "Quymoqlar", "Тонкие русские блюда из теста.", "Блины с икрой — русская классика.", "Ikrali quymoqlar — rus klassikasi."),
+      w("🥟", "Пельмени", "pil'myéni", "ot", "Chuchvara", "Тесто с мясом внутри, их варят.", "Пельмени любят и в Сибири, и в Ташкенте.", "Chuchvarani Sibirda ham, Toshkentda ham yaxshi ko'rishadi."),
+      w("🍕", "Пицца", "pítstsa", "ot", "Pitsa", "Итальянское блюдо: тесто, сыр, помидоры.", "Пицца на ужин? Отличная идея!", "Kechki ovqatga pitsa? Ajoyib fikr!"),
+      w("🍴", "Вилка", "vílka", "ot", "Sanchqi", "Ей едят мясо, салат, макароны.", "Вилка слева, нож справа.", "Sanchqi chapda, pichoq o'ngda."),
+    ],
+  },
+  {
+    title: "5-bosqich",
+    words: [
+      w("😋", "Есть", "yest'", "fe'l", "Yemoq", "я ем, ты ешь, он ест, мы едим, вы едите, они едят.", "Есть мороженое зимой — русская традиция!", "Qishda muzqaymoq yeyish — rus an'anasi!"),
+      w("🥤", "Пить", "pit'", "fe'l", "Ichmoq", "я пью, ты пьёшь, он пьёт, мы пьём, вы пьёте, они пьют.", "Пить воду нужно каждый день.", "Har kuni suv ichish kerak."),
+      w("❤️", "Любить", "lyubít'", "fe'l", "Yaxshi ko'rmoq", "я люблю, ты любишь, они любят.", "Любить шоколад — это нормально!", "Shokoladni yaxshi ko'rish — bu normal!"),
+      w("🤩", "Хотеть", "khatyét'", "fe'l", "Xohlamoq", "я хочу, ты хочешь, он хочет, мы хотим, вы хотите, они хотят.", "Хотеть — значит мочь!", "Xohlash — uddalay olish demak!"),
+      w("🍳", "Готовить", "gatóvit'", "fe'l", "Pishirmoq, tayyorlamoq", "я готовлю, ты готовишь, они готовят.", "Готовить плов — настоящее искусство.", "Palov pishirish — haqiqiy san'at."),
+      w("🥄", "Попробовать", "papróbavat'", "fe'l", "Tatib ko'rmoq", "Первый раз есть или пить что-то новое.", "Надо попробовать всё хотя бы один раз!", "Hamma narsani hech bo'lmasa bir marta tatib ko'rish kerak!"),
+      w("🤤", "Вкусный", "fkúsniy", "sifat", "Mazali", "Такой, который приятно есть.", "Какой вкусный плов! Можно ещё?", "Qanday mazali palov! Yana mumkinmi?"),
+      w("💯", "Всегда", "fsigdá", "ravish", "Doim", "Каждый раз, 100 %.", "Бабушка всегда говорит: «Ешь ещё!»", "Buvim doim aytadi: «Yana ye!»"),
+      w("🔁", "Обычно", "abíchna", "ravish", "Odatda", "Почти всегда, как правило.", "Обычно я ем кашу, но сегодня — пиццу!", "Odatda bo'tqa yeyman, lekin bugun — pitsa!"),
+      w("🚫", "Никогда", "nikagdá", "ravish", "Hech qachon", "Ни разу, 0 %. Никогда не + глагол.", "Никогда не говори «никогда»!", "Hech qachon «hech qachon» dema!"),
+    ],
+  },
+];
+
+const pick = (prompt: string, options: string[], correct: number, explanation?: string): SeedQuestion => ({
+  prompt,
+  options,
+  correct,
+  explanation,
+});
+const listen = (audio: string, options: string[], explanation?: string): SeedQuestion => ({
+  prompt: "Eshitgan gapingizni toping",
+  audio,
+  options,
+  correct: options.indexOf(audio),
+  explanation,
+});
+
+const RUB = ["рубль", "рубля", "рублей"];
+const ODIN = ["один", "одну", "одно", "одни"];
+const EGO = ["его", "её", "их"];
+const TF = ["To'g'ri", "Noto'g'ri"];
+const MENU =
+  "Кафе «Самарканд». Супы: борщ — 150 рублей, шурпа — 200 рублей. Горячие блюда: плов — 300 рублей, пельмени — 250 рублей, курица-гриль — 350 рублей. Десерты: мороженое — 100 рублей, пирожок — 50 рублей. Напитки: чай — 40 рублей, кофе — 120 рублей, сок — 90 рублей.";
+const tf = (statement: string, isTrue: boolean, explanation?: string): SeedQuestion => ({
+  prompt: `${MENU}||${statement}`,
+  options: TF,
+  correct: isTrue ? 0 : 1,
+  explanation,
+});
+
+export const R07_EXERCISES: SeedExercise[] = [
+  {
+    title: "Tinglang va toping",
+    skill: "Tinglash",
+    kind: "listen",
+    instructions: "Gap ovoz chiqarib o'qiladi. Eshitgan gapingizni toping.",
+    questions: [
+      listen("Я ем кашу на завтрак.", ["Я ем кашу на ужин.", "Я ем кашу на завтрак.", "Я пью кофе на завтрак.", "Мы едим кашу на завтрак."]),
+      listen("Счёт, пожалуйста!", ["Суп, пожалуйста!", "Сок, пожалуйста!", "Счёт, пожалуйста!", "Спасибо, не надо!"]),
+      listen("Будьте добры, один чай.", ["Будьте добры, один чай.", "Будьте добры, два чая.", "Будьте добры, одну колу.", "Дайте, пожалуйста, чай."]),
+      listen("Сколько это стоит?", ["Сколько это стоило?", "Что это стоит?", "Сколько стоит суп?", "Сколько это стоит?"]),
+      listen("Я не люблю рыбу.", ["Я люблю рыбу.", "Я не люблю рыбу.", "Я не люблю рис.", "Она не любит рыбу."]),
+      listen("Мы хотим пиццу.", ["Вы хотите пиццу?", "Мы хотели пиццу.", "Мы хотим пиццу.", "Мы хотим пить."]),
+      listen("Что вы будете пить?", ["Что вы будете пить?", "Что вы будете есть?", "Что вы пьёте?", "Что ты будешь пить?"]),
+      listen("Можно меню?", ["Можно чай?", "Можно мясо?", "Нужно меню?", "Можно меню?"]),
+      listen("Я никогда не пью кофе.", ["Я всегда пью кофе.", "Я никогда не пью кофе.", "Я иногда пью кофе.", "Я никогда не пил кофе."]),
+      listen("Это очень вкусно!", ["Это очень дорого!", "Это не вкусно!", "Это очень вкусно!", "Это очень интересно!"]),
+    ],
+  },
+  {
+    title: "Ovqat nomlari",
+    skill: "Juftlik",
+    kind: "match",
+    instructions: "Ruscha so'zni o'zbekcha tarjimasi bilan ulang.",
+    questions: [
+      ["хлеб|non", "масло|sariyog'", "молоко|sut", "яйцо|tuxum"],
+      ["суп|sho'rva", "мясо|go'sht", "курица|tovuq", "рыба|baliq"],
+      ["рис|guruch", "сахар|shakar", "каша|bo'tqa", "сыр|pishloq"],
+      ["морковь|sabzi", "огурец|bodring", "лук|piyoz", "капуста|karam"],
+      ["груша|nok", "вишня|olcha", "виноград|uzum", "яблоко|olma"],
+      ["завтрак|nonushta", "обед|tushlik", "ужин|kechki ovqat", "десерт|shirinlik"],
+      ["вилка|sanchqi", "ложка|qoshiq", "нож|pichoq", "тарелка|likopcha"],
+      ["повар|oshpaz", "меню|menyu", "счёт|hisob", "цена|narx"],
+      ["есть|yemoq", "пить|ichmoq", "готовить|pishirmoq", "хотеть|xohlamoq"],
+      ["всегда|doim", "обычно|odatda", "иногда|ba'zan", "никогда|hech qachon"],
+    ].map((options) => ({ prompt: "Juftlarni ulang", options })),
+  },
+  {
+    title: "Bu nima?",
+    skill: "Rasm",
+    kind: "picture",
+    instructions: "Rasmga qarang va uning ruscha nomini toping.",
+    questions: [
+      pick("🥪", ["бутерброд", "колбаса", "печенье", "масло"], 0),
+      pick("🥚", ["молоко", "яйцо", "сахар", "сыр"], 1),
+      pick("🍗", ["рыба", "мясо", "курица", "сосиски"], 2),
+      pick("🐟", ["рыба", "рис", "суп", "салат"], 0),
+      pick("🥕", ["огурец", "помидор", "морковь", "картошка"], 2),
+      pick("🥒", ["огурец", "груша", "вишня", "лук"], 0),
+      pick("🍇", ["апельсин", "виноград", "вишня", "груша"], 1),
+      pick("🍐", ["яблоко", "банан", "апельсин", "груша"], 3),
+      pick("🥟", ["блины", "пицца", "пельмени", "каша"], 2),
+      pick("🍴", ["ложка", "вилка", "нож", "меню"], 1),
+    ],
+  },
+  {
+    title: "Есть и пить",
+    skill: "Fe'l",
+    kind: "choice",
+    instructions:
+      "есть: я ем, ты ешь, он ест, мы едим, вы едите, они едят. пить: я пью, ты пьёшь, он пьёт, мы пьём, вы пьёте, они пьют.",
+    questions: [
+      pick("Я … кашу.", ["ест", "ем", "ешь", "едим"], 1),
+      pick("Ты … мясо?", ["ешь", "ест", "ем", "едите"], 0),
+      pick("Он … рыбу.", ["ем", "едят", "ешь", "ест"], 3),
+      pick("Мы … пиццу.", ["едите", "ест", "едим", "ем"], 2),
+      pick("Вы … суп?", ["едят", "едите", "едим", "ешь"], 1),
+      pick("Дети … мороженое.", ["едим", "ест", "едите", "едят"], 3),
+      pick("Я … чай.", ["пью", "пьёт", "пьёшь", "пьём"], 0),
+      pick("Ты … кофе?", ["пьёт", "пью", "пьёшь", "пьют"], 2),
+      pick("Мы … сок.", ["пьют", "пьём", "пьёте", "пью"], 1),
+      pick("Они … воду.", ["пьёт", "пьём", "пьёшь", "пьют"], 3),
+    ],
+  },
+  {
+    title: "Хотеть, любить, готовить",
+    skill: "Fe'l",
+    kind: "fill",
+    instructions:
+      "хотеть: я хочу, ты хочешь, он хочет, мы хотим, вы хотите, они хотят. любить: я люблю, ты любишь. готовить: я готовлю, ты готовишь («я» shaklida «л» qo'shiladi).",
+    questions: [
+      ["Я ___ чай. (хотеть)", "хочу"],
+      ["Ты ___ кофе? (хотеть)", "хочешь"],
+      ["Анна ___ салат. (хотеть)", "хочет"],
+      ["Мы ___ пиццу. (хотеть)", "хотим", "Ko'plikda «т» qaytadi: хотим, хотите, хотят."],
+      ["Вы ___ мясо или рыбу? (хотеть)", "хотите"],
+      ["Дети ___ мороженое. (хотеть)", "хотят"],
+      ["Я ___ готовить. (любить)", "люблю", "любить → я люблю («л» qo'shiladi)."],
+      ["Ты ___ сыр? (любить)", "любишь"],
+      ["Мама ___ борщ. (готовить)", "готовит"],
+      ["Я ___ плов. (готовить)", "готовлю", "готовить → я готовлю («л» qo'shiladi)."],
+    ].map(([prompt, answer, explanation]) => ({ prompt, answer, explanation })),
+  },
+  {
+    title: "Я ем кашу",
+    skill: "Tushum kelishigi",
+    kind: "choice",
+    instructions:
+      "Nimani? (В.п.): ayol jinsi -а → -у, -я → -ю: каша → кашу, вишня → вишню. Erkak jinsi (jonsiz), o'rta jins, ko'plik va -ь bilan tugagan so'zlar o'zgarmaydi: сыр, молоко, яблоки, морковь.",
+    questions: [
+      pick("Я ем … (каша)", ["каша", "кашу", "каши"], 1),
+      pick("Он пьёт … (вода)", ["воде", "вода", "воду"], 2),
+      pick("Мы любим … (рыба)", ["рыбу", "рыба", "рыбы"], 0),
+      pick("Я хочу … (пицца)", ["пицца", "пиццу", "пицце"], 1),
+      pick("Она ест … (сыр)", ["сыра", "сыру", "сыр"], 2, "Erkak jinsi, jonsiz — o'zgarmaydi."),
+      pick("Ты пьёшь … (молоко)", ["молоко", "молоку", "молока"], 0, "O'rta jins — o'zgarmaydi."),
+      pick("Мы едим … (курица)", ["курица", "курицу", "курице"], 1),
+      pick("Я не люблю … (морковь)", ["морковью", "моркови", "морковь"], 2, "-ь bilan tugagan ayol jinsi — o'zgarmaydi."),
+      pick("Он любит … (вишня)", ["вишню", "вишня", "вишни"], 0, "-я → -ю."),
+      pick("Дети едят … (яблоки)", ["яблоков", "яблоки", "яблокам"], 1, "Ko'plik (jonsiz) — o'zgarmaydi."),
+    ],
+  },
+  {
+    title: "Один, одну, одно, одни",
+    skill: "Buyurtma",
+    kind: "choice",
+    instructions:
+      "Buyurtmada: один — erkak jinsi (бутерброд), одну — ayol jinsi (колу, пиццу), одно — o'rta jins (мороженое), одни — ko'plik (блины).",
+    questions: [
+      pick("Будьте добры, … бутерброд.", ODIN, 0),
+      pick("Будьте добры, … колу.", ODIN, 1),
+      pick("Дайте, пожалуйста, … мороженое.", ODIN, 2),
+      pick("Можно … блины?", ODIN, 3, "Блины — ko'plik → одни."),
+      pick("… чай, пожалуйста.", ODIN, 0),
+      pick("Будьте добры, … пиццу.", ODIN, 1),
+      pick("Мне … яйцо, пожалуйста.", ODIN, 2),
+      pick("… пельмени, пожалуйста.", ODIN, 3),
+      pick("Дайте, пожалуйста, … воду.", ODIN, 1),
+      pick("Будьте добры, … салат.", ODIN, 0),
+    ],
+  },
+  {
+    title: "Narxni yozing",
+    skill: "Raqamlar",
+    kind: "number",
+    instructions:
+      "Narx ruscha o'qiladi. Uni raqam bilan yozing (masalan: 250). 100 — сто, 200 — двести, 300 — триста, 400 — четыреста, 500 — пятьсот … 900 — девятьсот, 1000 — тысяча.",
+    questions: [
+      ["сто рублей", "100"],
+      ["двести рублей", "200", "двести — istisno."],
+      ["триста пятьдесят рублей", "350"],
+      ["четыреста рублей", "400"],
+      ["пятьсот рублей", "500", "пять + сот = пятьсот."],
+      ["шестьсот двадцать рублей", "620"],
+      ["семьсот рублей", "700"],
+      ["восемьсот девяносто рублей", "890"],
+      ["девятьсот рублей", "900"],
+      ["тысяча рублей", "1000"],
+    ].map(([audio, answer, explanation]) => ({ prompt: "Narxni yozing", audio, answer, explanation })),
+  },
+  {
+    title: "Рубль, рубля или рублей?",
+    skill: "Grammatika",
+    kind: "choice",
+    instructions: "1, 21, 31… — рубль; 2–4, 22–24… — рубля; 5–20, 25–30, 100… — рублей.",
+    questions: [
+      pick("Это стоит 1 …", RUB, 0),
+      pick("Это стоит 21 …", RUB, 0, "21 — oxiri 1 → рубль."),
+      pick("Это стоит 2 …", RUB, 1),
+      pick("Это стоит 3 …", RUB, 1),
+      pick("Это стоит 34 …", RUB, 1, "34 — oxiri 4 → рубля."),
+      pick("Это стоит 5 …", RUB, 2),
+      pick("Это стоит 11 …", RUB, 2, "11–14 — har doim рублей."),
+      pick("Это стоит 100 …", RUB, 2),
+      pick("Это стоит 42 …", RUB, 1),
+      pick("Это стоит 250 …", RUB, 2),
+    ],
+  },
+  {
+    title: "Restoranda nima deysiz?",
+    skill: "Vaziyat",
+    kind: "situation",
+    instructions: "Vaziyatni o'qing va restoranda aytiladigan to'g'ri gapni tanlang.",
+    questions: [
+      pick("Siz menyuni so'ramoqchisiz.", ["Можно меню?", "Можно счёт?", "Меню нет.", "Это меню."], 0),
+      pick("Ovqatdan keyin to'lamoqchisiz.", ["Счёт, пожалуйста!", "Меню, пожалуйста!", "Спасибо, не надо.", "Я хочу есть."], 0),
+      pick("Ofitsiant: «Что-нибудь ещё?» Sizga boshqa hech narsa kerak emas.", ["Нет, спасибо.", "Да, конечно.", "Ещё один чай.", "Сколько стоит?"], 0),
+      pick("Narxni bilmoqchisiz.", ["Сколько это стоит?", "Что это?", "Где это?", "Кто это?"], 0),
+      pick("Gazsiz suv buyurtma qilmoqchisiz.", ["Воду без газа, пожалуйста.", "Воду с газом, пожалуйста.", "Я не пью воду.", "Где вода?"], 0),
+      pick("Choyni limon bilan so'raysiz.", ["Чай с лимоном, пожалуйста.", "Чай с сахаром, пожалуйста.", "Чай без лимона.", "Лимон, пожалуйста."], 0),
+      pick("Ovqat juda mazali bo'ldi, oshpazni maqtaysiz.", ["Очень вкусно, спасибо!", "Очень дорого!", "Невкусно.", "Это суп?"], 0),
+      pick("Siz go'sht yemaysiz. Ofitsiant steyk taklif qildi.", ["Спасибо, я не ем мясо.", "Да, я люблю мясо.", "Мясо, пожалуйста.", "Я ем мясо всегда."], 0),
+      pick("Ofitsiant: «Слушаю вас!» Siz bitta borsh xohlaysiz.", ["Будьте добры, один борщ.", "Будьте добры, одна борщ.", "Борщ нет.", "Где борщ?"], 0),
+      pick("Ovqatni olib ketmoqchisiz. Ofitsiant: «Здесь или с собой?»", ["С собой.", "Здесь.", "Спасибо.", "Счёт."], 0),
+    ],
+  },
+  {
+    title: "Suhbatni davom ettiring",
+    skill: "Dialog",
+    kind: "dialog",
+    instructions: "Suhbatdoshingiz savol berdi. Mos javobni tanlang.",
+    questions: [
+      pick("Слушаю вас!", ["Будьте добры, суп и салат.", "Я слушаю музыку.", "Спасибо, до свидания.", "Суп был вкусный."], 0),
+      pick("Что вы будете пить?", ["Сок, пожалуйста.", "Я буду суп.", "Я пью вчера.", "Пить хорошо."], 0),
+      pick("Что-нибудь ещё?", ["Да, ещё один чай.", "Да, ещё одна чай.", "Ещё нет чай.", "Да, чай был."], 0),
+      pick("Ты любишь рыбу?", ["Да, я её люблю.", "Да, я его люблю.", "Да, я их люблю.", "Да, я люблю её рыбу."], 0),
+      pick("Что ты обычно ешь на завтрак?", ["Обычно я ем кашу.", "Обычно я ем каша.", "Обычно я пью кашу.", "На завтрак обычно."], 0),
+      pick("Сколько стоят блины?", ["Двести рублей.", "Двести рубля.", "Два рублей.", "Они вкусные."], 0),
+      pick("Вы хотите кофе?", ["Нет, я хочу чай.", "Нет, я хотим чай.", "Нет, я хочет чай.", "Нет, кофе хочу нет."], 0),
+      pick("Ты любишь сосиски?", ["Нет, я их не люблю.", "Нет, я его не люблю.", "Нет, я её не люблю.", "Нет, я не люблю их сосиски."], 0),
+      pick("Вы едите мясо?", ["Нет, я никогда не ем мясо.", "Нет, я никогда ем мясо.", "Нет, я не никогда ем мясо.", "Нет, мясо не ест."], 0),
+      pick("Что ты готовишь?", ["Я готовлю плов.", "Я готовить плов.", "Я готовю плов.", "Я готовит плов."], 0),
+    ],
+  },
+  {
+    title: "Menyuni o'qing",
+    skill: "O'qish",
+    kind: "truefalse",
+    instructions: "Kafe menyusini o'qing va gap to'g'ri yoki noto'g'ri ekanini belgilang.",
+    questions: [
+      tf("Борщ стоит 150 рублей.", true),
+      tf("Плов стоит двести рублей.", false, "Плов стоит 300 рублей."),
+      tf("Самое дорогое блюдо — курица-гриль.", true),
+      tf("В кафе есть пицца.", false, "Pitsa menyuda yo'q."),
+      tf("Чай стоит сорок рублей.", true),
+      tf("Кофе стоит двенадцать рублей.", false, "Кофе стоит 120 (сто двадцать) рублей."),
+      tf("Мороженое стоит пятьдесят рублей.", false, "Мороженое стоит 100 рублей. 50 рублей — пирожок."),
+      tf("В меню есть два супа.", true, "Борщ и шурпа."),
+      tf("Пельмени стоят 350 рублей.", false, "Пельмени стоят 250 рублей."),
+      tf("Чай и пирожок стоят 90 рублей.", true, "40 + 50 = 90."),
+    ],
+  },
+  {
+    title: "Его, её или их?",
+    skill: "Olmosh",
+    kind: "choice",
+    instructions:
+      "Kimni? Nimani? он / оно → его, она → её, они → их. Ты любишь сыр? — Да, я его люблю.",
+    questions: [
+      pick("Ты любишь сыр? — Да, я … люблю.", EGO, 0),
+      pick("Ты любишь рыбу? — Да, я … люблю.", EGO, 1),
+      pick("Вы любите фрукты? — Да, мы … любим.", EGO, 2),
+      pick("Ты любишь молоко? — Нет, я … не люблю.", EGO, 0, "Молоко (оно) → его."),
+      pick("Она любит пиццу? — Да, она … очень любит.", EGO, 1),
+      pick("Дети любят конфеты? — Конечно, они … любят!", EGO, 2),
+      pick("Ты знаешь Ивана? — Да, я … знаю.", EGO, 0),
+      pick("Ты знаешь Анну? — Да, я … знаю.", EGO, 1),
+      pick("Ты любишь пельмени? — Да, я … люблю.", EGO, 2),
+      pick("Ты пьёшь кофе? — Нет, я … не пью.", EGO, 0, "Кофе — erkak jinsi: он → его."),
+    ],
+  },
+  {
+    title: "Harflardan so'z",
+    skill: "Harflar",
+    kind: "anagram",
+    instructions: "Harflar aralashib ketgan. Ularni to'g'ri tartibda bosib, so'zni yig'ing.",
+    questions: ["завтрак", "бутерброд", "картошка", "мороженое", "виноград", "пельмени", "апельсин", "печенье", "помидор", "попробовать"].map(
+      (word) => ({ prompt: scramble(word), answer: word })
+    ),
+  },
+  {
+    title: "Gap tuzing",
+    skill: "Gap tuzish",
+    kind: "order",
+    instructions: "So'zlarni to'g'ri tartibda bosib, gap tuzing.",
+    questions: [
+      "Что ты обычно ешь на завтрак?",
+      "На завтрак я ем кашу и пью чай.",
+      "Будьте добры, один борщ и салат.",
+      "Сколько стоит этот торт?",
+      "Я не люблю рыбу.",
+      "Мы хотим попробовать плов.",
+      "Дайте, пожалуйста, воду без газа.",
+      "Мама готовит очень вкусный суп.",
+      "Я никогда не пью кофе вечером.",
+      "Можно ещё один чай с лимоном?",
+    ].map((answer) => ({ prompt: "Gap tuzing", answer })),
+  },
+  {
+    title: "Ayting",
+    skill: "Talaffuz",
+    kind: "speak",
+    instructions: "Gapni eshiting, keyin mikrofon tugmasini bosib o'zingiz ayting.",
+    questions: [
+      "Можно меню, пожалуйста?",
+      "Будьте добры, один чай.",
+      "Что вы будете пить?",
+      "Сколько это стоит?",
+      "Я не ем мясо.",
+      "Очень вкусно, спасибо!",
+      "Счёт, пожалуйста!",
+      "Я люблю русскую кухню.",
+      "На завтрак я ем кашу.",
+      "Я хочу попробовать блины.",
+    ].map((phrase) => ({ prompt: phrase, answer: phrase })),
+  },
+];
