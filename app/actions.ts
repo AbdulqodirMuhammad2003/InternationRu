@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
 import { getUserByEmail, REVIEW_INTERVAL_DAYS, MAX_REVIEW_BOX } from "@/lib/data";
+import { finishExam, saveExamAnswers, startExam, type ExamAnswer, type ExamResult } from "@/lib/exam";
 import {
   AUTH_COOKIE,
   createSessionToken,
@@ -269,4 +270,27 @@ export async function updateProfileAction(
 
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+// ---------- Daraja imtihoni ----------
+
+export async function startExamAction(): Promise<boolean> {
+  const userId = await requireUserId();
+  const id = await startExam(userId);
+  revalidatePath("/exam");
+  return id !== null;
+}
+
+export async function saveExamAnswersAction(attemptId: number, answers: ExamAnswer[]) {
+  const userId = await requireUserId();
+  await saveExamAnswers(userId, attemptId, answers);
+}
+
+export async function submitExamAction(attemptId: number, answers: ExamAnswer[]): Promise<ExamResult | null> {
+  const userId = await requireUserId();
+  const result = await finishExam(userId, attemptId, answers);
+  revalidatePath("/exam");
+  revalidatePath("/marks");
+  revalidatePath("/lessons");
+  return result;
 }

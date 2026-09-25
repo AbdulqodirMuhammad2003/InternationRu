@@ -17,6 +17,7 @@ const COMMANDS = [
   { href: "/lessons", label: "Darslar", icon: GraduationCap, keywords: "lessons darslar lugat" },
   { href: "/marks", label: "Baholar", icon: ListChecks, keywords: "marks baho natija" },
   { href: "/ranking", label: "Reyting", icon: Trophy, keywords: "ranking reyting" },
+  { href: "/exam", label: "Daraja imtihoni", icon: GraduationCap, keywords: "imtihon exam test" },
 ];
 
 export function CommandPalette() {

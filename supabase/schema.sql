@@ -213,3 +213,23 @@ CREATE TABLE IF NOT EXISTS extra_lesson_bookings (
   booked_at TIMESTAMPTZ DEFAULT now(),
   PRIMARY KEY (user_id, extra_lesson_id)
 );
+
+-- Daraja yakuniy imtihoni urinishlari (lib/exam.ts). Savollar va to'g'ri
+-- javoblar faqat shu yerda (serverda) saqlanadi; o'quvchiga javobsiz nusxa
+-- yuboriladi. `cycle` — darajani nechanchi marta o'qiyotgani: 3 ta urinishda
+-- ham o'tolmasa, daraja natijalari nolga tushadi va yangi sikl boshlanadi.
+CREATE TABLE IF NOT EXISTS exam_attempts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  level_code TEXT NOT NULL,
+  cycle INTEGER NOT NULL DEFAULT 1,
+  questions_json TEXT NOT NULL,
+  answers_json TEXT,
+  score INTEGER,
+  total INTEGER NOT NULL,
+  passed INTEGER,
+  weak_units_json TEXT,
+  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  finished_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS exam_attempts_user_level ON exam_attempts (user_id, level_code);

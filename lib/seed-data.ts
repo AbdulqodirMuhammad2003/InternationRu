@@ -46,6 +46,7 @@ export async function insertExercises(
 
 export async function resetDatabase() {
   const tables = [
+    "exam_attempts",
     "extra_lesson_bookings",
     "extra_lessons",
     "ranking_entries",
