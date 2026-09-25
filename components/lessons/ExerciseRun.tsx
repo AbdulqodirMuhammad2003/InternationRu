@@ -706,6 +706,16 @@ export function ExerciseRun({
 
         {kind === "order" && (
           <>
+            {/* Ikki gapni birlashtirish kabi topshiriqlarda manba gaplar
+                ko'rsatiladi; oddiy «Gap tuzing»da prompt ko'rsatilmaydi. */}
+            {question.prompt !== "Gap tuzing" && (
+              <p
+                lang="ru"
+                className="rounded-2xl bg-ink-50 px-4 py-3 text-center text-lg font-semibold leading-relaxed text-ink-900 dark:bg-white/5 dark:text-ink-50"
+              >
+                {question.prompt}
+              </p>
+            )}
             <div
               className={`flex min-h-14 flex-wrap items-center gap-2 border-b-2 py-2 ${
                 checked === null

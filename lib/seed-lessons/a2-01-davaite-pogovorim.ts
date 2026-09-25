@@ -4,7 +4,7 @@
  * takrorlash — 6 kelishik va ularning savollari, fe'l turlari (НСВ/СВ),
  * qo'shma gaplar (который, если, когда, потому что, поэтому, чтобы).
  * Matn o'qish, tinglab tushunish va diktant. Lug'at 5 bosqich (50 so'z),
- * 16 ta mashq.
+ * 20 ta mashq; qo'shma gaplar 6 bosqichli zinapoya bilan o'rgatiladi.
  */
 import type { SeedExercise, SeedQuestion } from "../seed-exercises";
 import type { VocabSeed } from "./types";
@@ -111,6 +111,10 @@ const listen = (audio: string, options: string[], explanation?: string): SeedQue
   correct: options.indexOf(audio),
   explanation,
 });
+
+const PP = ["потому что", "поэтому"];
+const fill = (prompt: string, answer: string, explanation?: string): SeedQuestion => ({ prompt, answer, explanation });
+const join = (prompt: string, answer: string): SeedQuestion => ({ prompt, answer });
 
 const CASES = ["Именительный", "Родительный", "Дательный", "Винительный", "Творительный", "Предложный"];
 const TF = ["To'g'ri", "Noto'g'ri"];
@@ -272,11 +276,68 @@ export const A2_01_EXERCISES: SeedExercise[] = [
     ],
   },
   {
-    title: "Который, если, чтобы…",
-    skill: "Qo'shma gaplar",
+    title: "Потому что или поэтому?",
+    skill: "Qo'shma gaplar · 1-bosqich",
     kind: "choice",
     instructions:
-      "который — qaysiki (aniqlovchi), если — agar (shart), когда — qachonki (vaqt), потому что — chunki (sabab), поэтому — shuning uchun (natija), чтобы — ...ish uchun (maqsad).",
+      "Sabab va natijani farqlang. ПОТОМУ ЧТО — sabab, «nega?» savoliga javob: Я сижу дома, потому что идёт дождь (chunki yomg'ir yog'yapti). ПОЭТОМУ — natija, «shuning uchun»: Идёт дождь, поэтому я сижу дома. Maslahat: avval sababni toping — u «потому что»dan keyin keladi.",
+    questions: [
+      pick("Я изучаю русский, … работаю в российской компании.", PP, 0, "Nega o'rganaman? — Rossiya kompaniyasida ishlayman (sabab)."),
+      pick("Я работаю в российской компании, … изучаю русский.", PP, 1, "Ishlayman → shuning uchun o'rganaman (natija)."),
+      pick("На улице дождь, … мы сидим дома.", PP, 1),
+      pick("Мы сидим дома, … на улице дождь.", PP, 0),
+      pick("Анна очень устала, … рано легла спать.", PP, 1),
+      pick("Анна рано легла спать, … очень устала.", PP, 0),
+      pick("Мари любит Москву, … часто рассказывает о ней.", PP, 1),
+      pick("Анри начал учить русский, … хотел говорить с Людмилой.", PP, 0),
+      pick("У меня завтра экзамен, … сегодня я не пойду в кино.", PP, 1),
+      pick("Я не пойду в кино, … завтра у меня экзамен.", PP, 0),
+    ],
+  },
+  {
+    title: "Если или когда?",
+    skill: "Qo'shma gaplar · 2-bosqich",
+    kind: "choice",
+    instructions:
+      "ЕСЛИ — shart, «agar»: bo'lishi aniq emas (Если будет время, я позвоню — vaqt bo'lmasligi ham mumkin). КОГДА — vaqt, «…ganda, …ganimda»: albatta bo'ladi yoki bo'lgan (Когда я приду домой, я позвоню). O'zbekcha gapni o'qing va to'g'ri tarjimani tanlang.",
+    questions: [
+      pick("Agar vaqtim bo'lsa, senga qo'ng'iroq qilaman.", ["Если у меня будет время, я позвоню тебе.", "Когда у меня будет время, я позвоню тебе."], 0),
+      pick("Uyga kelganimda, senga qo'ng'iroq qilaman.", ["Когда я приду домой, я позвоню тебе.", "Если я приду домой, я позвоню тебе."], 0),
+      pick("Agar bilet qimmat bo'lsa, poyezdda boramiz.", ["Если билет будет дорогой, мы поедем на поезде.", "Когда билет будет дорогой, мы поедем на поезде."], 0),
+      pick("Bolaligimda ko'p kitob o'qirdim.", ["Когда я был маленьким, я много читал.", "Если я был маленьким, я много читал."], 0),
+      pick("Agar charchagan bo'lsang, dam ol.", ["Если ты устал, отдохни.", "Когда ты устал, отдохни."], 0),
+      pick("Matnni o'qiyotganimda, lug'atdan so'z qidirdim.", ["Когда я читала текст, я смотрела слова в словаре.", "Если я читала текст, я смотрела слова в словаре."], 0),
+      pick("Agar ruscha gapirsang, Moskvada oson bo'ladi.", ["Если ты говоришь по-русски, в Москве будет легко.", "Когда ты говоришь по-русски, в Москве будет легко."], 0),
+      pick("Yoz kelganda, dengizga boramiz.", ["Когда наступит лето, мы поедем на море.", "Если наступит лето, мы поедем на море."], 0),
+      pick("Agar ertaga yomg'ir yog'sa, uyda qolamiz.", ["Если завтра будет дождь, мы останемся дома.", "Когда завтра будет дождь, мы останемся дома."], 0),
+      pick("Anri Moskvaga kelganda, ruscha deyarli gapirmasdi.", ["Когда Анри приехал в Москву, он почти не говорил по-русски.", "Если Анри приехал в Москву, он почти не говорил по-русски."], 0),
+    ],
+  },
+  {
+    title: "Зачем? — Чтобы…",
+    skill: "Qo'shma gaplar · 3-bosqich",
+    kind: "choice",
+    instructions:
+      "ЧТОБЫ — maqsad, «…ish uchun», «Зачем?» savoliga javob. Ikkala qismda bitta odam bo'lsa — чтобы + infinitiv: Я учу русский, чтобы работать в Москве. Boshqa odam bo'lsa — чтобы + o'tgan zamon: Мама позвонила, чтобы я пришёл домой. «Почему?» savoliga esa «потому что» bilan javob beriladi.",
+    questions: [
+      pick("Зачем ты идёшь в магазин? — … купить хлеб.", ["Чтобы", "Потому что", "Поэтому"], 0),
+      pick("Анри учит русский, чтобы … с Людмилой.", ["говорить", "говорит", "говорил"], 0, "Bitta odam (Анри) — чтобы + infinitiv."),
+      pick("Я встал рано, чтобы не … на урок.", ["опоздать", "опоздал", "опаздываю"], 0),
+      pick("Мама позвонила, чтобы я … домой.", ["пришёл", "прийти", "приду"], 0, "Ikki xil odam (мама, я) — чтобы + o'tgan zamon."),
+      pick("Преподаватель говорит медленно, чтобы студенты … его.", ["поняли", "понять", "понимают"], 0),
+      pick("Почему ты не пришёл? — … я болел.", ["Потому что", "Чтобы", "Поэтому"], 0, "«Почему?» — sabab: потому что."),
+      pick("Я купил словарь, чтобы … новые слова.", ["учить", "учу", "учил"], 0),
+      pick("Я дал другу книгу, чтобы он … её.", ["прочитал", "прочитать", "прочитает"], 0),
+      pick("Зачем вы приехали в Ташкент? — … посмотреть город.", ["Чтобы", "Потому что", "Если"], 0),
+      pick("Мы говорим тихо, чтобы ребёнок … .", ["спал", "спать", "спит"], 0),
+    ],
+  },
+  {
+    title: "Aralash: который, если, чтобы…",
+    skill: "Qo'shma gaplar · 4-bosqich",
+    kind: "choice",
+    instructions:
+      "Endi hammasi aralash. который — qaysiki (aniqlovchi), если — agar (shart), когда — qachonki (vaqt), потому что — chunki (sabab), поэтому — shuning uchun (natija), чтобы — ...ish uchun (maqsad).",
     questions: [
       pick("Анри приехал в Россию, … работать в российской компании.", ["чтобы", "потому что", "если", "который"], 0),
       pick("Я давно знаю журналиста, … пишет о спорте.", ["когда", "который", "чтобы", "поэтому"], 1),
@@ -288,6 +349,44 @@ export const A2_01_EXERCISES: SeedExercise[] = [
       pick("Вчера я получила письмо, … я давно ждала.", ["который", "которая", "которые", "которое"], 3, "письмо — o'rta jins: которое."),
       pick("Елена написала письмо бабушке, … живёт в Риге.", ["которая", "который", "которое", "которые"], 0, "бабушка — ayol jinsi: которая."),
       pick("Я очень устала, … буду все выходные дома.", ["потому что", "поэтому", "чтобы", "если"], 1),
+    ],
+  },
+  {
+    title: "Который, которая, которое…",
+    skill: "Qo'shma gaplar · 5-bosqich",
+    kind: "fill",
+    instructions:
+      "«Который» jinsi va soni bo'yicha o'zidan oldingi otga moslashadi: друг — который, сестра — которая, письмо — которое, студенты — которые. Kelishigi esa ikkinchi gapdagi vazifasiga qarab o'zgaradi: книга, которую я читаю (что читаю? — В.п.); подруга, с которой я работаю (с кем? — Т.п.). Bo'sh joyga to'g'ri shaklni yozing.",
+    questions: [
+      fill("Это мой друг, ___ живёт в Москве.", "который", "друг — м.р., kim yashaydi? — который."),
+      fill("Это моя сестра, ___ учится в университете.", "которая", "сестра — ж.р.: которая."),
+      fill("Это письмо, ___ пришло вчера.", "которое", "письмо — ср.р.: которое."),
+      fill("Это студенты, ___ изучают русский язык.", "которые", "студенты — ko'plik: которые."),
+      fill("Вот книга, ___ я читаю.", "которую", "читаю что? — В.п., ж.р.: которую."),
+      fill("Это город, о ___ я много слышал.", "котором", "слышал о чём? — П.п., м.р.: о котором."),
+      fill("Это подруга, с ___ я работаю.", "которой", "работаю с кем? — Т.п., ж.р.: с которой."),
+      fill("Это друзья, ___ я часто звоню.", "которым", "звоню кому? — Д.п., ko'plik: которым."),
+      fill("Я знаю журналиста, ___ пишет о спорте.", "который"),
+      fill("Это девушка, ___ я подарил цветы.", "которой", "подарил кому? — Д.п., ж.р.: которой."),
+    ],
+  },
+  {
+    title: "Ikki gapni birlashtiring",
+    skill: "Qo'shma gaplar · 6-bosqich",
+    kind: "order",
+    instructions:
+      "Ikki sodda gap va qavs ichida bog'lovchi berilgan. So'zlarni bosib, bitta qo'shma gap tuzing. Takrorlanadigan so'zlar (она, он, его) ikkinchi marta yozilmaydi — ularning o'rnini bog'lovchi egallaydi.",
+    questions: [
+      join("Я знаю девушку. Она работает в банке. (которая)", "Я знаю девушку, которая работает в банке."),
+      join("Я изучаю русский. Я хочу работать в Москве. (чтобы)", "Я изучаю русский, чтобы работать в Москве."),
+      join("Я устал. Я буду отдыхать дома. (поэтому)", "Я устал, поэтому буду отдыхать дома."),
+      join("Мы не пошли гулять. Был сильный дождь. (потому что)", "Мы не пошли гулять, потому что был сильный дождь."),
+      join("Будет время. Я позвоню тебе. (если)", "Если будет время, я позвоню тебе."),
+      join("Я читал текст. Я смотрел слова в словаре. (когда)", "Когда я читал текст, я смотрел слова в словаре."),
+      join("Вот письмо. Я давно его ждала. (которое)", "Вот письмо, которое я давно ждала."),
+      join("Это мой друг. Я играю с ним в теннис. (с которым)", "Это мой друг, с которым я играю в теннис."),
+      join("Анри учит русский. Он хочет говорить с женой. (чтобы)", "Анри учит русский, чтобы говорить с женой."),
+      join("Мари любит Москву. Она часто рассказывает о ней. (поэтому)", "Мари любит Москву, поэтому часто рассказывает о ней."),
     ],
   },
   {

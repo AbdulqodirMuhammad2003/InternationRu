@@ -5,7 +5,7 @@
  * vaqt (в прошлом году, на следующей неделе) va sifatli joy (в Большом
  * театре), Родительный падеж — sana (родился двадцать первого июня),
  * «который» kelishiklarda. Matn o'qish, tinglab tushunish va diktant.
- * Lug'at 5 bosqich (50 so'z), 16 ta mashq.
+ * Lug'at 5 bosqich (50 so'z), 18 ta mashq; «который» 3 bosqichda.
  */
 import type { SeedExercise, SeedQuestion } from "../seed-exercises";
 import type { VocabSeed } from "./types";
@@ -112,6 +112,7 @@ const listen = (audio: string, options: string[]): SeedQuestion => ({
   correct: options.indexOf(audio),
 });
 const fill = (prompt: string, answer: string, explanation?: string): SeedQuestion => ({ prompt, answer, explanation });
+const join = (prompt: string, answer: string): SeedQuestion => ({ prompt, answer });
 
 const TF = ["To'g'ri", "Noto'g'ri"];
 const FREDDIE =
@@ -310,8 +311,27 @@ export const A2_02_EXERCISES: SeedExercise[] = [
     ],
   },
   {
+    title: "Который: qaysi shakl?",
+    skill: "Который · 1-bosqich",
+    kind: "choice",
+    instructions:
+      "«Который» shaklini ikki savol bilan toping. 1) U qaysi otga tegishli — jinsi va soni qanday? (группа — ж.р., друг — м.р., люди — ko'plik). 2) Ikkinchi gapda unga qanday savol beriladi? (играл в чём? — в которой; учился с кем? — с которым; подарил кому? — которому).",
+    questions: [
+      pick("Это группа, … он играл.", ["в которой", "в котором", "которая", "в которую"], "группа — ж.р.; играл где? — в которой."),
+      pick("Это мой друг, … я учился в школе.", ["с которым", "с которой", "который", "которому"], "друг — м.р.; учился с кем? — с которым."),
+      pick("Это город, … я родился.", ["в котором", "в которой", "который", "в который"]),
+      pick("Это актриса, … все говорят.", ["о которой", "о котором", "которая", "которую"]),
+      pick("Это певец, … я подарил цветы.", ["которому", "которого", "который", "которым"], "подарил кому? — Д.п.: которому."),
+      pick("Это фильм, … я смотрел вчера.", ["который", "которого", "которому", "котором"], "фильм — jonsiz; смотрел что? — В.п. = И.п.: который."),
+      pick("Это девушка, … я встретил в театре.", ["которую", "которая", "которой", "которого"], "встретил кого? — В.п., ж.р.: которую."),
+      pick("Это люди, … работают в театре.", ["которые", "которых", "которым", "которыми"]),
+      pick("Это студенты, … я помогаю.", ["которым", "которых", "которые", "которыми"], "помогаю кому? — Д.п., ko'plik: которым."),
+      pick("Это певица, у … есть своя школа вокала.", ["которой", "которая", "которую", "котором"], "у кого? — Р.п., ж.р.: у которой."),
+    ],
+  },
+  {
     title: "Который, в котором…",
-    skill: "Qo'shma gaplar",
+    skill: "Который · 2-bosqich",
     kind: "fill",
     instructions:
       "«Который» o'zi bog'langan ot bilan jins va sonda moslashadi, kelishigi esa ergash gapdagi vazifasiga qarab o'zgaradi: группа, в которой он играл; друг, с которым я работаю. Bo'sh joyga to'g'ri shaklni yozing.",
@@ -326,6 +346,25 @@ export const A2_02_EXERCISES: SeedExercise[] = [
       fill("Я знаю людей, ___ работают в Большом театре.", "которые"),
       fill("Это певец, ___ я подарил цветы.", "которому", "певец — м.р., кому? — которому (Д.п.)."),
       fill("Это письмо, ___ я давно ждала.", "которое"),
+    ],
+  },
+  {
+    title: "Ikki gapni birlashtiring",
+    skill: "Который · 3-bosqich",
+    kind: "order",
+    instructions:
+      "Ikki sodda gap va qavs ichida «который»ning kerakli shakli berilgan. So'zlarni bosib, bitta qo'shma gap tuzing. Ikkinchi gapdagi takrorlanadigan so'z (в этой группе, с ним, ей) tushib qoladi — uning o'rnini «который» egallaydi.",
+    questions: [
+      join("Это группа. Он играл в этой группе. (в которой)", "Это группа, в которой он играл."),
+      join("Это мой друг. Я учился с ним в школе. (с которым)", "Это мой друг, с которым я учился в школе."),
+      join("Это город. Я родился в этом городе. (в котором)", "Это город, в котором я родился."),
+      join("Это актриса. Все говорят о ней. (о которой)", "Это актриса, о которой все говорят."),
+      join("Это певец. Я подарил ему цветы. (которому)", "Это певец, которому я подарил цветы."),
+      join("Вот фильм. Я смотрел его вчера. (который)", "Вот фильм, который я смотрел вчера."),
+      join("Цой работал в котельной. Сейчас в ней фан-клуб. (в которой)", "Цой работал в котельной, в которой сейчас фан-клуб."),
+      join("Я знаю людей. Они работают в театре. (которые)", "Я знаю людей, которые работают в театре."),
+      join("Борис был лидером группы. Она была известной. (которая)", "Борис был лидером группы, которая была известной."),
+      join("Это учитель. Я часто вспоминаю его. (которого)", "Это учитель, которого я часто вспоминаю."),
     ],
   },
   {
