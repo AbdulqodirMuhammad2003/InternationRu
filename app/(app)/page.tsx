@@ -26,7 +26,7 @@ const QUICK_LINKS = [
   {
     href: "/marks",
     label: "Baholar",
-    desc: "Natijalar tarixi",
+    desc: "Darslar bo'yicha natijalar",
     icon: ListChecks,
     iconBg: "bg-ink-100 dark:bg-white/10",
     iconColor: "text-ink-700 dark:text-ink-200",

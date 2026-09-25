@@ -385,33 +385,6 @@ export async function seedDatabase() {
     VALUES (${userId}, ${null}, ${"Sinov testi (A1 darajasi)"}, ${78}, ${100}, ${"2026-08-17"})
   `;
 
-  // ---------- Reyting (Ranking) ----------
-  const branchNames = [
-    "Sherzod Karimov", "Nilufar Tosheva", "Aziz Rahimov", "Dilnoza Yuldasheva",
-    "Otabek Nazarov", "Madina Yusupova", "Jasur Aminov", "Sevara Ismoilova",
-    "Behruz Sobirov", "Gulnoza Ergasheva",
-  ];
-  const branchRows = branchNames.map((name, i) => ({
-    user_id: userId,
-    scope: "branch",
-    display_name: name,
-    points: 15000 - i * 620,
-    place: i + 1,
-  }));
-  branchRows.push({ user_id: userId, scope: "branch", display_name: "Abdulqodir Xabibullayev", points: 11130, place: 20 });
-  await sql`INSERT INTO ranking_entries ${sql(branchRows)}`;
-
-  const groupNames = ["Dilshod Norov", "Kamola Ahmedova", "Sanjar Yuldashev", "Zarina Po'latova"];
-  const groupRows = groupNames.map((name, i) => ({
-    user_id: userId,
-    scope: "group",
-    display_name: name,
-    points: 13200 - i * 700,
-    place: i + 1,
-  }));
-  groupRows.push({ user_id: userId, scope: "group", display_name: "Abdulqodir Xabibullayev", points: 11130, place: 5 });
-  await sql`INSERT INTO ranking_entries ${sql(groupRows)}`;
-
   // ---------- Qo'shimcha darslar (Extra lessons) ----------
   // Diqqat: `sql(rows)` helper'ining o'zi "(ustunlar) values (...)" qismini
   // to'liq generatsiya qiladi — shuning uchun ustunlar ro'yxati va "VALUES"

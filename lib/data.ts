@@ -446,22 +446,97 @@ export async function getMarksForUser(userId: number): Promise<MarkRecord[]> {
   `;
 }
 
-// ---------- Reyting ----------
+// ---------- Daraja jadvali (baholar va reyting) ----------
 
-export interface RankingRow {
+export interface BoardStudent {
   id: number;
-  display_name: string;
+  name: string;
+  avatar_url: string | null;
+  is_current_user: boolean;
+  /** Har bir dars bo'yicha foiz; dars hali boshlanmagan bo'lsa — null. */
+  percents: (number | null)[];
+  /** Mazmuni bor barcha darslar bo'yicha o'rtacha foiz. */
+  average: number;
+  /** Reyting bali — darslar foizlari yig'indisi. */
   points: number;
-  place: number;
-  is_current_user: number;
 }
 
-export async function getRanking(scope: "branch" | "group", userId: number): Promise<RankingRow[]> {
-  return sql<RankingRow[]>`
-    SELECT id, display_name, points, place,
-           (user_id = ${userId} AND display_name = (SELECT name FROM users WHERE id = ${userId}))::int as is_current_user
-    FROM ranking_entries WHERE scope = ${scope} ORDER BY place ASC
-  `;
+export interface LevelBoard {
+  level: string;
+  units: { id: number; title: string; subtitle: string }[];
+  students: BoardStudent[];
+}
+
+/** O'quvchi o'qiyotgan darajadagi barcha ro'yxatdan o'tgan o'quvchilarning
+ *  har bir dars bo'yicha natijasi. Dars foizi «Darslar» sahifasidagi bilan
+ *  bir xil hisoblanadi: lug'at va mashqlar foizining o'rtachasi. */
+export async function getLevelBoard(userId: number): Promise<LevelBoard> {
+  const [me] = await sql<{ level: string }[]>`SELECT level FROM users WHERE id = ${userId}`;
+  const level = me?.level ?? "A1";
+  const [users, units] = await Promise.all([
+    sql<{ id: number; name: string; avatar_url: string | null }[]>`
+      SELECT id, name, avatar_url FROM users WHERE level = ${level} ORDER BY name
+    `,
+    sql<{ id: number; title: string; subtitle: string; words: number; exercises: number }[]>`
+      SELECT u.id, u.title, u.subtitle,
+             (SELECT count(*)::int FROM vocabulary_words w JOIN vocabulary_rounds r ON r.id = w.round_id
+               WHERE r.unit_id = u.id) AS words,
+             (SELECT count(*)::int FROM exercises e WHERE e.unit_id = u.id) AS exercises
+      FROM units u JOIN levels l ON l.id = u.level_id
+      WHERE l.code = ${level}
+      ORDER BY u.order_index
+    `,
+  ]);
+  const withContent = units.filter((u) => u.words > 0 || u.exercises > 0);
+  if (users.length === 0 || withContent.length === 0) return { level, units: [], students: [] };
+
+  const userIds = users.map((u) => u.id);
+  const [learnedRows, exerciseRows] = await Promise.all([
+    sql<{ user_id: number; unit_id: number; n: number }[]>`
+      SELECT p.user_id, r.unit_id, count(*)::int AS n
+      FROM user_word_progress p
+      JOIN vocabulary_words w ON w.id = p.word_id
+      JOIN vocabulary_rounds r ON r.id = w.round_id
+      WHERE p.learned = 1 AND p.user_id IN ${sql(userIds)}
+      GROUP BY p.user_id, r.unit_id
+    `,
+    sql<{ user_id: number; unit_id: number; total: number; n: number }[]>`
+      SELECT p.user_id, e.unit_id, sum(p.score_pct)::int AS total, count(*)::int AS n
+      FROM user_exercise_progress p
+      JOIN exercises e ON e.id = p.exercise_id
+      WHERE p.user_id IN ${sql(userIds)}
+      GROUP BY p.user_id, e.unit_id
+    `,
+  ]);
+  const learned = new Map(learnedRows.map((r) => [`${r.user_id}:${r.unit_id}`, r.n]));
+  const exercised = new Map(exerciseRows.map((r) => [`${r.user_id}:${r.unit_id}`, r]));
+
+  const students = users.map((user) => {
+    const percents = withContent.map((unit) => {
+      const key = `${user.id}:${unit.id}`;
+      const learnedWords = learned.get(key) ?? 0;
+      const ex = exercised.get(key);
+      if (learnedWords === 0 && !ex) return null;
+      const parts: number[] = [];
+      if (unit.words > 0) parts.push((learnedWords / unit.words) * 100);
+      if (unit.exercises > 0) parts.push((ex?.total ?? 0) / unit.exercises);
+      return Math.round(parts.reduce((a, b) => a + b, 0) / parts.length);
+    });
+    const points = percents.reduce<number>((s, p) => s + (p ?? 0), 0);
+    return {
+      ...user,
+      is_current_user: user.id === userId,
+      percents,
+      average: Math.round(points / withContent.length),
+      points,
+    };
+  });
+
+  return {
+    level,
+    units: withContent.map(({ id, title, subtitle }) => ({ id, title, subtitle })),
+    students,
+  };
 }
 
 // ---------- Qo'shimcha darslar ----------
