@@ -10,6 +10,7 @@ import { R04_EXERCISES, R04_ROUNDS } from "./r04-zhivu";
 import { R05_EXERCISES, R05_ROUNDS } from "./r05-goroda";
 import { R06_EXERCISES, R06_ROUNDS } from "./r06-vchera";
 import { R07_EXERCISES, R07_ROUNDS } from "./r07-restoran";
+import { R08_EXERCISES, R08_ROUNDS } from "./r08-moy-den";
 
 export interface LessonContent {
   code: string;
@@ -40,6 +41,7 @@ const LESSONS: LessonContent[] = [
   { code: "R05", rounds: R05_ROUNDS, exercises: R05_EXERCISES },
   { code: "R06", rounds: R06_ROUNDS, exercises: R06_EXERCISES },
   { code: "R07", rounds: R07_ROUNDS, exercises: R07_EXERCISES },
+  { code: "R08", rounds: R08_ROUNDS, exercises: R08_EXERCISES },
 ];
 
 export const LESSON_CONTENT: LessonContent[] = LESSONS.map((l) => ({
