@@ -20,6 +20,7 @@ import { R14_EXERCISES, R14_ROUNDS } from "./r14-literatura";
 import { A2_01_EXERCISES, A2_01_ROUNDS } from "./a2-01-davaite-pogovorim";
 import { A2_02_EXERCISES, A2_02_ROUNDS } from "./a2-02-biografiya";
 import { A2_03_EXERCISES, A2_03_ROUNDS } from "./a2-03-semya";
+import { A2_04_EXERCISES, A2_04_ROUNDS } from "./a2-04-puteshestviya";
 
 export interface LessonContent {
   code: string;
@@ -66,6 +67,7 @@ const LESSONS: LessonContent[] = [
   { code: "A2-01", rounds: A2_01_ROUNDS, exercises: A2_01_EXERCISES },
   { code: "A2-02", rounds: A2_02_ROUNDS, exercises: A2_02_EXERCISES },
   { code: "A2-03", rounds: A2_03_ROUNDS, exercises: A2_03_EXERCISES },
+  { code: "A2-04", rounds: A2_04_ROUNDS, exercises: A2_04_EXERCISES },
 ];
 
 export const LESSON_CONTENT: LessonContent[] = LESSONS.map((l) => ({
