@@ -494,7 +494,7 @@ export function ExerciseRun({
           </>
         )}
 
-        {(kind === "stress" || kind === "number") && (
+        {(kind === "stress" || kind === "number" || kind === "dictation") && (
           <button
             onClick={() => question.audio_text && speakRu(question.audio_text)}
             className="btn-press mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
@@ -539,6 +539,36 @@ export function ExerciseRun({
                 : "border-ink-200 focus:border-azure-500 dark:border-white/10"
             }`}
           />
+        )}
+
+        {kind === "dictation" && (
+          <div className="flex flex-col gap-3">
+            <input
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") (checked === null ? check : next)();
+              }}
+              disabled={checked !== null}
+              lang="ru"
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              placeholder="Eshitgan so'zingizni yozing"
+              className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-xl font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-300 dark:bg-white/5 dark:text-ink-50 ${
+                checked === true
+                  ? "border-mint-500"
+                  : checked === false
+                  ? "border-rose-400"
+                  : "border-ink-200 focus:border-azure-500 dark:border-white/10"
+              }`}
+            />
+            <RussianKeyboard
+              disabled={checked !== null}
+              onKey={(ch) => setTyped((t) => t + ch)}
+              onBackspace={() => setTyped((t) => t.slice(0, -1))}
+            />
+          </div>
         )}
 
         {kind === "match" && (

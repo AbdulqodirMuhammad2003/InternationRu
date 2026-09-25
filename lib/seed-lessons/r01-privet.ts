@@ -1,8 +1,8 @@
 /**
- * 4-dars — «Привет!» (Liden & Denz, «Я ❤ Русский Язык», 1-urok asosida).
+ * 2-dars — «Привет!» (Liden & Denz, «Я ❤ Русский Язык», 1-urok asosida).
  * Kitob dastur sifatida ishlatiladi: mavzu, so'zlar va grammatika undan,
  * gap/dialog/mashqlar esa o'zimizniki (kitob matnlari ko'chirilmaydi).
- * 1–3-darslarda o'rganilgan so'zlar lug'atga qayta qo'shilmaydi.
+ * 1-darsda (alifbo) o'rganilgan so'zlar lug'atga qayta qo'shilmaydi.
  */
 import type { SeedExercise, SeedQuestion } from "../seed-exercises";
 import type { VocabSeed } from "./types";
@@ -44,13 +44,13 @@ export const R01_ROUNDS: { title: string; words: VocabSeed[] }[] = [
       { emoji: "💼", word: "Бизнесмен", transcription: "biznismén", pos: "ot", uz: "Biznesmen, tadbirkor", def: "Человек, у которого свой бизнес.", ex: "Это Алексей. Он бизнесмен.", exUz: "Bu Aleksey. U biznesmen." },
       { emoji: "🐕", word: "Собака", transcription: "sabáka", pos: "ot", uz: "It", def: "Домашнее животное, друг человека.", ex: "Это собака. Она тут.", exUz: "Bu it. U shu yerda." },
       { emoji: "📱", word: "Телефон", transcription: "tilifón", pos: "ot", uz: "Telefon", def: "По нему говорят с людьми, которые далеко.", ex: "— Где телефон? — Вот он.", exUz: "— Telefon qayerda? — Mana u." },
-      { emoji: "⌚", word: "Часы", transcription: "chisí", pos: "ot", uz: "Soat", def: "Они показывают время.", ex: "Вот часы. Они там.", exUz: "Mana soat. U anavi yerda." },
+      { emoji: "📖", word: "Книга", transcription: "kníga", pos: "ot", uz: "Kitob", def: "Её читают.", ex: "Вот книга.", exUz: "Mana kitob." },
       { emoji: "👓", word: "Очки", transcription: "achkí", pos: "ot", uz: "Ko'zoynak", def: "Их носят, чтобы лучше видеть.", ex: "— Где очки? — Они тут.", exUz: "— Ko'zoynak qayerda? — U shu yerda." },
       { emoji: "📰", word: "Журнал", transcription: "zhurnál", pos: "ot", uz: "Jurnal", def: "Издание с фотографиями и статьями.", ex: "Это журнал, а это книга.", exUz: "Bu jurnal, bu esa kitob." },
       { emoji: "✏️", word: "Карандаш", transcription: "karandásh", pos: "ot", uz: "Qalam", def: "Им пишут и рисуют.", ex: "Вот карандаш и тетрадь.", exUz: "Mana qalam va daftar." },
       { emoji: "📓", word: "Тетрадь", transcription: "titrát'", pos: "ot", uz: "Daftar", def: "В ней пишут на уроке.", ex: "Это тетрадь. Она тут.", exUz: "Bu daftar. U shu yerda." },
       { emoji: "📘", word: "Словарь", transcription: "slavár'", pos: "ot", uz: "Lug'at (kitob)", def: "Книга, где можно узнать, что значит слово.", ex: "— Где словарь? — Он там, слева.", exUz: "— Lug'at qayerda? — U anavi yerda, chapda." },
-      { emoji: "💡", word: "Лампа", transcription: "lámpa", pos: "ot", uz: "Chiroq", def: "Она даёт свет.", ex: "Справа лампа.", exUz: "O'ng tomonda chiroq." },
+      { emoji: "📻", word: "Радио", transcription: "rádio", pos: "ot", uz: "Radio", def: "По нему слушают музыку и новости.", ex: "Справа радио.", exUz: "O'ng tomonda radio." },
     ],
   },
   {
@@ -60,11 +60,11 @@ export const R01_ROUNDS: { title: string; words: VocabSeed[] }[] = [
       { emoji: "👜", word: "Сумка", transcription: "súmka", pos: "ot", uz: "Sumka", def: "В ней носят вещи.", ex: "Это сумка мамы.", exUz: "Bu onamning sumkasi." },
       { emoji: "☕", word: "Кофе", transcription: "kófe", pos: "ot", uz: "Qahva", def: "Горячий напиток. Слово мужского рода: кофе — он.", ex: "Кофе, пожалуйста!", exUz: "Qahva, iltimos!" },
       { emoji: "🍰", word: "Кафе", transcription: "kafé", pos: "ot", uz: "Kafe", def: "Место, где пьют кофе и едят.", ex: "Кафе там, справа.", exUz: "Kafe anavi yerda, o'ngda." },
-      { emoji: "🍽️", word: "Ресторан", transcription: "ristarán", pos: "ot", uz: "Restoran", def: "Место, где обедают и ужинают.", ex: "Ресторан слева.", exUz: "Restoran chap tomonda." },
-      { emoji: "💊", word: "Аптека", transcription: "aptyéka", pos: "ot", uz: "Dorixona", def: "Там покупают лекарства.", ex: "Извините, где аптека?", exUz: "Kechirasiz, dorixona qayerda?" },
+      { emoji: "🪵", word: "Стол", transcription: "stol", pos: "ot", uz: "Stol", def: "Мебель: за ним едят и работают.", ex: "Вот стол и стул.", exUz: "Mana stol va stul." },
+      { emoji: "🪑", word: "Стул", transcription: "stul", pos: "ot", uz: "Stul", def: "На нём сидят.", ex: "Это стул, а это стол.", exUz: "Bu stul, bu esa stol." },
       { emoji: "🚇", word: "Метро", transcription: "mitró", pos: "ot", uz: "Metro", def: "Подземный городской транспорт.", ex: "Метро там.", exUz: "Metro anavi yerda." },
       { emoji: "🏛️", word: "Музей", transcription: "muzyéy", pos: "ot", uz: "Muzey", def: "Там можно смотреть картины и старые вещи.", ex: "Музей справа.", exUz: "Muzey o'ng tomonda." },
-      { emoji: "🏫", word: "Школа", transcription: "shkóla", pos: "ot", uz: "Maktab", def: "Там учатся дети.", ex: "Это школа. Там урок.", exUz: "Bu maktab. U yerda dars." },
+      { emoji: "🧑‍🎓", word: "Студент", transcription: "studyént", pos: "ot", uz: "Talaba", def: "Человек, который учится в университете.", ex: "Иван — студент.", exUz: "Ivan — talaba." },
       { emoji: "🌊", word: "Море", transcription: "mórye", pos: "ot", uz: "Dengiz", def: "Большая солёная вода.", ex: "Там море!", exUz: "Anavi yerda dengiz!" },
     ],
   },
