@@ -125,7 +125,12 @@ export interface UnitDetail extends UnitRecord {
   rounds: VocabRound[];
   exercises: ExerciseRecord[];
   totalWords: number;
+  /** Dars yopiq bo'lsa — nega (o'quvchiga ko'rsatiladi), aks holda null. */
+  lock_reason: string | null;
 }
+
+/** Keyingi dars ochilishi uchun oldingi dars shu foizga yetishi kerak. */
+export const UNLOCK_THRESHOLD = 80;
 
 // ---------- Foydalanuvchi ----------
 
@@ -369,7 +374,7 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
   const questionsByExercise = groupBy(questionRows, (q) => q.exercise_id);
   const exercisesByUnit = groupBy(exerciseRows, (e) => e.unit_id);
 
-  return units.map((unit) => {
+  const detailed: UnitDetail[] = units.map((unit) => {
     const fullRounds: VocabRound[] = (roundsByUnit.get(unit.id) ?? []).map(({ unit_id: _u, ...r }) => ({
       ...r,
       words: (wordsByRound.get(r.id) ?? []).map(({ round_id: _r, ...w }) => w),
@@ -389,8 +394,32 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
       return { ...e, question_count: questions.length, questions };
     });
     const totalWords = fullRounds.reduce((sum, r) => sum + r.words.length, 0);
-    return { ...unit, rounds: fullRounds, exercises, totalWords };
+    return { ...unit, rounds: fullRounds, exercises, totalWords, lock_reason: null as string | null };
   });
+
+  // Dars progressi = lug'at va mashqlar foizining o'rtachasi (qaysi qismi
+  // bo'lsa). Darslar bazadagi `locked` bayrog'i bilan emas, o'quvchining
+  // haqiqiy natijasi bilan ochiladi: 1-dars doim ochiq, keyingisi — oldingi
+  // dars UNLOCK_THRESHOLD% ga yetganda. Mazmuni hali yo'q dars yopiq turadi.
+  let previous: UnitDetail | null = null;
+  for (const unit of detailed) {
+    const parts: number[] = [];
+    if (unit.totalWords > 0) {
+      const learned = unit.rounds.reduce((s, r) => s + r.words.filter((w) => w.learned).length, 0);
+      parts.push((learned / unit.totalWords) * 100);
+    }
+    if (unit.exercises.length > 0) {
+      parts.push(unit.exercises.reduce((s, e) => s + e.score_pct, 0) / unit.exercises.length);
+    }
+    unit.percent = parts.length > 0 ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length) : 0;
+
+    if (parts.length === 0) unit.lock_reason = "Tez orada";
+    else if (previous && previous.percent < UNLOCK_THRESHOLD)
+      unit.lock_reason = `${previous.title}ni ${UNLOCK_THRESHOLD}% ga yetkazing`;
+    unit.locked = unit.lock_reason ? 1 : 0;
+    previous = unit;
+  }
+  return detailed;
 }
 
 // ---------- Baholar ----------

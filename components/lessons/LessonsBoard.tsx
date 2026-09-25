@@ -310,7 +310,8 @@ export function LessonsBoard({
                     <div className="relative mt-auto flex w-full flex-col items-center gap-2">
                       {unit.locked ? (
                         <span className="flex h-12 items-center gap-2 rounded-full bg-rose-500 px-6 text-base font-bold shadow-lg shadow-rose-900/40">
-                          <LockKeyhole size={20} strokeWidth={2.4} /> Yopiq
+                          <LockKeyhole size={20} strokeWidth={2.4} />{" "}
+                          {unit.lock_reason === "Tez orada" ? "Tez orada" : "Yopiq"}
                         </span>
                       ) : (
                         <div className="relative h-12 w-full overflow-hidden rounded-full bg-white/90 shadow-lg shadow-black/20">
@@ -323,8 +324,12 @@ export function LessonsBoard({
                           </span>
                         </div>
                       )}
-                      <span className="h-5 text-sm font-semibold text-white/85">
-                        {unit.date_label}
+                      <span className="min-h-5 text-center text-xs font-semibold leading-tight text-white/85">
+                        {unit.locked
+                          ? unit.lock_reason === "Tez orada"
+                            ? ""
+                            : unit.lock_reason
+                          : unit.date_label}
                       </span>
                     </div>
                   </button>
