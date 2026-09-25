@@ -196,7 +196,7 @@ export const R00_EXERCISES: SeedExercise[] = [
     instructions: "So'zni eshiting va urg'uli bo'g'inni bosing. Urg'usiz «о» [a] bo'lib o'qiladi.",
     questions: (
       [
-        ["ма|ма", 0],
+        ["ба|нан", 1],
         ["о|на", 1],
         ["ка|фе", 1],
         ["мет|ро", 1],

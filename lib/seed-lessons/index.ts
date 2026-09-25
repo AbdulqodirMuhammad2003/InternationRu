@@ -7,6 +7,7 @@ import { R01_EXERCISES, R01_ROUNDS } from "./r01-privet";
 import { R02_EXERCISES, R02_ROUNDS } from "./r02-kto-vy";
 import { R03_EXERCISES, R03_ROUNDS } from "./r03-semya";
 import { R04_EXERCISES, R04_ROUNDS } from "./r04-zhivu";
+import { R05_EXERCISES, R05_ROUNDS } from "./r05-goroda";
 
 export interface LessonContent {
   code: string;
@@ -20,4 +21,5 @@ export const LESSON_CONTENT: LessonContent[] = [
   { code: "R02", rounds: R02_ROUNDS, exercises: R02_EXERCISES },
   { code: "R03", rounds: R03_ROUNDS, exercises: R03_EXERCISES },
   { code: "R04", rounds: R04_ROUNDS, exercises: R04_EXERCISES },
+  { code: "R05", rounds: R05_ROUNDS, exercises: R05_EXERCISES },
 ];

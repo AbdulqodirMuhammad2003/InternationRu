@@ -548,15 +548,15 @@ function SpellingStage({
 }) {
   const target = word.word;
   const letterSlots = useMemo(() => target.split(""), [target]);
-  const tileLetters = useMemo(
-    () =>
-      shuffle(
-        target
-          .split("")
-          .map((ch, i) => ({ id: i, ch }))
-          .filter((t) => t.ch !== " ")
-      ),
-    [target]
+  // Harflar savol ochilganda bir marta aralashtiriladi (qayta render'da
+  // joyidan sakramasligi uchun).
+  const [tileLetters] = useState(() =>
+    shuffle(
+      target
+        .split("")
+        .map((ch, i) => ({ id: i, ch }))
+        .filter((t) => t.ch !== " ")
+    )
   );
 
   const [filledIds, setFilledIds] = useState<(number | "space" | null)[]>(() =>
@@ -685,7 +685,11 @@ function DefinitionStage({
   allWords: VocabWord[];
   onResult: (correct: boolean) => void;
 }) {
-  const options = useMemo(() => {
+  // Variantlar savol ochilganda bir marta aralashtiriladi. useMemo emas:
+  // javob saqlangach sahifa ma'lumoti yangilanadi (revalidatePath) va
+  // `allWords` yangi massiv bo'lib keladi — bu variantlarni savol ustida
+  // turgan paytda qayta aralashtirib yuborardi.
+  const [options] = useState(() => {
     const pool = shuffle(
       allWords.filter((w) => w.id !== word.id && w.word !== word.word)
     );
@@ -698,7 +702,7 @@ function DefinitionStage({
       distractors.push(w.word);
     }
     return shuffle([word.word, ...distractors]);
-  }, [word.id, word.word, allWords]);
+  });
 
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState<boolean | null>(null);
