@@ -21,7 +21,9 @@ export type ExerciseKind =
   | "fill" // `prompt` — "___" bo'sh joyli gap/so'z, `answer` — tushgan qism
   | "speak" // `prompt` — ibora, o'quvchi mikrofonga aytadi
   | "dictation" // `audio` — so'z (ko'rsatilmaydi), `answer` — o'quvchi yozadi
-  | "truefalse"; // `prompt` — "matn||gap", variantlar: To'g'ri / Noto'g'ri
+  | "truefalse" // `prompt` — "matn||gap", variantlar: To'g'ri / Noto'g'ri
+  | "reading" // `prompt` — "matn||savol", javob variantlardan tanlanadi
+  | "audiotext"; // `audio` — tinglanadigan matn, `prompt` — savol, variantlar
 
 export interface SeedQuestion {
   prompt: string;

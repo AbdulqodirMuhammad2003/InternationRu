@@ -13,6 +13,7 @@ import { R07_EXERCISES, R07_ROUNDS } from "./r07-restoran";
 import { R08_EXERCISES, R08_ROUNDS } from "./r08-moy-den";
 import { R09_EXERCISES, R09_ROUNDS } from "./r09-kino";
 import { R10_EXERCISES, R10_ROUNDS } from "./r10-dom";
+import { R11_EXERCISES, R11_ROUNDS } from "./r11-universitet";
 
 export interface LessonContent {
   code: string;
@@ -24,7 +25,7 @@ export interface LessonContent {
  *  bu yerda u har bir savolda boshqa o'ringa ko'chiriladi. Barcha savollarda
  *  bir xil variantlar to'plami bo'lgan mashqlar (был/была…, в/на) va tartibi
  *  muhim turlar (match, stress, truefalse) tegilmaydi. */
-const MIXED_KINDS = new Set(["listen", "dialog", "picture", "situation", "choice"]);
+const MIXED_KINDS = new Set(["listen", "dialog", "picture", "situation", "choice", "reading", "audiotext"]);
 
 function withMixedAnswers(exercises: SeedExercise[]): SeedExercise[] {
   return exercises.map((e) => {
@@ -46,6 +47,7 @@ const LESSONS: LessonContent[] = [
   { code: "R08", rounds: R08_ROUNDS, exercises: R08_EXERCISES },
   { code: "R09", rounds: R09_ROUNDS, exercises: R09_EXERCISES },
   { code: "R10", rounds: R10_ROUNDS, exercises: R10_EXERCISES },
+  { code: "R11", rounds: R11_ROUNDS, exercises: R11_EXERCISES },
 ];
 
 export const LESSON_CONTENT: LessonContent[] = LESSONS.map((l) => ({

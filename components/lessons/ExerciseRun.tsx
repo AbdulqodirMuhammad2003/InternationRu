@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, Delete, Info, MapPin, Mic, PlayCircle, Trophy, Volume2 } from "lucide-react";
+import { BookOpen, Delete, Info, MapPin, Mic, PlayCircle, Snail, Trophy, Volume2 } from "lucide-react";
 import type { UnitDetail } from "@/lib/data";
 import { matchesPronunciation, speechNorm, SPEECH_ERRORS } from "@/lib/russian-speech";
 
-function speakRu(text: string) {
+function speakRu(text: string, rate = 0.85) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "ru-RU";
-  utter.rate = 0.85;
+  utter.rate = rate;
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utter);
 }
@@ -67,6 +67,15 @@ function RussianKeyboard({
           )}
         </div>
       ))}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onKey(" ")}
+        aria-label="Bo'sh joy"
+        className="h-10 w-1/2 rounded-lg bg-ink-100 text-xs font-semibold text-ink-500 hover:bg-azure-100 disabled:opacity-40 dark:bg-white/10 dark:text-ink-300"
+      >
+        пробел
+      </button>
     </div>
   );
 }
@@ -148,9 +157,11 @@ export function ExerciseRun({
   const total = pending.length;
 
   // Tinglash savoli ochilishi bilan so'z bir marta avtomatik o'qiladi.
+  // Tinglab tushunish mashqida matn hamma savollar uchun bitta — u faqat
+  // birinchi savolda o'qiladi, keyin o'quvchi o'zi qayta eshitadi.
   useEffect(() => {
-    if (question?.audio_text) speakRu(question.audio_text);
-  }, [question?.audio_text, qIndex]);
+    if (question?.audio_text && !(kind === "audiotext" && qIndex > 0)) speakRu(question.audio_text);
+  }, [question?.audio_text, qIndex, kind]);
 
   if (result !== null) {
     const great = result >= 80;
@@ -505,6 +516,50 @@ export function ExerciseRun({
           </>
         )}
 
+        {kind === "reading" && (
+          <>
+            <div className="rounded-2xl border border-ink-100 bg-white px-4 py-3 text-base leading-relaxed text-ink-900 dark:border-white/10 dark:bg-white/5 dark:text-ink-50">
+              <p className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ink-400">
+                <BookOpen size={14} /> Matn
+              </p>
+              <p lang="ru" className="whitespace-pre-line">{question.prompt.split("||")[0]}</p>
+            </div>
+            <p lang="ru" className="text-center text-lg font-semibold text-ink-950 dark:text-ink-50">
+              {question.prompt.split("||")[1]}
+            </p>
+            {optionGrid()}
+          </>
+        )}
+
+        {kind === "audiotext" && (
+          <>
+            <div className="flex items-center gap-3 rounded-2xl bg-gold-50 px-4 py-3 dark:bg-gold-950/30">
+              <button
+                onClick={() => question.audio_text && speakRu(question.audio_text)}
+                className="btn-press flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
+                aria-label="Matnni eshitish"
+              >
+                <Volume2 size={26} />
+              </button>
+              <button
+                onClick={() => question.audio_text && speakRu(question.audio_text, 0.6)}
+                className="btn-press flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-700 hover:bg-gold-200 dark:bg-gold-900/50 dark:text-gold-200"
+                aria-label="Sekinroq eshitish"
+                title="Sekinroq"
+              >
+                <Snail size={20} />
+              </button>
+              <p className="text-sm text-gold-900 dark:text-gold-100">
+                Matnni tinglang. Qayta eshitish uchun tugmani bosing, sekinroq eshitish uchun — shilliqqurtni.
+              </p>
+            </div>
+            <p lang="ru" className="text-center text-lg font-semibold text-ink-950 dark:text-ink-50">
+              {question.prompt}
+            </p>
+            {optionGrid()}
+          </>
+        )}
+
         {kind === "situation" && (
           <>
             <div className="flex gap-2.5 rounded-2xl border border-ink-100 bg-white px-4 py-3 text-base text-ink-900 dark:border-white/10 dark:bg-white/5 dark:text-ink-50">
@@ -516,13 +571,25 @@ export function ExerciseRun({
         )}
 
         {(kind === "stress" || kind === "number" || kind === "dictation") && (
-          <button
-            onClick={() => question.audio_text && speakRu(question.audio_text)}
-            className="btn-press mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
-            aria-label="Eshitish"
-          >
-            <Volume2 size={28} />
-          </button>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => question.audio_text && speakRu(question.audio_text)}
+              className="btn-press flex h-16 w-16 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
+              aria-label="Eshitish"
+            >
+              <Volume2 size={28} />
+            </button>
+            {kind === "dictation" && (
+              <button
+                onClick={() => question.audio_text && speakRu(question.audio_text, 0.55)}
+                className="btn-press flex h-12 w-12 items-center justify-center rounded-full bg-gold-100 text-gold-700 hover:bg-gold-200 dark:bg-gold-950/40 dark:text-gold-200"
+                aria-label="Sekinroq eshitish"
+                title="Sekinroq"
+              >
+                <Snail size={22} />
+              </button>
+            )}
+          </div>
         )}
 
         {kind === "stress" && (
@@ -575,7 +642,7 @@ export function ExerciseRun({
               autoComplete="off"
               autoCapitalize="off"
               spellCheck={false}
-              placeholder="Eshitgan so'zingizni yozing"
+              placeholder="Eshitganingizni yozing"
               className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-xl font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-300 dark:bg-white/5 dark:text-ink-50 ${
                 checked === true
                   ? "border-mint-500"
