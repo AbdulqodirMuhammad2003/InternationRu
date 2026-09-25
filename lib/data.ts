@@ -131,6 +131,9 @@ export interface UnitDetail extends UnitRecord {
 
 /** Keyingi dars ochilishi uchun oldingi dars shu foizga yetishi kerak. */
 export const UNLOCK_THRESHOLD = 80;
+/** VAQTINCHA o'chirilgan: darslar mazmunini tekshirish uchun hamma
+ *  tayyor darslar ochiq. Qoidani qaytarish uchun `true` qiling. */
+export const UNLOCK_RULE_ENABLED = false;
 
 // ---------- Foydalanuvchi ----------
 
@@ -414,7 +417,7 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
     unit.percent = parts.length > 0 ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length) : 0;
 
     if (parts.length === 0) unit.lock_reason = "Tez orada";
-    else if (previous && previous.percent < UNLOCK_THRESHOLD)
+    else if (UNLOCK_RULE_ENABLED && previous && previous.percent < UNLOCK_THRESHOLD)
       unit.lock_reason = `${previous.title}ni ${UNLOCK_THRESHOLD}% ga yetkazing`;
     unit.locked = unit.lock_reason ? 1 : 0;
     previous = unit;
