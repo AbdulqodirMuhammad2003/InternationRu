@@ -10,6 +10,7 @@
 import bcrypt from "bcryptjs";
 import { sql } from "./db";
 import { LESSON1_EXERCISES, type SeedExercise, type SeedQuestion } from "./seed-exercises";
+import { R01_EXERCISES, R01_ROUNDS } from "./seed-lessons/r01-privet";
 
 /** Mashqlarni savollari bilan birga darsga qo'shadi (tartib raqami
  *  darsdagi mavjud mashqlardan keyin davom etadi). Seed va bir martalik
@@ -193,11 +194,13 @@ export async function seedDatabase() {
         end: 600,
       },
     },
+    // 4–17-darslar: Liden & Denz «Я ❤ Русский Язык» (A1) kitobining 14 ta
+    // darsi (R01–R14). Kitob faqat dastur sifatida: mavzu, so'z va grammatika.
     {
-      code: "C2",
+      code: "R01",
       level: "A1",
       title: "4-dars",
-      subtitle: "Ismlar va birinchi fe'l",
+      subtitle: "Привет! Tanishuv va salomlashish",
       color: "purple",
       icon: "chat",
       locked: 1,
@@ -205,10 +208,10 @@ export async function seedDatabase() {
       clip: null,
     },
     {
-      code: "C3",
+      code: "R02",
       level: "A1",
       title: "5-dars",
-      subtitle: "Fe'llar: bor-yo'q va harakatlar",
+      subtitle: "Кто вы? Kasb, millat va yosh",
       color: "black",
       icon: "lock",
       locked: 1,
@@ -216,10 +219,10 @@ export async function seedDatabase() {
       clip: null,
     },
     {
-      code: "C4",
+      code: "R03",
       level: "A1",
       title: "6-dars",
-      subtitle: "Vaqt, joy va mashg'ulotlar",
+      subtitle: "Моя семья. Oila",
       color: "green",
       icon: "headphones",
       locked: 1,
@@ -227,10 +230,10 @@ export async function seedDatabase() {
       clip: null,
     },
     {
-      code: "C5",
-      level: "A2",
+      code: "R04",
+      level: "A1",
       title: "7-dars",
-      subtitle: "Sifatlar va solishtirish darajasi",
+      subtitle: "Живу, учусь, работаю. Qayerda?",
       color: "blue",
       icon: "book",
       locked: 1,
@@ -238,10 +241,10 @@ export async function seedDatabase() {
       clip: null,
     },
     {
-      code: "C6",
-      level: "A2",
+      code: "R05",
+      level: "A1",
       title: "8-dars",
-      subtitle: "Fe'l turlari va \"Necha yosh?\"",
+      subtitle: "Города, страны. Shahar va mamlakatlar",
       color: "orange",
       icon: "chart",
       locked: 1,
@@ -249,10 +252,10 @@ export async function seedDatabase() {
       clip: null,
     },
     {
-      code: "C7",
-      level: "A2",
+      code: "R06",
+      level: "A1",
       title: "9-dars",
-      subtitle: "Harakat fe'llari va narx so'rash",
+      subtitle: "Что вы делали вчера? O'tgan zamon",
       color: "purple",
       icon: "chat",
       locked: 1,
@@ -260,12 +263,89 @@ export async function seedDatabase() {
       clip: null,
     },
     {
-      code: "C8",
-      level: "A2",
+      code: "R07",
+      level: "A1",
       title: "10-dars",
-      subtitle: "Kelishiklar va harakat fe'llari",
+      subtitle: "Ресторан. Ovqat va buyurtma",
       color: "black",
       icon: "lock",
+      locked: 1,
+      date: "",
+      clip: null,
+    },
+    {
+      code: "R08",
+      level: "A1",
+      title: "11-dars",
+      subtitle: "Мой день. Kun tartibi va transport",
+      color: "green",
+      icon: "headphones",
+      locked: 1,
+      date: "",
+      clip: null,
+    },
+    {
+      code: "R09",
+      level: "A1",
+      title: "12-dars",
+      subtitle: "Кино. Музыка. Театр. Kelasi zamon",
+      color: "blue",
+      icon: "book",
+      locked: 1,
+      date: "",
+      clip: null,
+    },
+    {
+      code: "R10",
+      level: "A1",
+      title: "13-dars",
+      subtitle: "Дом, квартира. Uy-joy",
+      color: "orange",
+      icon: "chart",
+      locked: 1,
+      date: "",
+      clip: null,
+    },
+    {
+      code: "R11",
+      level: "A1",
+      title: "14-dars",
+      subtitle: "В университете. Fe'l turlari",
+      color: "purple",
+      icon: "chat",
+      locked: 1,
+      date: "",
+      clip: null,
+    },
+    {
+      code: "R12",
+      level: "A1",
+      title: "15-dars",
+      subtitle: "День рождения. Sovg'a va bayramlar",
+      color: "black",
+      icon: "lock",
+      locked: 1,
+      date: "",
+      clip: null,
+    },
+    {
+      code: "R13",
+      level: "A1",
+      title: "16-dars",
+      subtitle: "В городе. Yo'l so'rash",
+      color: "green",
+      icon: "headphones",
+      locked: 1,
+      date: "",
+      clip: null,
+    },
+    {
+      code: "R14",
+      level: "A1",
+      title: "17-dars",
+      subtitle: "Читаем русскую литературу",
+      color: "blue",
+      icon: "book",
       locked: 1,
       date: "",
       clip: null,
@@ -483,6 +563,12 @@ export async function seedDatabase() {
 
   // ---------- Mashqlar (Exercises) ----------
   await insertExercises(sql, unitIds["C1a"], LESSON1_EXERCISES);
+
+  // 4-dars (kitobning 1-darsi «Привет!»)
+  for (const [i, round] of R01_ROUNDS.entries()) {
+    await createRound(unitIds["R01"], round.title, i + 1, round.words);
+  }
+  await insertExercises(sql, unitIds["R01"], R01_EXERCISES);
 
   async function addSimpleExercise(
     unitId: number,

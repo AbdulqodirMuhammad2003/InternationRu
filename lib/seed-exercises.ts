@@ -8,11 +8,27 @@
  *   - ending  — `prompt` "книга (Иван)" ko'rinishida, qo'shimcha tanlanadi;
  *   - anagram — `prompt` aralash harflar, `answer` yig'ilishi kerak bo'lgan so'z;
  *   - type    — `prompt` berilgan so'z, `answer` o'quvchi yozadigan javob
- *               (bir nechta to'g'ri javob "|" bilan ajratiladi).
+ *               (bir nechta to'g'ri javob "|" bilan ajratiladi);
+ *   - qolgan turlar — `ExerciseKind` izohlarida.
  * `explanation` — javobdan keyin ko'rsatiladigan qisqa izoh.
  */
 
-export type ExerciseKind = "choice" | "listen" | "dialog" | "ending" | "anagram" | "type";
+export type ExerciseKind =
+  | "choice"
+  | "listen"
+  | "dialog"
+  | "ending"
+  | "anagram"
+  | "type"
+  // «Привет!» darsidan boshlab qo'shilgan turlar:
+  | "picture" // `prompt` — emoji/rasm, variantlardan nomi tanlanadi
+  | "situation" // `prompt` — vaziyat tavsifi, mos ibora tanlanadi
+  | "match" // `options` — "ruscha|o'zbekcha" juftlar, hammasi ulanadi
+  | "stress" // `audio` — so'z, `options` — bo'g'inlar, urg'uli bo'g'in tanlanadi
+  | "number" // `audio` — ruscha son, `answer` — raqamlar bilan
+  | "order" // `answer` — gap, o'quvchi so'z plitkalaridan yig'adi
+  | "fill" // `prompt` — "___" bo'sh joyli gap, `answer` — tushgan so'z
+  | "speak"; // `prompt` — ibora, o'quvchi mikrofonga aytadi
 
 export interface SeedQuestion {
   prompt: string;
