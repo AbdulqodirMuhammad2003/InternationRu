@@ -154,7 +154,7 @@ export async function getUserByEmail(email: string) {
  *  chaqirsa ham bazaga faqat bir marta murojaat qilinadi. */
 export const getUserStats = cache(async (userId: number): Promise<UserRecord | undefined> => {
   const rows = await sql<UserRecord[]>`
-    SELECT id, name, email, avatar_url, course, level, coins, stars, branch_rank, group_rank,
+    SELECT id, name, email, CASE WHEN avatar_url LIKE 'data:%' THEN '/avatar/' || id || '?v=' || length(avatar_url) ELSE avatar_url END AS avatar_url, course, level, coins, stars, branch_rank, group_rank,
            battle_wins, august_average, reading_pct, writing_pct, listening_pct, speaking_pct
     FROM users WHERE id = ${userId}
   `;
@@ -301,7 +301,7 @@ export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
  *  natijalar shu yerda yig'iladi (avval har bir bosqich/mashq uchun alohida
  *  so'rov ketardi — ~50 ta ketma-ket so'rov). */
 export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]> {
-  const [units, rounds, words, exerciseRows, questionRows] = await Promise.all([
+  const [units, rounds, words, exerciseRows, questionCounts] = await Promise.all([
     getUnitsForUser(userId),
     sql<{ id: number; unit_id: number; title: string; order_index: number }[]>`
       SELECT id, unit_id, title, order_index FROM vocabulary_rounds ORDER BY order_index ASC
@@ -344,26 +344,10 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
       LEFT JOIN user_exercise_progress p ON p.exercise_id = e.id AND p.user_id = ${userId}
       ORDER BY e.order_index ASC
     `,
-    sql<
-      {
-        id: number;
-        exercise_id: number;
-        prompt: string;
-        options_json: string;
-        correct_index: number;
-        order_index: number;
-        audio_text: string | null;
-        answer_text: string | null;
-        explanation: string | null;
-        answered_correctly: boolean;
-      }[]
-    >`
-      SELECT q.id, q.exercise_id, q.prompt, q.options_json, q.correct_index, q.order_index,
-             q.audio_text, q.answer_text, q.explanation,
-             COALESCE(p.correct, 0) = 1 AS answered_correctly
-      FROM exercise_questions q
-      LEFT JOIN user_question_progress p ON p.question_id = q.id AND p.user_id = ${userId}
-      ORDER BY q.order_index ASC
+    // Savollarning o'zi sahifaga yuborilmaydi (mashq ochilganda
+    // getExerciseQuestions yuklaydi) — bu yerda faqat soni kerak.
+    sql<{ exercise_id: number; n: number }[]>`
+      SELECT exercise_id, count(*)::int AS n FROM exercise_questions GROUP BY exercise_id
     `,
   ]);
 
@@ -380,7 +364,7 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
 
   const wordsByRound = groupBy(words, (w) => w.round_id);
   const roundsByUnit = groupBy(rounds, (r) => r.unit_id);
-  const questionsByExercise = groupBy(questionRows, (q) => q.exercise_id);
+  const questionCount = new Map(questionCounts.map((q) => [q.exercise_id, q.n]));
   const exercisesByUnit = groupBy(exerciseRows, (e) => e.unit_id);
 
   const detailed: UnitDetail[] = units.map((unit) => {
@@ -389,18 +373,7 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
       words: (wordsByRound.get(r.id) ?? []).map(({ round_id: _r, ...w }) => w),
     }));
     const exercises: ExerciseRecord[] = (exercisesByUnit.get(unit.id) ?? []).map(({ unit_id: _u, ...e }) => {
-      const questions: ExerciseQuestion[] = (questionsByExercise.get(e.id) ?? []).map((q) => ({
-        id: q.id,
-        prompt: q.prompt,
-        options: JSON.parse(q.options_json) as string[],
-        correct_index: q.correct_index,
-        order_index: q.order_index,
-        audio_text: q.audio_text,
-        answer_text: q.answer_text,
-        explanation: q.explanation,
-        answered_correctly: q.answered_correctly,
-      }));
-      return { ...e, question_count: questions.length, questions };
+      return { ...e, question_count: questionCount.get(e.id) ?? 0, questions: [] as ExerciseQuestion[] };
     });
     const totalWords = fullRounds.reduce((sum, r) => sum + r.words.length, 0);
     return { ...unit, rounds: fullRounds, exercises, totalWords, lock_reason: null as string | null };
@@ -515,7 +488,8 @@ export async function getLevelBoard(userId: number): Promise<LevelBoard> {
   const level = me?.level ?? "A1";
   const [users, units] = await Promise.all([
     sql<{ id: number; name: string; avatar_url: string | null }[]>`
-      SELECT id, name, avatar_url FROM users WHERE level = ${level} ORDER BY name
+      SELECT id, name, CASE WHEN avatar_url LIKE 'data:%' THEN '/avatar/' || id || '?v=' || length(avatar_url) ELSE avatar_url END AS avatar_url
+      FROM users WHERE level = ${level} ORDER BY name
     `,
     sql<{ id: number; title: string; subtitle: string; words: number; exercises: number }[]>`
       SELECT u.id, u.title, u.subtitle,
