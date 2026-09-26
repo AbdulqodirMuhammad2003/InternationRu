@@ -4,7 +4,7 @@
  * transport iboralari (сделать пересадку, сесть на, взять такси, попасть
  * в пробку), old qo'shimchali harakat fe'llari: при-/у-, в-/вы-, под-/от-,
  * за-, про-, пере-, об-, до- va ulardan keyingi predloglar. Zinapoya:
- * old qo'shimchalar — 4 bosqich. Lug'at 5 bosqich (50 so'z), 15 ta mashq.
+ * old qo'shimchalar — 4 bosqich. Lug'at 5 bosqich (50 so'z), 14 ta mashq.
  */
 import type { SeedExercise, SeedQuestion } from "../seed-exercises";
 import type { VocabSeed } from "./types";
