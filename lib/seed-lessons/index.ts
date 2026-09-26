@@ -32,6 +32,7 @@ import { A2_12_EXERCISES, A2_12_ROUNDS } from "./a2-12-restoran";
 import { A2_13_EXERCISES, A2_13_ROUNDS } from "./a2-13-obrazovanie";
 import { A2_14_EXERCISES, A2_14_ROUNDS } from "./a2-14-rabota";
 import { A2_15_EXERCISES, A2_15_ROUNDS } from "./a2-15-kino";
+import { A2_16_EXERCISES, A2_16_ROUNDS } from "./a2-16-prazdniki";
 
 export interface LessonContent {
   code: string;
@@ -90,6 +91,7 @@ const LESSONS: LessonContent[] = [
   { code: "A2-13", rounds: A2_13_ROUNDS, exercises: A2_13_EXERCISES },
   { code: "A2-14", rounds: A2_14_ROUNDS, exercises: A2_14_EXERCISES },
   { code: "A2-15", rounds: A2_15_ROUNDS, exercises: A2_15_EXERCISES },
+  { code: "A2-16", rounds: A2_16_ROUNDS, exercises: A2_16_EXERCISES },
 ];
 
 export const LESSON_CONTENT: LessonContent[] = LESSONS.map((l) => ({
