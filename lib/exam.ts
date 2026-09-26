@@ -1,10 +1,12 @@
 import "server-only";
 import { sql } from "./db";
 import { getLevelBoard, UNLOCK_RULE_ENABLED, UNLOCK_THRESHOLD } from "./data";
-import { A1_GRAMMAR_BANK } from "./exam-a1";
+import { A1_GRAMMAR_BANK, type ExamGrammarItem } from "./exam-a1";
+import { A2_GRAMMAR_BANK } from "./exam-a2";
 
 /**
- * Daraja yakuniy imtihoni (hozircha A1 — Elementar).
+ * Daraja yakuniy imtihoni: o'quvchi o'z darajasining imtihonini topshiradi
+ * (A1 — Elementar, A2 — Asosiy). Har daraja uchun grammatika banki alohida.
  *
  *  - 40 savol: 20 ta lug'at (rasm + o'zbekcha tarjima → ruscha so'zni yozish)
  *    va 20 ta grammatika (variant tanlash). Har dars kamida bittadan savol
@@ -19,8 +21,19 @@ import { A1_GRAMMAR_BANK } from "./exam-a1";
  *    boshlanadi. Baholar tarixi va takrorlash so'zlari saqlanadi.
  */
 
-export const EXAM_LEVEL = "A1";
-export const EXAM_TITLE = "Elementar daraja imtihoni";
+/** Imtihoni tayyor darajalar: nomi va grammatika savollari banki. */
+const EXAMS: Record<string, { title: string; bank: Record<string, ExamGrammarItem[]> }> = {
+  A1: { title: "Elementar daraja imtihoni", bank: A1_GRAMMAR_BANK },
+  A2: { title: "Asosiy daraja imtihoni", bank: A2_GRAMMAR_BANK },
+};
+const EXAM_LEVELS = Object.keys(EXAMS);
+
+/** O'quvchi qaysi daraja imtihonini ko'radi: o'z darajasiniki; u darajada
+ *  imtihon hali bo'lmasa — oxirgi tayyor imtihon (o'tganini ko'rsatish uchun). */
+async function examLevelOf(userId: number): Promise<string> {
+  const [u] = await sql<{ level: string }[]>`SELECT level FROM users WHERE id = ${userId}`;
+  return u && EXAMS[u.level] ? u.level : EXAM_LEVELS[EXAM_LEVELS.length - 1];
+}
 export const EXAM_VOCAB_COUNT = 20;
 export const EXAM_GRAMMAR_COUNT = 20;
 export const EXAM_MINUTES = 40;
@@ -129,7 +142,8 @@ async function levelUnits(level: string) {
 }
 
 async function buildVariant(level: string): Promise<StoredQuestion[]> {
-  const units = (await levelUnits(level)).filter((u) => A1_GRAMMAR_BANK[u.code]);
+  const bank = EXAMS[level].bank;
+  const units = (await levelUnits(level)).filter((u) => bank[u.code]);
   const words = await sql<{ id: number; unit_id: number; word: string; emoji: string; translation_uz: string }[]>`
     SELECT w.id, r.unit_id, w.word, w.emoji, w.translation_uz
     FROM vocabulary_words w JOIN vocabulary_rounds r ON r.id = w.round_id
@@ -158,7 +172,7 @@ async function buildVariant(level: string): Promise<StoredQuestion[]> {
   }));
 
   const grammar = spreadPick(
-    units.map((u) => A1_GRAMMAR_BANK[u.code]),
+    units.map((u) => bank[u.code]),
     EXAM_GRAMMAR_COUNT
   ).map(({ lessonIndex, item }): StoredQuestion => {
     const options = shuffle(item.options);
@@ -185,6 +199,7 @@ function isCorrect(q: StoredQuestion, a: ExamAnswer) {
 
 interface AttemptRow {
   id: number;
+  level_code: string;
   cycle: number;
   questions_json: string;
   answers_json: string | null;
@@ -198,7 +213,7 @@ interface AttemptRow {
 
 async function attemptsOf(userId: number, level: string) {
   return sql<AttemptRow[]>`
-    SELECT id, cycle, questions_json, answers_json, passed, score, total, weak_units_json, started_at, finished_at
+    SELECT id, level_code, cycle, questions_json, answers_json, passed, score, total, weak_units_json, started_at, finished_at
     FROM exam_attempts WHERE user_id = ${userId} AND level_code = ${level}
     ORDER BY id
   `;
@@ -210,7 +225,7 @@ const deadlineOf = (a: AttemptRow) => new Date(a.started_at.getTime() + EXAM_MIN
  *  ochiq urinishi bo'lsa ishlaydi. */
 export async function finishExam(userId: number, attemptId: number, answers: ExamAnswer[]): Promise<ExamResult | null> {
   const [row] = await sql<AttemptRow[]>`
-    SELECT id, cycle, questions_json, answers_json, passed, score, total, weak_units_json, started_at, finished_at
+    SELECT id, level_code, cycle, questions_json, answers_json, passed, score, total, weak_units_json, started_at, finished_at
     FROM exam_attempts WHERE id = ${attemptId} AND user_id = ${userId} AND finished_at IS NULL
   `;
   if (!row) return null;
@@ -249,11 +264,12 @@ export async function finishExam(userId: number, attemptId: number, answers: Exa
     WHERE id = ${row.id}
   `;
 
-  const all = await attemptsOf(userId, EXAM_LEVEL);
+  const level = row.level_code;
+  const all = await attemptsOf(userId, level);
   const attemptNumber = all.filter((a) => a.cycle === row.cycle && a.finished_at).length;
   await sql`
     INSERT INTO marks (user_id, unit_id, subject, score, max_score, date)
-    VALUES (${userId}, ${null}, ${`${EXAM_TITLE} (${attemptNumber}-urinish)`}, ${pct}, ${100},
+    VALUES (${userId}, ${null}, ${`${EXAMS[level]?.title ?? `${level} imtihoni`} (${attemptNumber}-urinish)`}, ${pct}, ${100},
             ${new Date().toISOString().slice(0, 10)})
   `;
 
@@ -271,13 +287,13 @@ export async function finishExam(userId: number, attemptId: number, answers: Exa
     await sql`
       UPDATE users SET level = next.code
       FROM levels cur JOIN levels next ON next.order_index = cur.order_index + 1
-      WHERE users.id = ${userId} AND users.level = ${EXAM_LEVEL} AND cur.code = ${EXAM_LEVEL}
+      WHERE users.id = ${userId} AND users.level = ${level} AND cur.code = ${level}
     `;
   }
 
   // 3-urinishda ham o'tolmasa — daraja qayta o'qiladi.
   const levelReset = !passed && attemptNumber >= EXAM_MAX_ATTEMPTS;
-  if (levelReset) await resetLevelProgress(userId, EXAM_LEVEL);
+  if (levelReset) await resetLevelProgress(userId, level);
 
   return {
     score,
@@ -327,13 +343,14 @@ async function resetLevelProgress(userId: number, level: string) {
 }
 
 export async function getExamStatus(userId: number): Promise<ExamStatus> {
-  let attempts = await attemptsOf(userId, EXAM_LEVEL);
+  const level = await examLevelOf(userId);
+  let attempts = await attemptsOf(userId, level);
 
   // Vaqti tugagan, lekin topshirilmagan urinish — saqlangan javoblar bilan yakunlanadi.
   const open = attempts.find((a) => !a.finished_at);
   if (open && deadlineOf(open).getTime() < Date.now()) {
     await finishExam(userId, open.id, open.answers_json ? JSON.parse(open.answers_json) : []);
-    attempts = await attemptsOf(userId, EXAM_LEVEL);
+    attempts = await attemptsOf(userId, level);
   }
 
   const passed = attempts.some((a) => a.passed === 1);
@@ -397,8 +414,8 @@ export async function getExamStatus(userId: number): Promise<ExamStatus> {
   }
 
   return {
-    level: EXAM_LEVEL,
-    title: EXAM_TITLE,
+    level,
+    title: EXAMS[level].title,
     passed,
     cycle,
     attemptsUsed,
@@ -418,10 +435,10 @@ export async function startExam(userId: number): Promise<number | null> {
   const status = await getExamStatus(userId);
   if (status.active) return status.active.id;
   if (!status.canStart) return null;
-  const questions = await buildVariant(EXAM_LEVEL);
+  const questions = await buildVariant(status.level);
   const [row] = await sql<{ id: number }[]>`
     INSERT INTO exam_attempts (user_id, level_code, cycle, questions_json, total)
-    VALUES (${userId}, ${EXAM_LEVEL}, ${status.cycle}, ${JSON.stringify(questions)}, ${questions.length})
+    VALUES (${userId}, ${status.level}, ${status.cycle}, ${JSON.stringify(questions)}, ${questions.length})
     RETURNING id
   `;
   return row.id;
