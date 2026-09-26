@@ -9,7 +9,7 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
-import { getUserStats, getAllUnitsDetailed, getActivityOverview, getReviewSummary } from "@/lib/data";
+import { getUserStats, getAllUnitsDetailed, withoutQuestions, getActivityOverview, getReviewSummary } from "@/lib/data";
 import { TodayPanel } from "@/components/TodayPanel";
 import { VocabGauge } from "@/components/VocabGauge";
 
@@ -48,7 +48,7 @@ export default async function HomePage() {
   const userId = session!.userId;
   const [userRow, unitsDetailed, activity, review] = await Promise.all([
     getUserStats(userId),
-    getAllUnitsDetailed(userId),
+    getAllUnitsDetailed(userId).then(withoutQuestions),
     getActivityOverview(userId),
     getReviewSummary(userId),
   ]);

@@ -33,8 +33,8 @@ import {
   Radio,
   type LucideIcon,
 } from "lucide-react";
-import type { ClipKind, ExerciseKind, LevelRecord, UnitDetail } from "@/lib/data";
-import { submitExerciseResult } from "@/app/actions";
+import type { ClipKind, ExerciseKind, ExerciseQuestion, LevelRecord, UnitDetail } from "@/lib/data";
+import { loadExerciseQuestions, submitExerciseResult } from "@/app/actions";
 import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
 import { ExerciseRun } from "./ExerciseRun";
@@ -148,7 +148,12 @@ export function LessonsBoard({
   const openUnit = units.find((u) => u.id === openUnitId) || null;
   const flowRound = openUnit?.rounds.find((r) => r.id === flowRoundId) || null;
   const flowAllWords = openUnit?.rounds.flatMap((r) => r.words) || [];
-  const activeExercise = openUnit?.exercises.find((e) => e.id === activeExerciseId) || null;
+  // Savollar sahifa bilan kelmaydi (hajm chegarasi) — mashq boshlanganda yuklanadi.
+  const [loadedQuestions, setLoadedQuestions] = useState<ExerciseQuestion[] | null>(null);
+  const [loadingExerciseId, setLoadingExerciseId] = useState<number | null>(null);
+  const activeExerciseBase = openUnit?.exercises.find((e) => e.id === activeExerciseId) || null;
+  const activeExercise =
+    activeExerciseBase && loadedQuestions ? { ...activeExerciseBase, questions: loadedQuestions } : null;
 
   function closePanel() {
     setOpenUnitId(null);
@@ -199,10 +204,18 @@ export function LessonsBoard({
     });
   }
 
-  function startExercise(exerciseId: number) {
-    setActiveExerciseId(exerciseId);
-    setRunKey((k) => k + 1);
-    setView("exercise-run");
+  async function startExercise(exerciseId: number) {
+    if (loadingExerciseId !== null) return;
+    setLoadingExerciseId(exerciseId);
+    try {
+      const questions = await loadExerciseQuestions(exerciseId);
+      setLoadedQuestions(questions);
+      setActiveExerciseId(exerciseId);
+      setRunKey((k) => k + 1);
+      setView("exercise-run");
+    } finally {
+      setLoadingExerciseId(null);
+    }
   }
 
   // Karusel markazidagi (faol) karta — u kattaroq ko'rsatiladi va faqat
@@ -534,8 +547,11 @@ export function LessonsBoard({
                         <button
                           key={ex.id}
                           onClick={() => startExercise(ex.id)}
+                          aria-busy={loadingExerciseId === ex.id}
                           style={{ animationDelay: `${i * 50}ms` }}
-                          className="relative flex w-40 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10"
+                          className={`relative flex w-40 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
+                            loadingExerciseId === ex.id ? "animate-pulse opacity-70" : ""
+                          }`}
                         >
                           <span className="absolute left-0 top-0 rounded-br-xl rounded-tl-2xl bg-mint-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
                             {ex.skill_label}

@@ -431,6 +431,40 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
   return detailed;
 }
 
+/** Sahifaga yuboriladigan darslar ro'yxatidan mashq savollarini olib
+ *  tashlaydi: hamma darslarning savollari birga bir necha MB bo'lib, Vercel
+ *  javob chegarasidan (4,5 MB) oshib ketadi. Savollar mashq ochilganda
+ *  `getExerciseQuestions` orqali alohida yuklanadi. */
+export function withoutQuestions(units: UnitDetail[]): UnitDetail[] {
+  return units.map((u) => ({ ...u, exercises: u.exercises.map((e) => ({ ...e, questions: [] })) }));
+}
+
+/** Bitta mashqning savollari (o'quvchi avval to'g'ri javob berganlari bilan). */
+export async function getExerciseQuestions(userId: number, exerciseId: number): Promise<ExerciseQuestion[]> {
+  const rows = await sql<
+    {
+      id: number;
+      prompt: string;
+      options_json: string;
+      correct_index: number;
+      order_index: number;
+      audio_text: string | null;
+      answer_text: string | null;
+      explanation: string | null;
+      answered_correctly: boolean;
+    }[]
+  >`
+    SELECT q.id, q.prompt, q.options_json, q.correct_index, q.order_index,
+           q.audio_text, q.answer_text, q.explanation,
+           COALESCE(p.correct, 0) = 1 AS answered_correctly
+    FROM exercise_questions q
+    LEFT JOIN user_question_progress p ON p.question_id = q.id AND p.user_id = ${userId}
+    WHERE q.exercise_id = ${exerciseId}
+    ORDER BY q.order_index ASC
+  `;
+  return rows.map(({ options_json, ...q }) => ({ ...q, options: JSON.parse(options_json) as string[] }));
+}
+
 // ---------- Baholar ----------
 
 export interface MarkRecord {

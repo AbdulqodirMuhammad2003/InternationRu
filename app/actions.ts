@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
-import { getUserByEmail, REVIEW_INTERVAL_DAYS, MAX_REVIEW_BOX } from "@/lib/data";
+import { getExerciseQuestions, getUserByEmail, REVIEW_INTERVAL_DAYS, MAX_REVIEW_BOX, type ExerciseQuestion } from "@/lib/data";
 import { finishExam, saveExamAnswers, startExam, type ExamAnswer, type ExamResult } from "@/lib/exam";
 import {
   AUTH_COOKIE,
@@ -293,4 +293,10 @@ export async function submitExamAction(attemptId: number, answers: ExamAnswer[])
   revalidatePath("/marks");
   revalidatePath("/lessons");
   return result;
+}
+
+/** Mashq ochilganda uning savollarini yuklaydi (sahifa savollarsiz keladi). */
+export async function loadExerciseQuestions(exerciseId: number): Promise<ExerciseQuestion[]> {
+  const userId = await requireUserId();
+  return getExerciseQuestions(userId, exerciseId);
 }

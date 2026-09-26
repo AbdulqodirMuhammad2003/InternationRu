@@ -1,5 +1,5 @@
 import { getSession } from "@/lib/auth";
-import { getUserStats, getAllUnitsDetailed, getLevels, getActivityOverview, getReviewSummary } from "@/lib/data";
+import { getUserStats, getAllUnitsDetailed, withoutQuestions, getLevels, getActivityOverview, getReviewSummary } from "@/lib/data";
 import { TodayPanel } from "@/components/TodayPanel";
 import { LessonsBoard } from "@/components/lessons/LessonsBoard";
 import { ExamCard } from "@/components/exam/ExamCard";
@@ -10,7 +10,7 @@ export default async function LessonsPage() {
   const userId = session!.userId;
   const [user, units, levels, activity, review, exam] = await Promise.all([
     getUserStats(userId),
-    getAllUnitsDetailed(userId),
+    getAllUnitsDetailed(userId).then(withoutQuestions),
     getLevels(userId),
     getActivityOverview(userId),
     getReviewSummary(userId),
