@@ -41,6 +41,7 @@ import { B1_03_EXERCISES, B1_03_ROUNDS } from "./b1-03-brak-i-razvod";
 import { B1_04_EXERCISES, B1_04_ROUNDS } from "./b1-04-byt-i-byudzhet";
 import { B1_05_EXERCISES, B1_05_ROUNDS } from "./b1-05-vysshee-obrazovanie";
 import { B1_06_EXERCISES, B1_06_ROUNDS } from "./b1-06-genii";
+import { B1_07_EXERCISES, B1_07_ROUNDS } from "./b1-07-rabota-frilans";
 
 export interface LessonContent {
   code: string;
@@ -108,6 +109,7 @@ const LESSONS: LessonContent[] = [
   { code: "B1-04", rounds: B1_04_ROUNDS, exercises: B1_04_EXERCISES },
   { code: "B1-05", rounds: B1_05_ROUNDS, exercises: B1_05_EXERCISES },
   { code: "B1-06", rounds: B1_06_ROUNDS, exercises: B1_06_EXERCISES },
+  { code: "B1-07", rounds: B1_07_ROUNDS, exercises: B1_07_EXERCISES },
 ];
 
 export const LESSON_CONTENT: LessonContent[] = LESSONS.map((l) => ({
