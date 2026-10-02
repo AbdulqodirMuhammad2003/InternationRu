@@ -265,6 +265,7 @@ export const UNITS: UnitSeed[] = [
   // Kitobning 8 moduli 16 ta darsga bo'lingan; 4–5-bosqich kollokatsiyalari
   // qisman A. Absalomov lug'atidan.
   { code: "B2-01", level: "B2", title: "1-dars", subtitle: "Природные богатства России", color: "blue", icon: "book", locked: 1, date: "", clip: null },
+  { code: "B2-02", level: "B2", title: "2-dars", subtitle: "Кремль и Регистан", color: "orange", icon: "chat", locked: 1, date: "", clip: null },
 ];
 
 export async function seedDatabase() {
