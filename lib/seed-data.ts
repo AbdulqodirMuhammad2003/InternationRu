@@ -221,6 +221,8 @@ export const UNITS: UnitSeed[] = [
   { code: "R12", level: "A1", title: "13-dars", subtitle: "День рождения. Sovg'a va bayramlar", color: "orange", icon: "chart", locked: 1, date: "", clip: null },
   { code: "R13", level: "A1", title: "14-dars", subtitle: "В городе. Yo'l so'rash", color: "purple", icon: "chat", locked: 1, date: "", clip: null },
   { code: "R14", level: "A1", title: "15-dars", subtitle: "Читаем русскую литературу", color: "black", icon: "lock", locked: 1, date: "", clip: null },
+  // Daraja oxirida, imtihondan oldin — butun daraja bo'yicha takrorlash.
+  { code: "A1-T", level: "A1", title: "Takrorlash", subtitle: "A1 darajasi bo'yicha umumiy takror", color: "orange", icon: "book", locked: 1, date: "", clip: null },
   // ---------- A2 — Базовый уровень (Liden & Denz, 2-kitob) ----------
   { code: "A2-01", level: "A2", title: "1-dars", subtitle: "Давайте поговорим! Takrorlash", color: "green", icon: "chat", locked: 1, date: "", clip: null },
   { code: "A2-02", level: "A2", title: "2-dars", subtitle: "Биография", color: "blue", icon: "book", locked: 1, date: "", clip: null },
@@ -238,6 +240,7 @@ export const UNITS: UnitSeed[] = [
   { code: "A2-14", level: "A2", title: "14-dars", subtitle: "Работа", color: "purple", icon: "headphones", locked: 1, date: "", clip: null },
   { code: "A2-15", level: "A2", title: "15-dars", subtitle: "Кино, театр, телевидение", color: "black", icon: "chat", locked: 1, date: "", clip: null },
   { code: "A2-16", level: "A2", title: "16-dars", subtitle: "Традиции и праздники", color: "green", icon: "book", locked: 1, date: "", clip: null },
+  { code: "A2-T", level: "A2", title: "Takrorlash", subtitle: "A2 darajasi bo'yicha umumiy takror", color: "orange", icon: "book", locked: 1, date: "", clip: null },
   // ---------- B1 — Первый сертификационный уровень (Liden & Denz, B1.1) ----------
   // Kitobning 8 moduli 16 ta darsga bo'lingan: har darsda bitta asosiy
   // grammatika mavzusi (katta mavzular — sifatdosh, ravishdosh — bir necha

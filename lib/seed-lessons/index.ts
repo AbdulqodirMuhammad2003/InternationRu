@@ -17,6 +17,7 @@ import { R11_EXERCISES, R11_ROUNDS } from "./r11-universitet";
 import { R12_EXERCISES, R12_ROUNDS } from "./r12-den-rozhdeniya";
 import { R13_EXERCISES, R13_ROUNDS } from "./r13-v-gorode";
 import { R14_EXERCISES, R14_ROUNDS } from "./r14-literatura";
+import { A1_REV_EXERCISES, A1_REV_ROUNDS } from "./a1-takror";
 import { A2_01_EXERCISES, A2_01_ROUNDS } from "./a2-01-davaite-pogovorim";
 import { A2_02_EXERCISES, A2_02_ROUNDS } from "./a2-02-biografiya";
 import { A2_03_EXERCISES, A2_03_ROUNDS } from "./a2-03-semya";
@@ -33,6 +34,7 @@ import { A2_13_EXERCISES, A2_13_ROUNDS } from "./a2-13-obrazovanie";
 import { A2_14_EXERCISES, A2_14_ROUNDS } from "./a2-14-rabota";
 import { A2_15_EXERCISES, A2_15_ROUNDS } from "./a2-15-kino";
 import { A2_16_EXERCISES, A2_16_ROUNDS } from "./a2-16-prazdniki";
+import { A2_REV_EXERCISES, A2_REV_ROUNDS } from "./a2-takror";
 import { B1_01_EXERCISES, B1_01_ROUNDS } from "./b1-01-semeynye-tsennosti";
 
 export interface LessonContent {
@@ -77,6 +79,7 @@ const LESSONS: LessonContent[] = [
   { code: "R12", rounds: R12_ROUNDS, exercises: R12_EXERCISES },
   { code: "R13", rounds: R13_ROUNDS, exercises: R13_EXERCISES },
   { code: "R14", rounds: R14_ROUNDS, exercises: R14_EXERCISES },
+  { code: "A1-T", rounds: A1_REV_ROUNDS, exercises: A1_REV_EXERCISES },
   { code: "A2-01", rounds: A2_01_ROUNDS, exercises: A2_01_EXERCISES },
   { code: "A2-02", rounds: A2_02_ROUNDS, exercises: A2_02_EXERCISES },
   { code: "A2-03", rounds: A2_03_ROUNDS, exercises: A2_03_EXERCISES },
@@ -93,6 +96,7 @@ const LESSONS: LessonContent[] = [
   { code: "A2-14", rounds: A2_14_ROUNDS, exercises: A2_14_EXERCISES },
   { code: "A2-15", rounds: A2_15_ROUNDS, exercises: A2_15_EXERCISES },
   { code: "A2-16", rounds: A2_16_ROUNDS, exercises: A2_16_EXERCISES },
+  { code: "A2-T", rounds: A2_REV_ROUNDS, exercises: A2_REV_EXERCISES },
   { code: "B1-01", rounds: B1_01_ROUNDS, exercises: B1_01_EXERCISES },
 ];
 
