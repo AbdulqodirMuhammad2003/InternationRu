@@ -3,10 +3,12 @@ import { sql } from "./db";
 import { getLevelBoard, UNLOCK_RULE_ENABLED, UNLOCK_THRESHOLD } from "./data";
 import { A1_GRAMMAR_BANK, type ExamGrammarItem } from "./exam-a1";
 import { A2_GRAMMAR_BANK } from "./exam-a2";
+import { B1_GRAMMAR_BANK } from "./exam-b1";
 
 /**
  * Daraja yakuniy imtihoni: o'quvchi o'z darajasining imtihonini topshiradi
- * (A1 — Elementar, A2 — Asosiy). Har daraja uchun grammatika banki alohida.
+ * (A1 — Elementar, A2 — Asosiy, B1 — Birinchi sertifikat). Har daraja uchun
+ * grammatika banki alohida.
  *
  *  - 40 savol: 20 ta lug'at (rasm + o'zbekcha tarjima → ruscha so'zni yozish)
  *    va 20 ta grammatika (variant tanlash). Har dars kamida bittadan savol
@@ -25,6 +27,7 @@ import { A2_GRAMMAR_BANK } from "./exam-a2";
 const EXAMS: Record<string, { title: string; bank: Record<string, ExamGrammarItem[]> }> = {
   A1: { title: "Elementar daraja imtihoni", bank: A1_GRAMMAR_BANK },
   A2: { title: "Asosiy daraja imtihoni", bank: A2_GRAMMAR_BANK },
+  B1: { title: "Birinchi sertifikat darajasi imtihoni", bank: B1_GRAMMAR_BANK },
 };
 const EXAM_LEVELS = Object.keys(EXAMS);
 
@@ -154,7 +157,11 @@ async function buildVariant(level: string): Promise<StoredQuestion[]> {
   const key = (uz: string) => uz.toLowerCase().replace(/\(.*?\)/g, "").split(/[;,]/)[0].trim();
   const seen = new Map<string, number>();
   for (const w of words) seen.set(key(w.translation_uz), (seen.get(key(w.translation_uz)) ?? 0) + 1);
-  const unique = words.filter((w) => seen.get(key(w.translation_uz)) === 1);
+  // Uch va undan ko'p so'zli kollokatsiyalar (B1 dan boshlab ko'p) imtihonda
+  // yoddan yozishga juda uzun — lug'at savollari 1–2 so'zli birliklardan olinadi.
+  const unique = words.filter(
+    (w) => seen.get(key(w.translation_uz)) === 1 && w.word.trim().split(/s+/).length <= 2
+  );
 
   const vocab = spreadPick(
     units.map((u) => unique.filter((w) => w.unit_id === u.id)),
