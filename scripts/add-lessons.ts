@@ -57,13 +57,17 @@ async function main() {
   const missingLevels = LEVELS.filter((l) => !levelIds.has(l.code));
   const missingUnits = UNITS.filter((u) => !unitIds.has(u.code));
 
-  const counts = await sql<{ code: string; rounds: number; exercises: number }[]>`
-    SELECT u.code,
-           (SELECT count(*) FROM vocabulary_rounds r WHERE r.unit_id = u.id)::int AS rounds,
-           (SELECT count(*) FROM exercises e WHERE e.unit_id = u.id)::int AS exercises
-    FROM units u
-  `;
-  const countOf = new Map(counts.map((c) => [c.code, c]));
+  // Ikki yengil guruhlash so'rovi (har dars uchun subquery Supabase'da
+  // statement timeout'ga olib kelardi).
+  const [roundCounts, exerciseCounts] = await Promise.all([
+    sql<{ unit_id: number; n: number }[]>`SELECT unit_id, count(*)::int AS n FROM vocabulary_rounds GROUP BY unit_id`,
+    sql<{ unit_id: number; n: number }[]>`SELECT unit_id, count(*)::int AS n FROM exercises GROUP BY unit_id`,
+  ]);
+  const roundsOf = new Map(roundCounts.map((r) => [r.unit_id, r.n]));
+  const exercisesOf = new Map(exerciseCounts.map((r) => [r.unit_id, r.n]));
+  const countOf = new Map(
+    units.map((u) => [u.code, { rounds: roundsOf.get(u.id) ?? 0, exercises: exercisesOf.get(u.id) ?? 0 }])
+  );
   for (const code of replaceCodes) {
     if (!LESSON_CONTENT.some((l) => l.code === code) || !unitIds.has(code)) {
       throw new Error(`--replace=${code}: bunday dars kodda yoki bazada yo'q.`);
