@@ -246,6 +246,7 @@ export const UNITS: UnitSeed[] = [
   // grammatika mavzusi (katta mavzular — sifatdosh, ravishdosh — bir necha
   // darsga yoyilgan). Lug'atning 4–5-bosqichi — kollokatsiyalar.
   { code: "B1-01", level: "B1", title: "1-dars", subtitle: "Семейные ценности", color: "blue", icon: "book", locked: 1, date: "", clip: null },
+  { code: "B1-02", level: "B1", title: "2-dars", subtitle: "Династия Запашных", color: "orange", icon: "headphones", locked: 1, date: "", clip: null },
 ];
 
 export async function seedDatabase() {

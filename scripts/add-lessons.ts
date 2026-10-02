@@ -11,6 +11,12 @@
  *    mazmuni (har dars bitta tranzaksiyada).
  * Mazmuni qisman bor dars o'tkazib yuboriladi (ogohlantirish bilan) —
  * uni qo'lda tekshirish kerak.
+ *
+ *   npm run db:add-lessons -- --replace=B1-01 [--apply]
+ *
+ * Mavjud darsning mazmunini (lug'at va mashqlar) koddagi bilan almashtiradi.
+ * DIQQAT: o'quvchilarning shu darsdagi so'z va mashq natijalari ham o'chadi
+ * (ON DELETE CASCADE) — sinov rejimi ularning sonini ko'rsatadi.
  */
 import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
@@ -20,6 +26,10 @@ import { insertExercises, insertRound, insertUnit, LEVELS, UNITS } from "../lib/
 import { LESSON_CONTENT } from "../lib/seed-lessons";
 
 const apply = process.argv.includes("--apply");
+const replaceCodes = process.argv
+  .filter((a) => a.startsWith("--replace="))
+  .flatMap((a) => a.slice("--replace=".length).split(","))
+  .filter(Boolean);
 
 async function main() {
   const sql = getDb();
@@ -40,7 +50,14 @@ async function main() {
     FROM units u
   `;
   const countOf = new Map(counts.map((c) => [c.code, c]));
+  for (const code of replaceCodes) {
+    if (!LESSON_CONTENT.some((l) => l.code === code) || !unitIds.has(code)) {
+      throw new Error(`--replace=${code}: bunday dars kodda yoki bazada yo'q.`);
+    }
+  }
+  const toReplace = LESSON_CONTENT.filter((l) => replaceCodes.includes(l.code));
   const toFill = LESSON_CONTENT.filter((l) => {
+    if (replaceCodes.includes(l.code)) return false;
     const c = countOf.get(l.code);
     if (!c) return true; // dars hozir qo'shiladi
     if (c.rounds === 0 && c.exercises === 0) return true;
@@ -59,6 +76,27 @@ async function main() {
       toFill.map((l) => `${l.code} (${l.rounds.reduce((s, r) => s + r.words.length, 0)} so'z, ${l.exercises.length} mashq)`).join(", ") || "yo'q"
     }`
   );
+
+  for (const l of toReplace) {
+    const unitId = unitIds.get(l.code)!;
+    const [p] = await sql<{ words: number; stages: number; reviews: number; questions: number; exercises: number; units: number }[]>`
+      SELECT
+        (SELECT count(*) FROM user_word_progress p JOIN vocabulary_words w ON w.id = p.word_id
+           JOIN vocabulary_rounds r ON r.id = w.round_id WHERE r.unit_id = ${unitId})::int AS words,
+        (SELECT count(*) FROM user_word_stage_progress p JOIN vocabulary_words w ON w.id = p.word_id
+           JOIN vocabulary_rounds r ON r.id = w.round_id WHERE r.unit_id = ${unitId})::int AS stages,
+        (SELECT count(*) FROM user_word_review p JOIN vocabulary_words w ON w.id = p.word_id
+           JOIN vocabulary_rounds r ON r.id = w.round_id WHERE r.unit_id = ${unitId})::int AS reviews,
+        (SELECT count(*) FROM user_question_progress p JOIN exercise_questions q ON q.id = p.question_id
+           JOIN exercises e ON e.id = q.exercise_id WHERE e.unit_id = ${unitId})::int AS questions,
+        (SELECT count(*) FROM user_exercise_progress p JOIN exercises e ON e.id = p.exercise_id
+           WHERE e.unit_id = ${unitId})::int AS exercises,
+        (SELECT count(*) FROM user_unit_progress WHERE unit_id = ${unitId})::int AS units
+    `;
+    console.log(
+      `Mazmuni almashtiriladigan dars: ${l.code} — o'chadigan natijalar: ${p.words} so'z, ${p.stages} so'z bosqichi, ${p.reviews} takrorlash, ${p.questions} savol, ${p.exercises} mashq, ${p.units} dars foizi`
+    );
+  }
 
   if (!apply) {
     console.log("\nBu sinov rejimi — bazaga hech narsa yozilmadi. Qo'shish uchun: npm run db:add-lessons -- --apply");
@@ -80,6 +118,21 @@ async function main() {
     const order = UNITS.filter((x) => x.level === u.level).indexOf(u) + 1;
     unitIds.set(u.code, await insertUnit(sql, levelIds.get(u.level)!, order, u));
     console.log(`+ dars ${u.code} «${u.subtitle}»`);
+  }
+
+  for (const lesson of toReplace) {
+    const unitId = unitIds.get(lesson.code)!;
+    await sql.begin(async (t) => {
+      const db = t as unknown as Db;
+      await db`DELETE FROM vocabulary_rounds WHERE unit_id = ${unitId}`;
+      await db`DELETE FROM exercises WHERE unit_id = ${unitId}`;
+      await db`DELETE FROM user_unit_progress WHERE unit_id = ${unitId}`;
+      for (const [i, round] of lesson.rounds.entries()) {
+        await insertRound(db, unitId, round.title, i + 1, round.words);
+      }
+      await insertExercises(db, unitId, lesson.exercises);
+    });
+    console.log(`~ mazmun almashtirildi ${lesson.code}`);
   }
 
   for (const lesson of toFill) {
