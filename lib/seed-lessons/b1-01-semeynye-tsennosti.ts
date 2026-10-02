@@ -7,7 +7,7 @@
  * по кому, заботиться о ком, жениться на ком, выйти замуж за кого).
  * Zinapoya: -ся bilan/-siz — 2 bosqich, turlari — 1, boshqaruv — 2,
  * majhul konstruksiya — 1. Lug'at 5 bosqich (50 so'z), shundan 4–5-bosqich
- * — kollokatsiyalar. 15 ta mashq.
+ * — kollokatsiyalar. 18 ta mashq (qarindoshlar, urg'u va talaffuz 2026-10-02 da qo'shilgan).
  */
 import type { SeedExercise, SeedQuestion } from "../seed-exercises";
 import type { VocabSeed } from "./types";
@@ -115,6 +115,14 @@ const listen = (audio: string, options: string[]): SeedQuestion => ({
 });
 const fill = (prompt: string, answer: string, explanation?: string): SeedQuestion => ({ prompt, answer, explanation });
 const join = (prompt: string, answer: string): SeedQuestion => ({ prompt, answer });
+/** Urg'u: bo'g'inlar "|" bilan, `correct` — urg'uli bo'g'in raqami (0 dan). */
+const stress = (syllables: string, correct: number, explanation?: string): SeedQuestion => ({
+  prompt: "Urg'uli bo'g'inni toping",
+  audio: syllables.replace(/|/g, ""),
+  options: syllables.split("|"),
+  correct,
+  explanation,
+});
 
 /** -ся fe'lining turlari — barcha savollarda bir xil tartibdagi variantlar. */
 const SYA_TYPES = [
@@ -325,6 +333,25 @@ export const B1_01_EXERCISES: SeedExercise[] = [
     ],
   },
   {
+    title: "Свекровь или тёща?",
+    skill: "Qarindoshlar",
+    kind: "type",
+    instructions:
+      "Rus tilida erning va xotinning qarindoshlari turlicha ataladi: СВЕКРОВЬ / СВЁКОР — erning onasi / otasi, ТЁЩА / ТЕСТЬ — xotinning onasi / otasi, ЗЯТЬ — qizning eri (kuyov), НЕВЕСТКА — o'g'ilning xotini (kelin), СВАТЫ — qudalar. Ta'rifga mos so'zni yozing.",
+    questions: [
+      ["мать мужа", "свекровь"],
+      ["мать жены", "тёща|теща"],
+      ["отец мужа", "свёкор|свекор"],
+      ["отец жены", "тесть"],
+      ["муж дочери", "зять"],
+      ["жена сына", "невестка"],
+      ["родители мужа и жены друг для друга", "сваты", "O'zbekcha «qudalar»."],
+      ["женщина, у которой умер муж", "вдова"],
+      ["мужчина, у которого умерла жена", "вдовец"],
+      ["муж (официальное слово)", "супруг"],
+    ].map(([prompt, answer, explanation]) => ({ prompt, answer, explanation })),
+  },
+  {
     title: "Дети воспитываются…",
     skill: "Majhul konstruksiya",
     kind: "order",
@@ -378,6 +405,43 @@ export const B1_01_EXERCISES: SeedExercise[] = [
       pick("Ты скучаешь по дому?", ["Очень! Особенно по маминой еде.", "Очень! Особенно о маминой еде.", "Да, скучаю домой.", "Нет, дом скучный."]),
       pick("Говорят, ты женишься? Поздравляю!", ["Да, спасибо! Свадьба в сентябре.", "Да, я женюсь на свадьбе.", "Нет, я женат на сентябре.", "Поздравляю тоже!"]),
     ],
+  },
+  {
+    title: "Urg'u qayerda?",
+    skill: "Urg'u",
+    kind: "stress",
+    instructions:
+      "Darsdagi so'zlarning urg'usini mustahkamlaymiz: свекро́вь, неве́стка, усынови́ть. So'zni eshiting va urg'uli bo'g'inni bosing. Urg'usiz «о» [a] bo'lib o'qiladi.",
+    questions: [
+      stress("гор|дость", 0, "го́рдость"),
+      stress("цен|ность", 0, "це́нность"),
+      stress("вдо|вец", 1, "вдове́ц"),
+      stress("све|кровь", 1, "свекро́вь"),
+      stress("не|вест|ка", 1, "неве́стка"),
+      stress("раз|во|дить|ся", 2, "разводи́ться"),
+      stress("у|сы|но|вить", 3, "усынови́ть"),
+      stress("у|ва|же|ни|е", 2, "уваже́ние"),
+      stress("под|дер|жи|вать", 1, "подде́рживать"),
+      stress("пе|ре|жи|вать", 3, "пережива́ть"),
+    ],
+  },
+  {
+    title: "Ayting",
+    skill: "Talaffuz",
+    kind: "speak",
+    instructions: "Gapni eshiting, keyin mikrofon tugmasini bosib o'zingiz ayting. -ся oxiridagi «-тся / -ться» [tsa] deb o'qiladi.",
+    questions: [
+      "Мы познакомились на свадьбе у друзей.",
+      "Я очень скучаю по своей семье.",
+      "Не надо обижаться, я не хотел тебя обидеть.",
+      "Семья — главная ценность в жизни.",
+      "Он сделал ей предложение весной.",
+      "Дети воспитываются в атмосфере любви.",
+      "Свекровь научила меня готовить плов.",
+      "Перед важным решением я советуюсь с родителями.",
+      "Настоящий друг умеет держать слово.",
+      "Крепкая семья строится на доверии.",
+    ].map((phrase) => ({ prompt: phrase, answer: phrase })),
   },
   {
     title: "Pushkin oilasi",

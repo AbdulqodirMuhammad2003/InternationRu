@@ -17,6 +17,14 @@
  * Mavjud darsning mazmunini (lug'at va mashqlar) koddagi bilan almashtiradi.
  * DIQQAT: o'quvchilarning shu darsdagi so'z va mashq natijalari ham o'chadi
  * (ON DELETE CASCADE) — sinov rejimi ularning sonini ko'rsatadi.
+ *
+ *   npm run db:add-lessons -- --sync=B1-01,B1-02 [--apply]
+ *
+ * Mavjud darsga kodda qo'shilgan YANGI mashqlarni (nomi bo'yicha) qo'shadi
+ * va mashqlar tartibini koddagidek qiladi. Lug'at, mavjud mashqlar va
+ * o'quvchi natijalari o'zgarmaydi. Bazada kodda yo'q mashq bo'lsa yoki
+ * mavjud mashqning savollari soni o'zgargan bo'lsa — dars o'tkazib
+ * yuboriladi (unda --replace kerak).
  */
 import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
@@ -26,6 +34,12 @@ import { insertExercises, insertRound, insertUnit, LEVELS, UNITS } from "../lib/
 import { LESSON_CONTENT } from "../lib/seed-lessons";
 
 const apply = process.argv.includes("--apply");
+const listArg = (name: string) =>
+  process.argv
+    .filter((a) => a.startsWith(`--${name}=`))
+    .flatMap((a) => a.slice(name.length + 3).split(","))
+    .filter(Boolean);
+const syncCodes = listArg("sync");
 const replaceCodes = process.argv
   .filter((a) => a.startsWith("--replace="))
   .flatMap((a) => a.slice("--replace=".length).split(","))
@@ -56,8 +70,31 @@ async function main() {
     }
   }
   const toReplace = LESSON_CONTENT.filter((l) => replaceCodes.includes(l.code));
+  const toSync: { lesson: (typeof LESSON_CONTENT)[number]; unitId: number; missing: number[] }[] = [];
+  for (const code of syncCodes) {
+    const lesson = LESSON_CONTENT.find((l) => l.code === code);
+    const unitId = unitIds.get(code);
+    if (!lesson || !unitId) throw new Error(`--sync=${code}: bunday dars kodda yoki bazada yo'q.`);
+    const dbEx = await sql<{ title: string; n: number }[]>`
+      SELECT e.title, (SELECT count(*) FROM exercise_questions q WHERE q.exercise_id = e.id)::int AS n
+      FROM exercises e WHERE e.unit_id = ${unitId}
+    `;
+    const codeTitles = new Set(lesson.exercises.map((e) => e.title));
+    const extra = dbEx.filter((e) => !codeTitles.has(e.title)).map((e) => e.title);
+    const changed = dbEx.filter((e) => {
+      const c = lesson.exercises.find((x) => x.title === e.title);
+      return c && c.questions.length !== e.n;
+    });
+    if (extra.length || changed.length) {
+      console.warn(`! ${code}: bazada kodda yo'q mashqlar (${extra.join("; ") || "—"}) yoki savollar soni o'zgargan (${changed.map((e) => e.title).join("; ") || "—"}) — o'tkazib yuborildi.`);
+      continue;
+    }
+    const dbTitles = new Set(dbEx.map((e) => e.title));
+    const missing = lesson.exercises.flatMap((e, i) => (dbTitles.has(e.title) ? [] : [i]));
+    toSync.push({ lesson, unitId, missing });
+  }
   const toFill = LESSON_CONTENT.filter((l) => {
-    if (replaceCodes.includes(l.code)) return false;
+    if (replaceCodes.includes(l.code) || syncCodes.includes(l.code)) return false;
     const c = countOf.get(l.code);
     if (!c) return true; // dars hozir qo'shiladi
     if (c.rounds === 0 && c.exercises === 0) return true;
@@ -98,6 +135,12 @@ async function main() {
     );
   }
 
+  for (const { lesson, missing } of toSync) {
+    console.log(
+      `Yangi mashqlar qo'shiladigan dars: ${lesson.code} — ${missing.map((i) => lesson.exercises[i].title).join("; ") || "yo'q (faqat tartib)"}`
+    );
+  }
+
   if (!apply) {
     console.log("\nBu sinov rejimi — bazaga hech narsa yozilmadi. Qo'shish uchun: npm run db:add-lessons -- --apply");
     return;
@@ -133,6 +176,19 @@ async function main() {
       await insertExercises(db, unitId, lesson.exercises);
     });
     console.log(`~ mazmun almashtirildi ${lesson.code}`);
+  }
+
+  for (const { lesson, unitId, missing } of toSync) {
+    await sql.begin(async (t) => {
+      const db = t as unknown as Db;
+      await insertExercises(db, unitId, missing.map((i) => lesson.exercises[i]));
+      // Tartib koddagidek: avval vaqtincha manfiy raqamlar (takrorlanmasligi uchun).
+      for (const [i, ex] of lesson.exercises.entries()) {
+        await db`UPDATE exercises SET order_index = ${-(i + 1)} WHERE unit_id = ${unitId} AND title = ${ex.title}`;
+      }
+      await db`UPDATE exercises SET order_index = -order_index WHERE unit_id = ${unitId}`;
+    });
+    console.log(`+ ${lesson.code}: ${missing.length} ta mashq qo'shildi, tartib yangilandi`);
   }
 
   for (const lesson of toFill) {
