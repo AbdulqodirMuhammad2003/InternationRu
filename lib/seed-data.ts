@@ -256,6 +256,7 @@ export const UNITS: UnitSeed[] = [
   { code: "B1-09", level: "B1", title: "9-dars", subtitle: "Здоровый образ жизни", color: "green", icon: "headphones", locked: 1, date: "", clip: null },
   { code: "B1-10", level: "B1", title: "10-dars", subtitle: "Фитнес, телемедицина", color: "blue", icon: "chat", locked: 1, date: "", clip: null },
   { code: "B1-11", level: "B1", title: "11-dars", subtitle: "Спорт для всех", color: "orange", icon: "book", locked: 1, date: "", clip: null },
+  { code: "B1-12", level: "B1", title: "12-dars", subtitle: "Соревнования, болельщики", color: "purple", icon: "headphones", locked: 1, date: "", clip: null },
 ];
 
 export async function seedDatabase() {
