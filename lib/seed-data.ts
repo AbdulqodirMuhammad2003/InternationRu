@@ -261,6 +261,10 @@ export const UNITS: UnitSeed[] = [
   { code: "B1-14", level: "B1", title: "14-dars", subtitle: "Отходы и экопроекты", color: "blue", icon: "chat", locked: 1, date: "", clip: null },
   { code: "B1-15", level: "B1", title: "15-dars", subtitle: "Город и деревня", color: "orange", icon: "headphones", locked: 1, date: "", clip: null },
   { code: "B1-16", level: "B1", title: "16-dars", subtitle: "Русская дача", color: "green", icon: "book", locked: 1, date: "", clip: null },
+  // ---------- B2 (Liden & Denz, «Я ❤ Русский Язык» B1.2) ----------
+  // Kitobning 8 moduli 16 ta darsga bo'lingan; 4–5-bosqich kollokatsiyalari
+  // qisman A. Absalomov lug'atidan.
+  { code: "B2-01", level: "B2", title: "1-dars", subtitle: "Природные богатства России", color: "blue", icon: "book", locked: 1, date: "", clip: null },
 ];
 
 export async function seedDatabase() {
