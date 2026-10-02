@@ -134,6 +134,10 @@ export const UNLOCK_THRESHOLD = 80;
 /** VAQTINCHA o'chirilgan: darslar mazmunini tekshirish uchun hamma
  *  tayyor darslar ochiq. Qoidani qaytarish uchun `true` qiling. */
 export const UNLOCK_RULE_ENABLED = false;
+/** VAQTINCHA: shu hisoblarga imtihonsiz ham barcha darajalar ochiq (yangi
+ *  darajalar mazmunini tekshirish uchun). Qoidani qaytarish uchun ro'yxatni
+ *  bo'shating. */
+export const PREVIEW_ALL_LEVELS_EMAILS = ["demo@avangard.uz"];
 
 // ---------- Foydalanuvchi ----------
 
@@ -269,12 +273,15 @@ export async function getWordPool(): Promise<{ id: number; word: string; transla
 
 /** Darajalar o'quvchi uchun: uning joriy darajasi va undan oldingilari
  *  ochiq, keyingilari yopiq. Keyingi daraja yakuniy imtihondan o'tganda
- *  ochiladi (lib/exam.ts o'quvchining darajasini ko'taradi). */
+ *  ochiladi (lib/exam.ts o'quvchining darajasini ko'taradi).
+ *  PREVIEW_ALL_LEVELS_EMAILS dagi hisoblarga hamma darajalar ochiq. */
 export async function getLevels(userId: number): Promise<LevelRecord[]> {
   return sql<LevelRecord[]>`
     SELECT l.id, l.code, l.title, l.description, l.order_index,
            (l.order_index > COALESCE(
-              (SELECT lv.order_index FROM users u JOIN levels lv ON lv.code = u.level WHERE u.id = ${userId}), 1
+              (SELECT CASE WHEN u.email IN ${sql(PREVIEW_ALL_LEVELS_EMAILS.length ? PREVIEW_ALL_LEVELS_EMAILS : [""])}
+                           THEN 999 ELSE lv.order_index END
+               FROM users u JOIN levels lv ON lv.code = u.level WHERE u.id = ${userId}), 1
            ))::int AS locked
     FROM levels l ORDER BY l.order_index ASC
   `;
