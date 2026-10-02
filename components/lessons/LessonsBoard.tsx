@@ -198,9 +198,10 @@ export function LessonsBoard({
   }
 
   function finishExercise(exerciseId: number, answers: { questionId: number; correct: boolean }[]) {
+    // revalidatePath ichidagi javob yangilangan sahifani ham olib keladi —
+    // alohida router.refresh() serverda sahifani ikkinchi marta hisoblatardi.
     startTransition(async () => {
       await submitExerciseResult(exerciseId, answers);
-      router.refresh();
     });
   }
 

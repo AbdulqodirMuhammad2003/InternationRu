@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
@@ -97,7 +97,11 @@ export function VocabRoundFlow({
   onClose: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
-  const [, startTransition] = useTransition();
+  // Saqlanayotgan javoblar: bosqich yopilganda hammasi tugashi kutiladi,
+  // shundan keyingina sahifa yangilanadi (aks holda foiz eski holicha qoladi).
+  const pendingSaves = useRef(new Set<Promise<unknown>>());
+  const closingRef = useRef(false);
+  const [closing, setClosing] = useState(false);
 
   const [phase, setPhase] = useState<Phase>("learn");
   const [learnIndex, setLearnIndex] = useState(0);
@@ -126,7 +130,7 @@ export function VocabRoundFlow({
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") close();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -134,14 +138,19 @@ export function VocabRoundFlow({
   }, []);
 
   function persistStage(wordId: number, stage: VocabStage, passed: boolean) {
-    startTransition(async () => {
-      try {
-        await setWordStagePassed(wordId, stage, passed);
-      } catch {
-        // Tarmoq/server xatosi bo'lsa ham UI o'z holicha davom etadi —
-        // foydalanuvchi roundni yakunlaganda umumiy progress qayta yuklanadi.
-      }
-    });
+    // Tarmoq/server xatosi bo'lsa ham UI o'z holicha davom etadi.
+    const save = setWordStagePassed(wordId, stage, passed).catch(() => {});
+    pendingSaves.current.add(save);
+    save.finally(() => pendingSaves.current.delete(save));
+  }
+
+  /** Avval barcha javoblar saqlanadi, keyin oyna yopiladi va foiz yangilanadi. */
+  async function close() {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setClosing(true);
+    await Promise.all([...pendingSaves.current]);
+    onClose();
   }
 
   function buildQueueForStage(stage: VocabStage): QueueItem[] {
@@ -244,8 +253,9 @@ export function VocabRoundFlow({
           </p>
         </div>
         <button
-          onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-ink-600 shadow-sm transition-colors hover:bg-white dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/15"
+          onClick={close}
+          disabled={closing}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 disabled:animate-pulse text-ink-600 shadow-sm transition-colors hover:bg-white dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/15"
           aria-label="Yopish"
         >
           <X size={20} />
@@ -341,7 +351,7 @@ export function VocabRoundFlow({
               setMistakeIdx(0);
               setPhase("mistakes-review");
             }}
-            onFinish={onClose}
+            onFinish={close}
           />
         )}
 
@@ -379,10 +389,11 @@ export function VocabRoundFlow({
               </p>
             </div>
             <button
-              onClick={onClose}
-              className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
+              onClick={close}
+              disabled={closing}
+              className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-70"
             >
-              Tugatish
+              {closing ? "Saqlanmoqda…" : "Tugatish"}
             </button>
           </div>
         )}

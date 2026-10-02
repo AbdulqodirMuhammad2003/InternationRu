@@ -208,8 +208,9 @@ export async function setWordStagePassed(
       `;
     }
   }
-
-  revalidatePath("/lessons");
+  // revalidatePath yo'q: bosqichda har bir to'g'ri javob alohida saqlanadi va
+  // har safar butun sahifani qayta hisoblash so'rovlar navbatini sekinlashtirib,
+  // foizni kechiktirardi. Sahifa bosqich yopilganda (VocabRoundFlow) yangilanadi.
 }
 
 /** Takrorlashdagi bitta javob: to'g'ri bo'lsa so'z keyingi qutichaga o'tadi
