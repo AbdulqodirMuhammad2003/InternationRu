@@ -66,6 +66,7 @@ import { B2_12_EXERCISES, B2_12_ROUNDS } from "./b2-12-lyudi-i-roboty";
 import { B2_13_EXERCISES, B2_13_ROUNDS } from "./b2-13-internet-veshchey";
 import { B2_14_EXERCISES, B2_14_ROUNDS } from "./b2-14-zhizn-v-sotssetyakh";
 import { B2_15_EXERCISES, B2_15_ROUNDS } from "./b2-15-oni-izmenili-mir";
+import { B2_16_EXERCISES, B2_16_ROUNDS } from "./b2-16-smi-i-novosti";
 
 export interface LessonContent {
   code: string;
@@ -158,6 +159,7 @@ const LESSONS: LessonContent[] = [
   { code: "B2-13", rounds: B2_13_ROUNDS, exercises: B2_13_EXERCISES },
   { code: "B2-14", rounds: B2_14_ROUNDS, exercises: B2_14_EXERCISES },
   { code: "B2-15", rounds: B2_15_ROUNDS, exercises: B2_15_EXERCISES },
+  { code: "B2-16", rounds: B2_16_ROUNDS, exercises: B2_16_EXERCISES },
 ];
 
 export const LESSON_CONTENT: LessonContent[] = LESSONS.map((l) => ({
