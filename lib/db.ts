@@ -17,6 +17,20 @@ declare global {
   var __avangardSql: ReturnType<typeof postgres> | undefined;
 }
 
+/**
+ * Supabase transaction pooler (*.pooler.supabase.com:6543) katta javobli
+ * so'rovlarda (masalan, «Darslar» sahifasidagi ~2400 so'zli lug'at) ulanishni
+ * qotirib qo'yadi: baza javobni yuborib bo'ladi, lekin u ilovaga yetib
+ * kelmaydi va server nusxasining keyingi so'rovlari cheksiz kutib qoladi
+ * (2026-10-03 da sahifa ochilmay qolgan). Xuddi shu xostdagi session pooler
+ * (5432-port) bunday qilmaydi — shu sababli 6543 avtomatik 5432 ga
+ * almashtiriladi. Boshqa ulanish satrlari (to'g'ridan-to'g'ri, lokal)
+ * o'zgarmaydi.
+ */
+function toSessionPooler(url: string) {
+  return url.replace(/(\.pooler\.supabase\.com):6543\b/, "$1:5432");
+}
+
 function createConnection() {
   if (!process.env.DATABASE_URL) {
     try {
@@ -37,12 +51,18 @@ function createConnection() {
     );
   }
 
-  return postgres(connectionString ?? "", {
+  return postgres(toSessionPooler(connectionString ?? ""), {
     // Supabase'ning "Transaction" pooler (pgbouncer, 6543-port) bilan ishlatilsa,
     // prepared statement'lar qo'llab-quvvatlanmaydi — shu sababli o'chirib qo'yilgan.
     // To'g'ridan-to'g'ri ulanish (5432-port) yoki "Session" pooler bilan ham xavfsiz.
     prepare: false,
     ssl: "require",
+    // Session pooler'da har bir ochiq ulanish serverdagi bitta ulanishni band
+    // qiladi: bitta server nusxasi ko'pi bilan 5 tasini ochadi (qolgan
+    // so'rovlar navbatda kutadi) va bo'sh ulanishlarni 20 soniyada yopadi —
+    // Vercel'ning bir nechta nusxasi pooler limitini to'ldirib qo'ymasligi uchun.
+    max: 5,
+    idle_timeout: 20,
   });
 }
 
