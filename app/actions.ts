@@ -4,7 +4,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
-import { getExerciseQuestions, getUserByEmail, REVIEW_INTERVAL_DAYS, MAX_REVIEW_BOX, type ExerciseQuestion } from "@/lib/data";
+import {
+  getExerciseQuestions,
+  getUnitWords,
+  getUserByEmail,
+  REVIEW_INTERVAL_DAYS,
+  MAX_REVIEW_BOX,
+  type ExerciseQuestion,
+  type VocabRoundWithWords,
+} from "@/lib/data";
 import { finishExam, saveExamAnswers, startExam, type ExamAnswer, type ExamResult } from "@/lib/exam";
 import {
   AUTH_COOKIE,
@@ -300,4 +308,11 @@ export async function submitExamAction(attemptId: number, answers: ExamAnswer[])
 export async function loadExerciseQuestions(exerciseId: number): Promise<ExerciseQuestion[]> {
   const userId = await requireUserId();
   return getExerciseQuestions(userId, exerciseId);
+}
+
+/** Darsning lug'at so'zlari — sahifa bilan kelmaydi (hajmi katta), lug'at
+ *  bosqichi ochilganda yuklanadi. */
+export async function loadUnitWords(unitId: number): Promise<VocabRoundWithWords[]> {
+  const userId = await requireUserId();
+  return getUnitWords(userId, unitId);
 }

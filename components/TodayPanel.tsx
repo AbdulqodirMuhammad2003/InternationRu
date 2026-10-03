@@ -22,12 +22,12 @@ function findNextStep(units: UnitDetail[]): NextStep | null {
   for (const unit of units) {
     if (unit.locked) continue;
     for (const round of unit.rounds) {
-      const left = round.words.filter((w) => !w.learned).length;
+      const left = round.word_count - round.learned_count;
       if (left > 0) {
         return {
           title: `${unit.title} · Lug'at, ${round.title}`,
           detail: `${left} ta so'z qoldi`,
-          percent: Math.round(((round.words.length - left) / round.words.length) * 100),
+          percent: Math.round((round.learned_count / round.word_count) * 100),
           href: `/lessons?unit=${unit.id}`,
         };
       }
@@ -80,10 +80,7 @@ export function TodayPanel({
   review: ReviewSummary;
 }) {
   const next = findNextStep(units);
-  const learned = units.reduce(
-    (s, u) => s + u.rounds.reduce((rs, r) => rs + r.words.filter((w) => w.learned).length, 0),
-    0
-  );
+  const learned = units.reduce((s, u) => s + u.learnedWords, 0);
   const totalWords = units.reduce((s, u) => s + u.totalWords, 0);
   const goalReached = activity.todayCorrect >= DAILY_GOAL;
 

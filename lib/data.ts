@@ -82,10 +82,18 @@ export interface VocabWord {
   stage_sentence: number;
 }
 
+/** Lug'at bosqichi sahifa bilan faqat sanoqlari bilan keladi — so'zlarning
+ *  o'zi bosqich ochilganda `getUnitWords` orqali yuklanadi (hamma
+ *  darslarning ~2400 so'zi birga sahifani ~1,8 MB qilib, sekinlashtirardi). */
 export interface VocabRound {
   id: number;
   title: string;
   order_index: number;
+  word_count: number;
+  learned_count: number;
+}
+
+export interface VocabRoundWithWords extends VocabRound {
   words: VocabWord[];
 }
 
@@ -125,6 +133,7 @@ export interface UnitDetail extends UnitRecord {
   rounds: VocabRound[];
   exercises: ExerciseRecord[];
   totalWords: number;
+  learnedWords: number;
   /** Dars yopiq bo'lsa — nega (o'quvchiga ko'rsatiladi), aks holda null. */
   lock_reason: string | null;
 }
@@ -308,28 +317,19 @@ export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
  *  natijalar shu yerda yig'iladi (avval har bir bosqich/mashq uchun alohida
  *  so'rov ketardi — ~50 ta ketma-ket so'rov). */
 export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]> {
-  const [units, rounds, words, exerciseRows, questionCounts] = await Promise.all([
+  const [units, rounds, wordCounts, exerciseRows, questionCounts] = await Promise.all([
     getUnitsForUser(userId),
     sql<{ id: number; unit_id: number; title: string; order_index: number }[]>`
       SELECT id, unit_id, title, order_index FROM vocabulary_rounds ORDER BY order_index ASC
     `,
-    // PostgreSQL GROUP BY'da faqat w.id bo'lsa ham w.* ustunlarini beradi
-    // (PRIMARY KEY orqali funksional bog'liq); boshqa jadvallardan kelgan
-    // qiymatlar MAX() bilan o'raladi — har bir (user, word, stage) uchun
-    // ko'pi bilan bitta qator bo'lgani sababli natija o'zgarmaydi.
-    sql<(VocabWord & { round_id: number })[]>`
-      SELECT w.id, w.round_id, w.word, w.transcription, w.part_of_speech, w.translation_uz, w.definition,
-             w.example_sentence, w.example_translation, w.emoji, w.order_index,
-             COALESCE(MAX(p.learned), 0) as learned,
-             COALESCE(MAX(CASE WHEN sp.stage = 'spelling' THEN sp.passed END), 0) as stage_spelling,
-             COALESCE(MAX(CASE WHEN sp.stage = 'definition' THEN sp.passed END), 0) as stage_definition,
-             COALESCE(MAX(CASE WHEN sp.stage = 'pronunciation' THEN sp.passed END), 0) as stage_pronunciation,
-             COALESCE(MAX(CASE WHEN sp.stage = 'sentence' THEN sp.passed END), 0) as stage_sentence
+    // So'zlarning o'zi emas, faqat har bir bosqichdagi soni va o'rganilgani
+    // (so'zlar bosqich ochilganda `getUnitWords` bilan yuklanadi).
+    sql<{ round_id: number; word_count: number; learned_count: number }[]>`
+      SELECT w.round_id, count(*)::int AS word_count,
+             count(*) FILTER (WHERE p.learned = 1)::int AS learned_count
       FROM vocabulary_words w
       LEFT JOIN user_word_progress p ON p.word_id = w.id AND p.user_id = ${userId}
-      LEFT JOIN user_word_stage_progress sp ON sp.word_id = w.id AND sp.user_id = ${userId}
-      GROUP BY w.id
-      ORDER BY w.order_index ASC
+      GROUP BY w.round_id
     `,
     sql<
       {
@@ -369,21 +369,23 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
     return map;
   }
 
-  const wordsByRound = groupBy(words, (w) => w.round_id);
+  const countsByRound = new Map(wordCounts.map((c) => [c.round_id, c]));
   const roundsByUnit = groupBy(rounds, (r) => r.unit_id);
   const questionCount = new Map(questionCounts.map((q) => [q.exercise_id, q.n]));
   const exercisesByUnit = groupBy(exerciseRows, (e) => e.unit_id);
 
   const detailed: UnitDetail[] = units.map((unit) => {
-    const fullRounds: VocabRound[] = (roundsByUnit.get(unit.id) ?? []).map(({ unit_id: _u, ...r }) => ({
+    const unitRounds: VocabRound[] = (roundsByUnit.get(unit.id) ?? []).map(({ unit_id: _u, ...r }) => ({
       ...r,
-      words: (wordsByRound.get(r.id) ?? []).map(({ round_id: _r, ...w }) => w),
+      word_count: countsByRound.get(r.id)?.word_count ?? 0,
+      learned_count: countsByRound.get(r.id)?.learned_count ?? 0,
     }));
     const exercises: ExerciseRecord[] = (exercisesByUnit.get(unit.id) ?? []).map(({ unit_id: _u, ...e }) => {
       return { ...e, question_count: questionCount.get(e.id) ?? 0, questions: [] as ExerciseQuestion[] };
     });
-    const totalWords = fullRounds.reduce((sum, r) => sum + r.words.length, 0);
-    return { ...unit, rounds: fullRounds, exercises, totalWords, lock_reason: null as string | null };
+    const totalWords = unitRounds.reduce((sum, r) => sum + r.word_count, 0);
+    const learnedWords = unitRounds.reduce((sum, r) => sum + r.learned_count, 0);
+    return { ...unit, rounds: unitRounds, exercises, totalWords, learnedWords, lock_reason: null as string | null };
   });
 
   // Dars progressi = lug'at va mashqlar foizining o'rtachasi (qaysi qismi
@@ -394,8 +396,7 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
   for (const unit of detailed) {
     const parts: number[] = [];
     if (unit.totalWords > 0) {
-      const learned = unit.rounds.reduce((s, r) => s + r.words.filter((w) => w.learned).length, 0);
-      parts.push((learned / unit.totalWords) * 100);
+      parts.push((unit.learnedWords / unit.totalWords) * 100);
     }
     if (unit.exercises.length > 0) {
       parts.push(unit.exercises.reduce((s, e) => s + e.score_pct, 0) / unit.exercises.length);
@@ -417,6 +418,44 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
  *  `getExerciseQuestions` orqali alohida yuklanadi. */
 export function withoutQuestions(units: UnitDetail[]): UnitDetail[] {
   return units.map((u) => ({ ...u, exercises: u.exercises.map((e) => ({ ...e, questions: [] })) }));
+}
+
+/** Bitta darsning lug'at bosqichlari so'zlari bilan (o'quvchi progressi —
+ *  o'rganilgan so'zlar va o'tilgan tekshiruv bosqichlari — bilan birga).
+ *  PostgreSQL GROUP BY'da faqat w.id bo'lsa ham w.* ustunlarini beradi
+ *  (PRIMARY KEY orqali funksional bog'liq); boshqa jadvallardan kelgan
+ *  qiymatlar MAX() bilan o'raladi — har bir (user, word, stage) uchun
+ *  ko'pi bilan bitta qator bo'lgani sababli natija o'zgarmaydi. */
+export async function getUnitWords(userId: number, unitId: number): Promise<VocabRoundWithWords[]> {
+  const [rounds, words] = await Promise.all([
+    sql<{ id: number; title: string; order_index: number }[]>`
+      SELECT id, title, order_index FROM vocabulary_rounds WHERE unit_id = ${unitId} ORDER BY order_index ASC
+    `,
+    sql<(VocabWord & { round_id: number })[]>`
+      SELECT w.id, w.round_id, w.word, w.transcription, w.part_of_speech, w.translation_uz, w.definition,
+             w.example_sentence, w.example_translation, w.emoji, w.order_index,
+             COALESCE(MAX(p.learned), 0) as learned,
+             COALESCE(MAX(CASE WHEN sp.stage = 'spelling' THEN sp.passed END), 0) as stage_spelling,
+             COALESCE(MAX(CASE WHEN sp.stage = 'definition' THEN sp.passed END), 0) as stage_definition,
+             COALESCE(MAX(CASE WHEN sp.stage = 'pronunciation' THEN sp.passed END), 0) as stage_pronunciation,
+             COALESCE(MAX(CASE WHEN sp.stage = 'sentence' THEN sp.passed END), 0) as stage_sentence
+      FROM vocabulary_words w
+      JOIN vocabulary_rounds r ON r.id = w.round_id AND r.unit_id = ${unitId}
+      LEFT JOIN user_word_progress p ON p.word_id = w.id AND p.user_id = ${userId}
+      LEFT JOIN user_word_stage_progress sp ON sp.word_id = w.id AND sp.user_id = ${userId}
+      GROUP BY w.id
+      ORDER BY w.order_index ASC
+    `,
+  ]);
+  return rounds.map((r) => {
+    const roundWords = words.filter((w) => w.round_id === r.id).map(({ round_id: _r, ...w }) => w);
+    return {
+      ...r,
+      words: roundWords,
+      word_count: roundWords.length,
+      learned_count: roundWords.filter((w) => w.learned).length,
+    };
+  });
 }
 
 /** Bitta mashqning savollari (o'quvchi avval to'g'ri javob berganlari bilan). */

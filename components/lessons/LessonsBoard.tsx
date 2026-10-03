@@ -33,8 +33,15 @@ import {
   Radio,
   type LucideIcon,
 } from "lucide-react";
-import type { ClipKind, ExerciseKind, ExerciseQuestion, LevelRecord, UnitDetail } from "@/lib/data";
-import { loadExerciseQuestions, submitExerciseResult } from "@/app/actions";
+import type {
+  ClipKind,
+  ExerciseKind,
+  ExerciseQuestion,
+  LevelRecord,
+  UnitDetail,
+  VocabRoundWithWords,
+} from "@/lib/data";
+import { loadExerciseQuestions, loadUnitWords, submitExerciseResult } from "@/app/actions";
 import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
 import { ExerciseRun } from "./ExerciseRun";
@@ -146,8 +153,14 @@ export function LessonsBoard({
   const visibleUnits = units.filter((u) => openLevels.some((l) => l.code === u.level_code));
 
   const openUnit = units.find((u) => u.id === openUnitId) || null;
-  const flowRound = openUnit?.rounds.find((r) => r.id === flowRoundId) || null;
-  const flowAllWords = openUnit?.rounds.flatMap((r) => r.words) || [];
+  // So'zlar ham sahifa bilan kelmaydi — dars paneli ochilganda shu darsniki
+  // fonda yuklanadi; bosqich so'zlar kelgach ochiladi.
+  const [unitWords, setUnitWords] = useState<{ unitId: number; rounds: VocabRoundWithWords[] } | null>(null);
+  const wordsRequest = useRef<{ unitId: number; promise: Promise<VocabRoundWithWords[]> } | null>(null);
+  const [loadingRoundId, setLoadingRoundId] = useState<number | null>(null);
+  const openUnitRounds = unitWords && unitWords.unitId === openUnitId ? unitWords.rounds : [];
+  const flowRound = openUnitRounds.find((r) => r.id === flowRoundId) || null;
+  const flowAllWords = openUnitRounds.flatMap((r) => r.words);
   // Savollar sahifa bilan kelmaydi (hajm chegarasi) — mashq boshlanganda yuklanadi.
   const [loadedQuestions, setLoadedQuestions] = useState<ExerciseQuestion[] | null>(null);
   const [loadingExerciseId, setLoadingExerciseId] = useState<number | null>(null);
@@ -170,18 +183,49 @@ export function LessonsBoard({
     // Lug'at tugallangan bo'lsa, to'g'ridan-to'g'ri mashqlar ochiladi.
     setOpenSection(unitVocabPercent(unit) < 100 || unit.exercises.length === 0 ? "vocab" : "exercises");
     setClipNotice(false);
+    if (unit.totalWords > 0) fetchUnitWords(unit.id);
+  }
+
+  /** Darsning so'zlarini yuklaydi (bir dars uchun bitta so'rov qayta
+   *  ishlatiladi; `fresh` — progress o'zgargach qaytadan olish). */
+  function fetchUnitWords(unitId: number, fresh = false) {
+    if (!fresh && wordsRequest.current?.unitId === unitId) return wordsRequest.current.promise;
+    const promise = loadUnitWords(unitId);
+    const request = { unitId, promise };
+    wordsRequest.current = request;
+    promise.then(
+      (rounds) => {
+        if (wordsRequest.current === request) setUnitWords({ unitId, rounds });
+      },
+      () => {
+        // Xato bo'lsa keyingi urinishda qaytadan so'raladi.
+        if (wordsRequest.current === request) wordsRequest.current = null;
+      }
+    );
+    return promise;
+  }
+
+  async function openRound(roundId: number) {
+    if (!openUnit || loadingRoundId !== null) return;
+    setLoadingRoundId(roundId);
+    try {
+      await fetchUnitWords(openUnit.id);
+      setFlowRoundId(roundId);
+    } catch {
+      // Tarmoq xatosi — karta qayta bosilganda yana urinib ko'riladi.
+    } finally {
+      setLoadingRoundId(null);
+    }
   }
 
   function roundPercent(round: UnitDetail["rounds"][number]) {
-    if (round.words.length === 0) return 0;
-    const learned = round.words.filter((w) => !!w.learned).length;
-    return Math.round((learned / round.words.length) * 100);
+    if (round.word_count === 0) return 0;
+    return Math.round((round.learned_count / round.word_count) * 100);
   }
 
   function unitVocabPercent(unit: UnitDetail) {
     if (unit.totalWords === 0) return 0;
-    const learned = unit.rounds.flatMap((r) => r.words).filter((w) => !!w.learned).length;
-    return Math.round((learned / unit.totalWords) * 100);
+    return Math.round((unit.learnedWords / unit.totalWords) * 100);
   }
 
   function unitExercisePercent(unit: UnitDetail) {
@@ -264,6 +308,7 @@ export function LessonsBoard({
     });
     setActiveCard(current);
     scrollToCard(current, "instant");
+    if (linkedUnit && linkedUnit.totalWords > 0) fetchUnitWords(linkedUnit.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -445,9 +490,12 @@ export function LessonsBoard({
                       return (
                         <button
                           key={round.id}
-                          onClick={() => setFlowRoundId(round.id)}
+                          onClick={() => openRound(round.id)}
+                          aria-busy={loadingRoundId === round.id}
                           style={{ animationDelay: `${i * 50}ms` }}
-                          className="relative flex w-40 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10"
+                          className={`relative flex w-40 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
+                            loadingRoundId === round.id ? "animate-pulse opacity-70" : ""
+                          }`}
                         >
                           <span
                             className={`absolute left-0 top-0 rounded-br-xl rounded-tl-2xl px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${
@@ -461,7 +509,7 @@ export function LessonsBoard({
                           )}
                           <p className="font-semibold text-ink-950 dark:text-ink-50">{round.title}</p>
                           <p className="mb-3 mt-0.5 text-xs text-ink-500 dark:text-ink-400">
-                            {round.words.length} ta so'z
+                            {round.word_count} ta so'z
                           </p>
                           <div className="mt-auto flex items-center gap-2">
                             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
@@ -654,6 +702,7 @@ export function LessonsBoard({
           onClose={() => {
             setFlowRoundId(null);
             router.refresh();
+            if (openUnitId !== null) fetchUnitWords(openUnitId, true);
           }}
         />
       )}

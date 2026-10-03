@@ -13,7 +13,7 @@ import {
   ArrowRight,
   Eraser,
 } from "lucide-react";
-import type { VocabRound, VocabWord } from "@/lib/data";
+import type { VocabRoundWithWords, VocabWord } from "@/lib/data";
 import { setWordStagePassed, type VocabStage } from "@/app/actions";
 import { matchesPronunciation, pronunciationTargets, SPEECH_ERRORS } from "@/lib/russian-speech";
 
@@ -89,7 +89,7 @@ export function VocabRoundFlow({
   showPictures = false,
   onClose,
 }: {
-  round: VocabRound;
+  round: VocabRoundWithWords;
   allWords: VocabWord[];
   /** Boshlang'ich darslarda gap bosqichida ham so'zning rasmi ko'rsatiladi
    *  (misollar ko'pincha «Это …» bo'lgani uchun rasm yordam beradi). */

@@ -55,10 +55,7 @@ export default async function HomePage() {
   const user = userRow!;
 
   const totalWords = unitsDetailed.reduce((s, u) => s + u.totalWords, 0);
-  const learnedWords = unitsDetailed.reduce(
-    (s, u) => s + u.rounds.reduce((rs, r) => rs + r.words.filter((w) => w.learned).length, 0),
-    0
-  );
+  const learnedWords = unitsDetailed.reduce((s, u) => s + u.learnedWords, 0);
   const totalUnits = unitsDetailed.length;
   const currentUnit = unitsDetailed.find((u) => !u.locked && u.percent < 100) || null;
 
