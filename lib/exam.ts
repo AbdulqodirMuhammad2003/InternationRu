@@ -4,10 +4,11 @@ import { getLevelBoard, UNLOCK_RULE_ENABLED, UNLOCK_THRESHOLD } from "./data";
 import { A1_GRAMMAR_BANK, type ExamGrammarItem } from "./exam-a1";
 import { A2_GRAMMAR_BANK } from "./exam-a2";
 import { B1_GRAMMAR_BANK } from "./exam-b1";
+import { B2_GRAMMAR_BANK } from "./exam-b2";
 
 /**
  * Daraja yakuniy imtihoni: o'quvchi o'z darajasining imtihonini topshiradi
- * (A1 — Elementar, A2 — Asosiy, B1 — Birinchi sertifikat). Har daraja uchun
+ * (A1 — Elementar, A2 — Asosiy, B1 — Birinchi, B2 — Ikkinchi sertifikat). Har daraja uchun
  * grammatika banki alohida.
  *
  *  - 40 savol: 20 ta lug'at (rasm + o'zbekcha tarjima → ruscha so'zni yozish)
@@ -28,6 +29,7 @@ const EXAMS: Record<string, { title: string; bank: Record<string, ExamGrammarIte
   A1: { title: "Elementar daraja imtihoni", bank: A1_GRAMMAR_BANK },
   A2: { title: "Asosiy daraja imtihoni", bank: A2_GRAMMAR_BANK },
   B1: { title: "Birinchi sertifikat darajasi imtihoni", bank: B1_GRAMMAR_BANK },
+  B2: { title: "Ikkinchi sertifikat darajasi imtihoni", bank: B2_GRAMMAR_BANK },
 };
 const EXAM_LEVELS = Object.keys(EXAMS);
 
@@ -160,7 +162,7 @@ async function buildVariant(level: string): Promise<StoredQuestion[]> {
   // Uch va undan ko'p so'zli kollokatsiyalar (B1 dan boshlab ko'p) imtihonda
   // yoddan yozishga juda uzun — lug'at savollari 1–2 so'zli birliklardan olinadi.
   const unique = words.filter(
-    (w) => seen.get(key(w.translation_uz)) === 1 && w.word.trim().split(/s+/).length <= 2
+    (w) => seen.get(key(w.translation_uz)) === 1 && w.word.trim().split(/\s+/).length <= 2
   );
 
   const vocab = spreadPick(
