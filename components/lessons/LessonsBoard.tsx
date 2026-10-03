@@ -31,6 +31,7 @@ import {
   BookOpenCheck,
   BookOpenText,
   Radio,
+  GraduationCap,
   type LucideIcon,
 } from "lucide-react";
 import type {
@@ -47,7 +48,7 @@ import { VocabRoundFlow } from "./VocabRoundFlow";
 import { ExerciseRun } from "./ExerciseRun";
 
 type View = "main" | "exercise-run" | "clip";
-type Section = "vocab" | "exercises";
+type Section = "vocab" | "rule" | "exercises";
 
 const EXERCISE_KIND_ICONS: Record<ExerciseKind, LucideIcon> = {
   listen: Headphones,
@@ -68,6 +69,7 @@ const EXERCISE_KIND_ICONS: Record<ExerciseKind, LucideIcon> = {
   truefalse: BookOpenCheck,
   reading: BookOpenText,
   audiotext: Radio,
+  rule: GraduationCap,
 };
 
 /** Darajalarning ruscha rasmiy nomlari (ТРКИ — rus tili bo'yicha davlat
@@ -180,8 +182,11 @@ export function LessonsBoard({
     if (unit.locked) return;
     setOpenUnitId(unit.id);
     setView("main");
-    // Lug'at tugallangan bo'lsa, to'g'ridan-to'g'ri mashqlar ochiladi.
-    setOpenSection(unitVocabPercent(unit) < 100 || unit.exercises.length === 0 ? "vocab" : "exercises");
+    // Lug'at tugallangan bo'lsa — qoida (hali ishlanmagan bo'lsa), keyin mashqlar.
+    const ruleLeft = unit.exercises.some((e) => e.kind === "rule" && !e.attempted);
+    setOpenSection(
+      unitVocabPercent(unit) < 100 || unit.exercises.length === 0 ? "vocab" : ruleLeft ? "rule" : "exercises"
+    );
     setClipNotice(false);
     if (unit.totalWords > 0) fetchUnitWords(unit.id);
   }
@@ -525,6 +530,60 @@ export function LessonsBoard({
                     })}
                   </LessonSection>
 
+                  {openUnit.exercises.some((ex) => ex.kind === "rule") && (
+                    <LessonSection
+                      title="Qoida"
+                      subtitle="Grammatika sodda tilda + 10 ta test"
+                      percent={Math.round(
+                        openUnit.exercises.filter((ex) => ex.kind === "rule").reduce((s, ex) => s + ex.score_pct, 0) /
+                          openUnit.exercises.filter((ex) => ex.kind === "rule").length
+                      )}
+                      icon={<GraduationCap size={22} />}
+                      gradient="from-gold-400 to-gold-700"
+                      open={openSection === "rule"}
+                      disabled={false}
+                      onToggle={() => setOpenSection(openSection === "rule" ? null : "rule")}
+                      delay={60}
+                    >
+                      {openUnit.exercises
+                        .filter((ex) => ex.kind === "rule")
+                        .map((ex) => (
+                          <button
+                            key={ex.id}
+                            onClick={() => startExercise(ex.id)}
+                            aria-busy={loadingExerciseId === ex.id}
+                            className={`relative flex w-56 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
+                              loadingExerciseId === ex.id ? "animate-pulse opacity-70" : ""
+                            }`}
+                          >
+                            <span className="absolute left-0 top-0 rounded-br-xl rounded-tl-2xl bg-gold-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                              Qoida
+                            </span>
+                            {ex.score_pct === 100 ? (
+                              <Medal size={26} className="absolute right-2.5 top-2 text-gold-500" />
+                            ) : (
+                              <GraduationCap size={22} className="absolute right-3 top-2.5 text-ink-400 dark:text-ink-500" />
+                            )}
+                            <p className="font-semibold leading-snug text-ink-950 dark:text-ink-50">
+                              {ex.title.replace(/^Qoida:\s*/, "")}
+                            </p>
+                            <p className="mb-3 mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                              Tushuntirish va {ex.question_count} ta test
+                            </p>
+                            <div className="mt-auto flex items-center gap-2">
+                              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
+                                <div
+                                  className="h-full rounded-full bg-gold-500 transition-[width] duration-500"
+                                  style={{ width: `${ex.score_pct}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">{ex.score_pct}%</span>
+                            </div>
+                          </button>
+                        ))}
+                    </LessonSection>
+                  )}
+
                   {openUnit.clip_url && (
                     <>
                       <button
@@ -581,7 +640,7 @@ export function LessonsBoard({
 
                   <LessonSection
                     title="Mashqlar"
-                    subtitle={`${openUnit.exercises.length} ta mashq`}
+                    subtitle={`${openUnit.exercises.filter((ex) => ex.kind !== "rule").length} ta mashq`}
                     percent={unitExercisePercent(openUnit)}
                     icon={<ListChecks size={22} />}
                     gradient="from-mint-500 to-mint-900"
@@ -590,7 +649,7 @@ export function LessonsBoard({
                     onToggle={() => setOpenSection(openSection === "exercises" ? null : "exercises")}
                     delay={120}
                   >
-                    {openUnit.exercises.map((ex, i) => {
+                    {openUnit.exercises.filter((ex) => ex.kind !== "rule").map((ex, i) => {
                       const KindIcon = EXERCISE_KIND_ICONS[ex.kind] ?? ListChecks;
                       return (
                         <button

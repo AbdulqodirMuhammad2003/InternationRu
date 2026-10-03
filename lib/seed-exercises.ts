@@ -23,7 +23,8 @@ export type ExerciseKind =
   | "dictation" // `audio` — so'z (ko'rsatilmaydi), `answer` — o'quvchi yozadi
   | "truefalse" // `prompt` — "matn||gap", variantlar: To'g'ri / Noto'g'ri
   | "reading" // `prompt` — "matn||savol", javob variantlardan tanlanadi
-  | "audiotext"; // `audio` — tinglanadigan matn, `prompt` — savol, variantlar
+  | "audiotext" // `audio` — tinglanadigan matn, `prompt` — savol, variantlar
+  | "rule"; // darsning qoidasi: `instructions` — sodda tushuntirish, savollar — choice kabi test
 
 export interface SeedQuestion {
   prompt: string;

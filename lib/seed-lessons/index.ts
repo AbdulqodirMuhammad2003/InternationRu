@@ -67,6 +67,10 @@ import { B2_13_EXERCISES, B2_13_ROUNDS } from "./b2-13-internet-veshchey";
 import { B2_14_EXERCISES, B2_14_ROUNDS } from "./b2-14-zhizn-v-sotssetyakh";
 import { B2_15_EXERCISES, B2_15_ROUNDS } from "./b2-15-oni-izmenili-mir";
 import { B2_16_EXERCISES, B2_16_ROUNDS } from "./b2-16-smi-i-novosti";
+import { A1_RULES } from "./rules/a1";
+import { A2_RULES } from "./rules/a2";
+import { B1_RULES } from "./rules/b1";
+import { B2_RULES } from "./rules/b2";
 
 export interface LessonContent {
   code: string;
@@ -79,7 +83,9 @@ export interface LessonContent {
  *  variantlar to'plamidan foydalanadigan mashqlar (был/была…, в/на, этот/тот —
  *  bir yoki ikki to'plam, har biri bir necha savolda) va tartibi muhim turlar
  *  (match, stress, truefalse) tegilmaydi. */
-const MIXED_KINDS = new Set(["listen", "dialog", "picture", "situation", "choice", "reading", "audiotext"]);
+const MIXED_KINDS = new Set([
+  "listen", "dialog", "picture", "situation", "choice", "reading", "audiotext", "rule",
+]);
 
 function withMixedAnswers(exercises: SeedExercise[]): SeedExercise[] {
   return exercises.map((e) => {
@@ -162,7 +168,11 @@ const LESSONS: LessonContent[] = [
   { code: "B2-16", rounds: B2_16_ROUNDS, exercises: B2_16_EXERCISES },
 ];
 
+/** Har bir darsning «Qoida» bo'limi (sodda tushuntirish + 10 ta test) —
+ *  mashqlar ro'yxatining boshiga qo'yiladi. */
+const RULES: Record<string, SeedExercise> = { ...A1_RULES, ...A2_RULES, ...B1_RULES, ...B2_RULES };
+
 export const LESSON_CONTENT: LessonContent[] = LESSONS.map((l) => ({
   ...l,
-  exercises: withMixedAnswers(l.exercises),
+  exercises: withMixedAnswers(RULES[l.code] ? [RULES[l.code], ...l.exercises] : l.exercises),
 }));

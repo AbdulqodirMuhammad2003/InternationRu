@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, Delete, Info, MapPin, Mic, PlayCircle, Snail, Trophy, Volume2 } from "lucide-react";
+import { BookOpen, Delete, GraduationCap, Info, MapPin, Mic, PlayCircle, Snail, Trophy, Volume2 } from "lucide-react";
 import type { UnitDetail } from "@/lib/data";
 import { matchesPronunciation, speechNorm, SPEECH_ERRORS } from "@/lib/russian-speech";
 
@@ -103,6 +103,66 @@ function parseEnding(prompt: string) {
   return { noun, owner, stem };
 }
 
+/** «**qalin**» belgilarini ajratib ko'rsatadi. */
+function RichLine({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+        part.startsWith("**") && part.endsWith("**") ? (
+          <strong key={i} className="font-bold text-ink-950 dark:text-ink-50">
+            {part.slice(2, -2)}
+          </strong>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
+
+/** Qoida matni: «## » — kichik sarlavha, «• » — ro'yxat, «→ » — misol
+ *  (alohida ajratilgan qator), qolgani — oddiy xatboshi. */
+function RuleText({ text }: { text: string }) {
+  return (
+    <div className="flex flex-col gap-2 text-[15px] leading-relaxed text-ink-800 dark:text-ink-200">
+      {text.split("\n").map((raw, i) => {
+        const line = raw.trim();
+        if (!line) return <div key={i} className="h-1" />;
+        if (line.startsWith("## "))
+          return (
+            <p key={i} className="font-display mt-2 text-base font-bold text-azure-700 dark:text-azure-300">
+              {line.slice(3)}
+            </p>
+          );
+        if (line.startsWith("• "))
+          return (
+            <p key={i} className="flex gap-2 pl-1">
+              <span className="text-azure-500">•</span>
+              <span>
+                <RichLine text={line.slice(2)} />
+              </span>
+            </p>
+          );
+        if (line.startsWith("→ "))
+          return (
+            <p
+              key={i}
+              lang="ru"
+              className="rounded-xl bg-mint-50 px-3 py-1.5 font-medium text-mint-900 dark:bg-mint-950/40 dark:text-mint-100"
+            >
+              <RichLine text={line.slice(2)} />
+            </p>
+          );
+        return (
+          <p key={i}>
+            <RichLine text={line} />
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 const OPTION_STATE_CLASSES = {
   right: "border-mint-500 bg-mint-50 font-semibold text-mint-900 dark:bg-mint-950/40 dark:text-mint-100",
   wrong: "border-rose-400 bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200",
@@ -155,6 +215,8 @@ export function ExerciseRun({
   const question = pending[qIndex];
   const kind = exercise.kind;
   const total = pending.length;
+  // Qoida mashqida avval tushuntirish ko'rsatiladi, test undan keyin.
+  const [showRule, setShowRule] = useState(kind === "rule");
 
   // Tinglash savoli ochilishi bilan so'z bir marta avtomatik o'qiladi.
   // Tinglab tushunish mashqida matn hamma savollar uchun bitta — u faqat
@@ -195,6 +257,33 @@ export function ExerciseRun({
             Tayyor
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (kind === "rule" && showRule) {
+    return (
+      <div className="flex animate-fade-up flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-gold-400 to-gold-600 text-white shadow-md shadow-gold-700/20">
+            <GraduationCap size={22} />
+          </span>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">Qoida</p>
+            <p className="font-display text-lg font-bold leading-tight text-ink-950 dark:text-ink-50">
+              {exercise.title.replace(/^Qoida:\s*/, "")}
+            </p>
+          </div>
+        </div>
+        <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/5 dark:ring-white/10">
+          <RuleText text={exercise.instructions ?? ""} />
+        </div>
+        <button
+          onClick={() => setShowRule(false)}
+          className="btn-press self-center rounded-full bg-azure-600 px-7 py-3 text-sm font-bold text-white shadow-md hover:bg-azure-500"
+        >
+          {qIndex > 0 ? "Testga qaytish" : `Testni boshlash (${total} savol)`}
+        </button>
       </div>
     );
   }
@@ -317,7 +406,7 @@ export function ExerciseRun({
   const optionGrid = (prefix = "") => (
     <div
       className={`grid gap-2 ${
-        kind === "choice" || kind === "ending"
+        kind === "choice" || kind === "rule" || kind === "ending"
           ? shortOptions
             ? question.options.length === 2
               ? "grid-cols-2"
@@ -364,7 +453,15 @@ export function ExerciseRun({
           Faqat xato qilingan {total} ta savol qoldi — {alreadyCorrect} tasi avval to'g'ri topilgan.
         </p>
       )}
-      {exercise.instructions && (
+      {kind === "rule" && (
+        <button
+          onClick={() => setShowRule(true)}
+          className="flex items-center gap-2 self-start rounded-full bg-gold-50 px-4 py-2 text-sm font-semibold text-gold-800 hover:bg-gold-100 dark:bg-gold-950/40 dark:text-gold-200"
+        >
+          <GraduationCap size={16} /> Qoidani ko'rish
+        </button>
+      )}
+      {exercise.instructions && kind !== "rule" && (
         <div className="flex gap-2.5 rounded-2xl bg-azure-50 px-4 py-3 text-sm leading-relaxed text-azure-900 dark:bg-azure-950/40 dark:text-azure-100">
           <Info size={18} className="mt-0.5 shrink-0" />
           <p>
@@ -400,7 +497,7 @@ export function ExerciseRun({
           </>
         )}
 
-        {kind === "choice" && (
+        {(kind === "choice" || kind === "rule") && (
           <>
             <p
               className={`whitespace-pre-line text-center font-semibold text-ink-950 dark:text-ink-50 ${
