@@ -57,12 +57,16 @@ function createConnection() {
     // To'g'ridan-to'g'ri ulanish (5432-port) yoki "Session" pooler bilan ham xavfsiz.
     prepare: false,
     ssl: "require",
-    // Session pooler'da har bir ochiq ulanish serverdagi bitta ulanishni band
-    // qiladi: bitta server nusxasi ko'pi bilan 5 tasini ochadi (qolgan
-    // so'rovlar navbatda kutadi) va bo'sh ulanishlarni 20 soniyada yopadi —
-    // Vercel'ning bir nechta nusxasi pooler limitini to'ldirib qo'ymasligi uchun.
-    max: 5,
-    idle_timeout: 20,
+    // Session pooler (5432) bir vaqtda ko'pi bilan 15 ta mijoz ulanishiga ruxsat
+    // beradi (Supabase → Connection pooling → Pool size); limit to'lsa sahifalar
+    // EMAXCONNSESSION bilan yiqiladi. Shu sababli bitta server nusxasi ko'pi
+    // bilan 3 ta ulanish ochadi (qolgan so'rovlar navbatda kutadi) va bo'sh
+    // ulanishlarni 5 soniyada yopadi — Vercel'ning bir nechta nusxasi limitni
+    // to'ldirib qo'ymasligi uchun. Transaction pooler (6543) bu muammodan
+    // xoli, lekin Next.js ichida so'rovlarni qotiradi (2026-10-04 da yana
+    // tekshirildi) — unga qaytmang.
+    max: 3,
+    idle_timeout: 5,
   });
 }
 
