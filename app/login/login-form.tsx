@@ -18,7 +18,6 @@ export function LoginForm() {
           type="email"
           name="email"
           required
-          defaultValue="demo@avangard.uz"
           placeholder="you@example.com"
           className="w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-300 focus:border-azure-500 focus:ring-2 focus:ring-azure-100"
         />
@@ -31,7 +30,6 @@ export function LoginForm() {
           type="password"
           name="password"
           required
-          defaultValue="demo1234"
           placeholder="••••••••"
           className="w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-300 focus:border-azure-500 focus:ring-2 focus:ring-azure-100"
         />

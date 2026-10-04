@@ -102,6 +102,9 @@ export interface ExamStatus {
   plan: { lesson: number; title: string; percent: number; done: boolean }[];
   lastResult: { pct: number; passed: boolean; finishedAt: string } | null;
   levelResetHappened: boolean;
+  /** Darajaning barcha darslari UNLOCK_THRESHOLD % ga yetganmi — imtihon
+   *  kartasi faqat shundan keyin ko'rsatiladi. */
+  levelComplete: boolean;
 }
 
 const normalize = (s: string) =>
@@ -398,6 +401,8 @@ export async function getExamStatus(userId: number): Promise<ExamStatus> {
       })
     : [];
 
+  const notReady = board.units.filter((u, i) => (me?.percents[i] ?? 0) < UNLOCK_THRESHOLD);
+
   let blockReason: string | null = null;
   let nextAvailableAt: string | null = null;
   if (passed) blockReason = "Imtihondan o'tgansiz.";
@@ -406,7 +411,6 @@ export async function getExamStatus(userId: number): Promise<ExamStatus> {
     // Darslar ketma-ketligi qoidasi yoqilgan bo'lsa yoki daraja qayta
     // o'qilayotgan bo'lsa (2-sikl va keyingilari), imtihon barcha darslar
     // 80 % ga yetgach ochiladi.
-    const notReady = board.units.filter((u, i) => (me?.percents[i] ?? 0) < UNLOCK_THRESHOLD);
     if ((UNLOCK_RULE_ENABLED || cycle > 1) && notReady.length > 0) {
       blockReason = `Imtihon barcha darslar ${UNLOCK_THRESHOLD}% ga yetgach ochiladi. Qolgan darslar: ${notReady
         .map((u) => u.title)
@@ -436,6 +440,7 @@ export async function getExamStatus(userId: number): Promise<ExamStatus> {
     plan,
     lastResult: last ? { pct: Math.round(((last.score ?? 0) / last.total) * 100), passed: last.passed === 1, finishedAt: last.finished_at!.toISOString() } : null,
     levelResetHappened,
+    levelComplete: notReady.length === 0,
   };
 }
 

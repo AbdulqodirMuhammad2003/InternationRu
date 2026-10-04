@@ -67,10 +67,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
 
         <LoginForm />
-
-        <div className="mt-6 rounded-xl bg-ink-50 p-3 text-xs text-ink-700/70">
-          Demo kirish: <b className="text-ink-900">demo@avangard.uz</b> / <b className="text-ink-900">demo1234</b>
-        </div>
       </div>
     </div>
   );
