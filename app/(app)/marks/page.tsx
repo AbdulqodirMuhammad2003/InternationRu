@@ -48,9 +48,6 @@ export default async function MarksPage() {
                     {unit.title}
                   </th>
                 ))}
-                <th className="whitespace-nowrap border-b border-ink-100 px-3 py-3 text-center font-semibold dark:border-white/10">
-                  O'rtacha
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -93,18 +90,11 @@ export default async function MarksPage() {
                       )}
                     </td>
                   ))}
-                  <td
-                    className={`border-b border-ink-50 px-3 py-2.5 text-center font-bold text-ink-950 dark:border-white/5 dark:text-ink-50 ${
-                      student.is_current_user ? "bg-gold-50/60 dark:bg-gold-950/20" : ""
-                    }`}
-                  >
-                    {student.average}%
-                  </td>
                 </tr>
               ))}
               {board.students.length === 0 && (
                 <tr>
-                  <td colSpan={board.units.length + 2} className="px-4 py-8 text-center text-ink-400 dark:text-ink-600">
+                  <td colSpan={board.units.length + 1} className="px-4 py-8 text-center text-ink-400 dark:text-ink-600">
                     Hozircha natijalar yo'q.
                   </td>
                 </tr>
