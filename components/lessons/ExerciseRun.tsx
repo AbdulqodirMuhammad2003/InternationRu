@@ -170,6 +170,9 @@ const OPTION_STATE_CLASSES = {
   idle: "border-ink-100 bg-white hover:border-ink-200 hover:bg-ink-50/60 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10",
 };
 
+/** Qoida testidan o'tish (mashqlar ochilishi) uchun kerakli natija. */
+export const RULE_PASS_PCT = 60;
+
 export function ExerciseRun({
   exercise,
   onFinish,
@@ -181,7 +184,8 @@ export function ExerciseRun({
    *  chaqiriladi (server ularni avvalgi natijalar bilan birlashtiradi). */
   onFinish: (answers: { questionId: number; correct: boolean }[]) => void;
   onRetry: () => void;
-  onDone: () => void;
+  /** Natija oynasidan chiqish; yakuniy natija (%) bilan. */
+  onDone: (resultPct: number) => void;
 }) {
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -227,6 +231,7 @@ export function ExerciseRun({
 
   if (result !== null) {
     const great = result >= 80;
+    const rulePassed = result >= RULE_PASS_PCT;
     return (
       <div className="flex animate-pop-in flex-col items-center gap-4 py-10 text-center">
         <div
@@ -243,6 +248,19 @@ export function ExerciseRun({
           {great ? "Ajoyib natija!" : "Xato qilingan savollarni yana bir marta ishlab ko'ring."}{" "}
           To'g'ri javoblar: {alreadyCorrect + correctCount} / {exercise.questions.length}
         </p>
+        {kind === "rule" && (
+          <p
+            className={`rounded-xl px-3 py-2 text-sm font-semibold ${
+              rulePassed
+                ? "bg-mint-50 text-mint-700 dark:bg-mint-950/40 dark:text-mint-300"
+                : "bg-gold-50 text-gold-700 dark:bg-gold-950/40 dark:text-gold-300"
+            }`}
+          >
+            {rulePassed
+              ? "Testdan o'tdingiz — mashqlar ochildi!"
+              : `Mashqlarga o'tish uchun kamida ${RULE_PASS_PCT}% kerak. Qoidani yana bir ko'rib, xatolarni qayta ishlang.`}
+          </p>
+        )}
         <div className="mt-2 flex gap-2">
           <button
             onClick={onRetry}
@@ -251,7 +269,7 @@ export function ExerciseRun({
             Qayta ishlash
           </button>
           <button
-            onClick={onDone}
+            onClick={() => onDone(result)}
             className="btn-press rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
           >
             Tayyor

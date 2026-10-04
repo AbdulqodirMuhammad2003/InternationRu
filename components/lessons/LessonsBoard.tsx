@@ -45,7 +45,7 @@ import type {
 import { loadExerciseQuestions, loadUnitWords, submitExerciseResult } from "@/app/actions";
 import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
-import { ExerciseRun } from "./ExerciseRun";
+import { ExerciseRun, RULE_PASS_PCT } from "./ExerciseRun";
 
 type View = "main" | "exercise-run" | "clip";
 type Section = "vocab" | "rule" | "exercises";
@@ -183,7 +183,7 @@ export function LessonsBoard({
     setOpenUnitId(unit.id);
     setView("main");
     // Lug'at tugallangan bo'lsa — qoida (hali ishlanmagan bo'lsa), keyin mashqlar.
-    const ruleLeft = unit.exercises.some((e) => e.kind === "rule" && !e.attempted);
+    const ruleLeft = !unitRuleDone(unit);
     setOpenSection(
       unitVocabPercent(unit) < 100 || unit.exercises.length === 0 ? "vocab" : ruleLeft ? "rule" : "exercises"
     );
@@ -247,13 +247,13 @@ export function LessonsBoard({
   }
 
   /** Dars bosqichlari ketma-ket ochiladi: lug'at tugamaguncha qoida, qoida
-   *  testi kamida bir marta yakunlanmaguncha mashqlar yopiq. */
+   *  testidan kamida RULE_PASS_PCT natija olinmaguncha mashqlar yopiq. */
   function unitVocabDone(unit: UnitDetail) {
     return unit.totalWords === 0 || unitVocabPercent(unit) === 100;
   }
 
   function unitRuleDone(unit: UnitDetail) {
-    return unit.exercises.every((e) => e.kind !== "rule" || e.attempted);
+    return unit.exercises.every((e) => e.kind !== "rule" || e.score_pct >= RULE_PASS_PCT);
   }
 
   function finishExercise(exerciseId: number, answers: { questionId: number; correct: boolean }[]) {
@@ -665,7 +665,7 @@ export function LessonsBoard({
                       !unitVocabDone(openUnit)
                         ? "Mashqlar lug'atdagi barcha so'zlarni o'rganib bo'lgach ochiladi."
                         : !unitRuleDone(openUnit)
-                          ? "Mashqlar qoida bo'limidagi testni yakunlagach ochiladi."
+                          ? `Mashqlar qoida testidan kamida ${RULE_PASS_PCT}% olgach ochiladi.`
                           : null
                     }
                     onToggle={() => setOpenSection(openSection === "exercises" ? null : "exercises")}
@@ -722,10 +722,10 @@ export function LessonsBoard({
                     exercise={activeExercise}
                     onFinish={(answers) => finishExercise(activeExercise.id, answers)}
                     onRetry={() => startExercise(activeExercise.id)}
-                    onDone={() => {
+                    onDone={(resultPct) => {
                       setView("main");
-                      // Qoida testidan keyin navbat — mashqlar.
-                      if (activeExercise.kind === "rule") setOpenSection("exercises");
+                      // Qoida testidan o'tilgach navbat — mashqlar.
+                      if (activeExercise.kind === "rule" && resultPct >= RULE_PASS_PCT) setOpenSection("exercises");
                     }}
                   />
                 </div>
