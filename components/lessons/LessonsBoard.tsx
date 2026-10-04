@@ -32,6 +32,7 @@ import {
   BookOpenText,
   Radio,
   GraduationCap,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 import type {
@@ -116,12 +117,26 @@ function toYouTubeEmbedUrl(
   }
 }
 
+/** Daraja imtihoni kartasi uchun holat (o'quvchining joriy darajasi). */
+export interface BoardExam {
+  level: string;
+  /** Kartani bosib imtihon sahifasiga o'tish mumkinmi (daraja tugagan,
+   *  imtihon davom etyapti yoki takrorlash rejasi bor). */
+  open: boolean;
+  passed: boolean;
+  note: string;
+}
+
+type CarouselItem = { kind: "unit"; unit: UnitDetail } | { kind: "exam"; level: string };
+
 export function LessonsBoard({
   units,
   levels,
+  exam,
 }: {
   units: UnitDetail[];
   levels: LevelRecord[];
+  exam: BoardExam;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -153,6 +168,13 @@ export function LessonsBoard({
   const [openSection, setOpenSection] = useState<Section | null>("vocab");
 
   const visibleUnits = units.filter((u) => openLevels.some((l) => l.code === u.level_code));
+  // Har bir darajaning oxirgi darsidan keyin — o'sha darajaning imtihon kartasi.
+  const items: CarouselItem[] = visibleUnits.flatMap((unit, i): CarouselItem[] => {
+    const next = visibleUnits[i + 1];
+    return !next || next.level_code !== unit.level_code
+      ? [{ kind: "unit", unit }, { kind: "exam", level: unit.level_code }]
+      : [{ kind: "unit", unit }];
+  });
 
   const openUnit = units.find((u) => u.id === openUnitId) || null;
   // So'zlar ham sahifa bilan kelmaydi — dars paneli ochilganda shu darsniki
@@ -318,8 +340,8 @@ export function LessonsBoard({
   // markazga olib kelamiz.
   useEffect(() => {
     let current = 0;
-    visibleUnits.forEach((u, i) => {
-      if (!u.locked) current = i;
+    items.forEach((item, i) => {
+      if (item.kind === "unit" ? !item.unit.locked : item.level === exam.level && exam.open) current = i;
     });
     setActiveCard(current);
     scrollToCard(current, "instant");
@@ -357,7 +379,24 @@ export function LessonsBoard({
               onScroll={syncActiveCard}
               className="no-scrollbar flex min-w-0 snap-x snap-mandatory items-center gap-5 overflow-x-auto scroll-smooth px-[calc(50%-7.5rem)] py-8"
             >
-              {visibleUnits.map((unit, i) => {
+              {items.map((item, i) => {
+                if (item.kind === "exam") {
+                  return (
+                    <ExamCarouselCard
+                      key={`exam-${item.level}`}
+                      level={item.level}
+                      exam={exam}
+                      active={i === activeCard}
+                      delay={i * 70}
+                      onClick={() => {
+                        const open = item.level === exam.level && exam.open;
+                        if (i !== activeCard) scrollToCard(i);
+                        else if (open) router.push("/exam");
+                      }}
+                    />
+                  );
+                }
+                const unit = item.unit;
                 const gradient = UNIT_GRADIENTS[unit.color] || UNIT_GRADIENTS.green;
                 const active = i === activeCard;
                 return (
@@ -429,7 +468,7 @@ export function LessonsBoard({
             </button>
             <button
               onClick={() => scrollToCard(activeCard + 1)}
-              disabled={activeCard === visibleUnits.length - 1}
+              disabled={activeCard === items.length - 1}
               className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
               aria-label="O’ngga aylantirish"
             >
@@ -439,11 +478,11 @@ export function LessonsBoard({
 
           {/* Sahifa nuqtalari */}
           <div className="mt-2 flex items-center justify-center gap-1.5">
-            {visibleUnits.map((unit, i) => (
+            {items.map((item, i) => (
               <button
-                key={unit.id}
+                key={item.kind === "unit" ? item.unit.id : `exam-${item.level}`}
                 onClick={() => scrollToCard(i)}
-                aria-label={unit.title}
+                aria-label={item.kind === "unit" ? item.unit.title : `${item.level} imtihoni`}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === activeCard
                     ? "w-6 bg-gold-400"
@@ -792,6 +831,71 @@ export function LessonsBoard({
         />
       )}
     </div>
+  );
+}
+
+/** Daraja oxiridagi imtihon kartasi. Oldingi (o'tilgan) darajalarda —
+ *  «Topshirilgan»; joriy darajada daraja tugaguncha yopiq, keyin bosilsa
+ *  imtihon sahifasi ochiladi (o'tish bali 80 % — keyingi daraja ochiladi). */
+function ExamCarouselCard({
+  level,
+  exam,
+  active,
+  delay,
+  onClick,
+}: {
+  level: string;
+  exam: BoardExam;
+  active: boolean;
+  delay: number;
+  onClick: () => void;
+}) {
+  const current = level === exam.level;
+  const passed = !current || exam.passed;
+  const open = current && exam.open && !exam.passed;
+  return (
+    <button
+      data-card
+      onClick={onClick}
+      aria-disabled={!open}
+      style={{ animationDelay: `${delay}ms` }}
+      className={`group relative flex h-72 w-60 shrink-0 snap-center animate-fade-up flex-col items-center overflow-hidden rounded-[2rem] bg-gradient-to-br px-5 pb-6 pt-7 text-center text-white ring-1 ring-inset ring-white/10 transition-all duration-500 ease-out ${
+        passed ? "from-gold-400 to-gold-700" : "from-azure-600 to-azure-900"
+      } ${active ? "z-10 scale-110 shadow-2xl shadow-black/30" : "scale-95 opacity-60 shadow-md hover:opacity-90"} ${
+        active && !open ? "cursor-default" : ""
+      }`}
+    >
+      <span className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
+      <span className="pointer-events-none absolute -bottom-6 -right-4 h-24 w-24 rounded-full bg-black/10" />
+
+      <span className="relative rounded-full bg-white/15 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
+        {level}
+      </span>
+      <span className="relative mt-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
+        {passed ? <Trophy size={28} /> : <GraduationCap size={28} />}
+      </span>
+      <p className="font-display relative mt-3 text-2xl font-bold tracking-tight">Daraja imtihoni</p>
+      <p className="relative mt-1 text-sm leading-snug text-white/80">40 savol · 40 daqiqa · o'tish bali 80%</p>
+
+      <div className="relative mt-auto flex w-full flex-col items-center gap-2">
+        {passed ? (
+          <span className="flex h-12 items-center gap-2 rounded-full bg-white/90 px-6 text-base font-bold text-gold-700 shadow-lg shadow-black/20">
+            <Trophy size={20} /> Topshirilgan
+          </span>
+        ) : open ? (
+          <span className="flex h-12 items-center rounded-full bg-white/90 px-6 text-base font-bold text-azure-800 shadow-lg shadow-black/20">
+            Imtihonga o'tish
+          </span>
+        ) : (
+          <span className="flex h-12 items-center gap-2 rounded-full bg-rose-500 px-6 text-base font-bold shadow-lg shadow-rose-900/40">
+            <LockKeyhole size={20} strokeWidth={2.4} /> Yopiq
+          </span>
+        )}
+        <span className="min-h-5 text-center text-xs font-semibold leading-tight text-white/85">
+          {passed ? "Keyingi daraja ochilgan" : open ? exam.note : "Barcha darslarni 80% ga yetkazing"}
+        </span>
+      </div>
+    </button>
   );
 }
 
