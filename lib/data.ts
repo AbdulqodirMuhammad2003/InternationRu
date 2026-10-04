@@ -140,13 +140,12 @@ export interface UnitDetail extends UnitRecord {
 
 /** Keyingi dars ochilishi uchun oldingi dars shu foizga yetishi kerak. */
 export const UNLOCK_THRESHOLD = 80;
-/** VAQTINCHA o'chirilgan: darslar mazmunini tekshirish uchun hamma
- *  tayyor darslar ochiq. Qoidani qaytarish uchun `true` qiling. */
-export const UNLOCK_RULE_ENABLED = false;
-/** VAQTINCHA: shu hisoblarga imtihonsiz ham barcha darajalar ochiq (yangi
- *  darajalar mazmunini tekshirish uchun). Qoidani qaytarish uchun ro'yxatni
- *  bo'shating. */
-export const PREVIEW_ALL_LEVELS_EMAILS = ["demo@avangard.uz"];
+/** Oldingi dars UNLOCK_THRESHOLD foizga yetmaguncha keyingisi yopiq.
+ *  Mazmunni tekshirish uchun vaqtincha `false` qilish mumkin. */
+export const UNLOCK_RULE_ENABLED = true;
+/** Shu hisoblarga imtihonsiz ham barcha darajalar ochiq (yangi daraja
+ *  mazmunini tekshirish uchun vaqtincha email qo'shiladi). Odatda bo'sh. */
+export const PREVIEW_ALL_LEVELS_EMAILS: string[] = [];
 
 // ---------- Foydalanuvchi ----------
 
