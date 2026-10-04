@@ -41,6 +41,10 @@ export async function loginAction(
     return { error: "Bunday email bilan foydalanuvchi topilmadi." };
   }
 
+  if (!user.password_hash) {
+    return { error: "Bu hisob Google orqali ochilgan — «Google orqali kirish» tugmasini bosing." };
+  }
+
   const valid = await verifyPassword(password, user.password_hash);
   if (!valid) {
     return { error: "Parol noto'g'ri. Qaytadan urinib ko'ring." };

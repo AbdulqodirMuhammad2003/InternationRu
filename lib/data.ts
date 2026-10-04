@@ -155,7 +155,8 @@ export async function getUserByEmail(email: string) {
       id: number;
       name: string;
       email: string;
-      password_hash: string;
+      /** Google orqali yaratilgan hisobda parol yo'q. */
+      password_hash: string | null;
       avatar_url: string | null;
     }[]
   >`SELECT id, name, email, password_hash, avatar_url FROM users WHERE email = ${email}`;
