@@ -246,6 +246,16 @@ export function LessonsBoard({
     return unit.exercises.length > 0 && unit.exercises.every((e) => e.attempted);
   }
 
+  /** Dars bosqichlari ketma-ket ochiladi: lug'at tugamaguncha qoida, qoida
+   *  testi kamida bir marta yakunlanmaguncha mashqlar yopiq. */
+  function unitVocabDone(unit: UnitDetail) {
+    return unit.totalWords === 0 || unitVocabPercent(unit) === 100;
+  }
+
+  function unitRuleDone(unit: UnitDetail) {
+    return unit.exercises.every((e) => e.kind !== "rule" || e.attempted);
+  }
+
   function finishExercise(exerciseId: number, answers: { questionId: number; correct: boolean }[]) {
     // revalidatePath ichidagi javob yangilangan sahifani ham olib keladi —
     // alohida router.refresh() serverda sahifani ikkinchi marta hisoblatardi.
@@ -542,6 +552,11 @@ export function LessonsBoard({
                       gradient="from-gold-400 to-gold-700"
                       open={openSection === "rule"}
                       disabled={false}
+                      lockNote={
+                        unitVocabDone(openUnit)
+                          ? null
+                          : "Qoida lug'atdagi barcha so'zlarni o'rganib bo'lgach ochiladi."
+                      }
                       onToggle={() => setOpenSection(openSection === "rule" ? null : "rule")}
                       delay={60}
                     >
@@ -646,6 +661,13 @@ export function LessonsBoard({
                     gradient="from-mint-500 to-mint-900"
                     open={openSection === "exercises"}
                     disabled={openUnit.exercises.length === 0}
+                    lockNote={
+                      !unitVocabDone(openUnit)
+                        ? "Mashqlar lug'atdagi barcha so'zlarni o'rganib bo'lgach ochiladi."
+                        : !unitRuleDone(openUnit)
+                          ? "Mashqlar qoida bo'limidagi testni yakunlagach ochiladi."
+                          : null
+                    }
                     onToggle={() => setOpenSection(openSection === "exercises" ? null : "exercises")}
                     delay={120}
                   >
@@ -700,7 +722,11 @@ export function LessonsBoard({
                     exercise={activeExercise}
                     onFinish={(answers) => finishExercise(activeExercise.id, answers)}
                     onRetry={() => startExercise(activeExercise.id)}
-                    onDone={() => setView("main")}
+                    onDone={() => {
+                      setView("main");
+                      // Qoida testidan keyin navbat — mashqlar.
+                      if (activeExercise.kind === "rule") setOpenSection("exercises");
+                    }}
                   />
                 </div>
               )}
@@ -779,6 +805,7 @@ function LessonSection({
   gradient,
   open,
   disabled,
+  lockNote = null,
   onToggle,
   delay = 0,
   children,
@@ -790,6 +817,8 @@ function LessonSection({
   gradient: string;
   open: boolean;
   disabled: boolean;
+  /** Bo'lim yopiq bo'lsa — sababi (kartalar o'rniga ko'rsatiladi). */
+  lockNote?: string | null;
   onToggle: () => void;
   delay?: number;
   children: React.ReactNode;
@@ -825,10 +854,14 @@ function LessonSection({
             <span className="text-xs font-bold">{percent}%</span>
           </span>
         </span>
-        <ChevronDown
-          size={22}
-          className={`relative shrink-0 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-        />
+        {lockNote ? (
+          <Lock size={20} className="relative shrink-0" />
+        ) : (
+          <ChevronDown
+            size={22}
+            className={`relative shrink-0 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+          />
+        )}
       </button>
       <div
         className={`grid transition-[grid-template-rows] duration-300 ease-out ${
@@ -836,7 +869,14 @@ function LessonSection({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto px-4 pb-4 pt-4">{children}</div>
+          {lockNote ? (
+            <p className="mx-4 my-4 flex items-center gap-2 rounded-xl bg-gold-50 px-3 py-2 text-sm text-gold-700 dark:bg-gold-950/40 dark:text-gold-300">
+              <Lock size={16} className="shrink-0" />
+              {lockNote}
+            </p>
+          ) : (
+            <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto px-4 pb-4 pt-4">{children}</div>
+          )}
         </div>
       </div>
     </div>
