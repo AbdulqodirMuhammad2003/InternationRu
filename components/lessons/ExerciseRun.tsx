@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Delete, GraduationCap, Info, MapPin, Mic, PlayCircle, Snail, Trophy, Volume2 } from "lucide-react";
 import type { UnitDetail } from "@/lib/data";
+import { toCyrillicLookalikes } from "@/lib/cyrillic";
 import { matchesPronunciation, speechNorm, SPEECH_ERRORS } from "@/lib/russian-speech";
 
 function speakRu(text: string, rate = 0.85) {
@@ -17,7 +18,7 @@ function speakRu(text: string, rate = 0.85) {
 /** Yozma javobni solishtirish uchun: kichik harf, ё → е, urg'u belgisi va
  *  tinish belgilari olib tashlanadi. */
 function normalizeAnswer(s: string) {
-  return s
+  return toCyrillicLookalikes(s)
     .toLowerCase()
     .replace(/ё/g, "е")
     .replace(/́/g, "")

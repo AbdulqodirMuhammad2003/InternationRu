@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { VocabRoundWithWords, VocabWord } from "@/lib/data";
 import { setWordStagePassed, type VocabStage } from "@/app/actions";
+import { toCyrillicLookalikes } from "@/lib/cyrillic";
 import { matchesPronunciation, pronunciationTargets, SPEECH_ERRORS } from "@/lib/russian-speech";
 
 // ---------- Yordamchi funksiyalar ----------
@@ -40,8 +41,7 @@ function shuffle<T>(arr: T[]): T[] {
  *  klaviaturada «ё» yo'q), Unicode bir xil shaklga keltiriladi (ba'zi
  *  telefon klaviaturalari «ё» ni «е» + ikki nuqta belgisi qilib yuboradi). */
 function normalize(s: string) {
-  return s
-    .normalize("NFC")
+  return toCyrillicLookalikes(s)
     .toLowerCase()
     .replace(/ё/g, "е")
     .trim()
