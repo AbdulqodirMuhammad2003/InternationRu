@@ -11,7 +11,6 @@ import {
   Sparkles,
   Trophy,
   ArrowRight,
-  Eraser,
   Delete,
 } from "lucide-react";
 import type { VocabRoundWithWords, VocabWord } from "@/lib/data";
@@ -637,12 +636,6 @@ function SpellingStage({
     }
   }
 
-  function clearAll() {
-    if (checked !== null) return;
-    setFilledIds(letterSlots.map((ch) => (ch === " " ? "space" : null)));
-    setUsedTileIds(new Set());
-  }
-
   return (
     <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
       <div className="flex h-28 items-center justify-center rounded-2xl bg-gradient-to-br from-ink-50 to-gold-50 text-5xl dark:from-white/5 dark:to-gold-950/30">
@@ -703,22 +696,13 @@ function SpellingStage({
         )}
       </div>
 
-      <div className="flex items-center justify-center gap-5">
-        <button
-          onClick={removeLast}
-          disabled={checked !== null || usedTileIds.size === 0}
-          className="flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-700 disabled:opacity-40 dark:text-ink-400 dark:hover:text-ink-200"
-        >
-          <Delete size={14} /> Oxirgi harfni o'chirish
-        </button>
-        <button
-          onClick={clearAll}
-          disabled={checked !== null || usedTileIds.size === 0}
-          className="flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-700 disabled:opacity-40 dark:text-ink-400 dark:hover:text-ink-200"
-        >
-          <Eraser size={14} /> Очистить
-        </button>
-      </div>
+      <button
+        onClick={removeLast}
+        disabled={checked !== null || usedTileIds.size === 0}
+        className="mx-auto flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-700 disabled:opacity-40 dark:text-ink-400 dark:hover:text-ink-200"
+      >
+        <Delete size={14} /> Oxirgi harfni o'chirish
+      </button>
     </div>
   );
 }
