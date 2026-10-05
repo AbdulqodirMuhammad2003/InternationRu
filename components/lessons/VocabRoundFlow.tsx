@@ -12,6 +12,7 @@ import {
   Trophy,
   ArrowRight,
   Eraser,
+  Delete,
 } from "lucide-react";
 import type { VocabRoundWithWords, VocabWord } from "@/lib/data";
 import { setWordStagePassed, type VocabStage } from "@/app/actions";
@@ -629,13 +630,18 @@ function SpellingStage({
     });
   }
 
+  /** Oxirgi qo'yilgan harfni (eng o'ngdagi to'lgan katakni) qaytaradi. */
+  function removeLast() {
+    for (let i = filledIds.length - 1; i >= 0; i--) {
+      if (filledIds[i] !== null && filledIds[i] !== "space") return removeSlot(i);
+    }
+  }
+
   function clearAll() {
     if (checked !== null) return;
     setFilledIds(letterSlots.map((ch) => (ch === " " ? "space" : null)));
     setUsedTileIds(new Set());
   }
-
-  const availableTiles = tileLetters.filter((t) => !usedTileIds.has(t.id));
 
   return (
     <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
@@ -673,26 +679,46 @@ function SpellingStage({
         })}
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2">
-        {availableTiles.map((tile) => (
-          <button
-            key={tile.id}
-            onClick={() => placeTile(tile)}
-            disabled={checked !== null}
-            className="btn-press flex h-10 w-10 items-center justify-center rounded-xl bg-ink-100 text-base font-bold uppercase text-ink-800 shadow-sm transition-colors hover:bg-ink-200 dark:bg-white/10 dark:text-ink-100 dark:hover:bg-white/20"
-          >
-            {tile.ch}
-          </button>
-        ))}
+      {/* Ishlatilgan harf o'z joyida bo'sh iz bo'lib qoladi — qolgan harflar
+          siljimaydi, shuning uchun tez bosilganda ham qo'shni harf bosilib
+          ketmaydi. Yuqoridagi katak bosilsa, harf shu iziga qaytadi. */}
+      <div className="flex flex-wrap justify-center gap-2.5">
+        {tileLetters.map((tile) =>
+          usedTileIds.has(tile.id) ? (
+            <span
+              key={tile.id}
+              aria-hidden
+              className="h-12 w-12 rounded-xl border-2 border-dashed border-ink-200 dark:border-white/10"
+            />
+          ) : (
+            <button
+              key={tile.id}
+              onClick={() => placeTile(tile)}
+              disabled={checked !== null}
+              className="btn-press flex h-12 w-12 items-center justify-center rounded-xl bg-ink-100 text-lg font-bold uppercase text-ink-800 shadow-sm transition-colors hover:bg-ink-200 dark:bg-white/10 dark:text-ink-100 dark:hover:bg-white/20"
+            >
+              {tile.ch}
+            </button>
+          )
+        )}
       </div>
 
-      <button
-        onClick={clearAll}
-        disabled={checked !== null}
-        className="mx-auto flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-700 disabled:opacity-40 dark:text-ink-400 dark:hover:text-ink-200"
-      >
-        <Eraser size={14} /> Очистить
-      </button>
+      <div className="flex items-center justify-center gap-5">
+        <button
+          onClick={removeLast}
+          disabled={checked !== null || usedTileIds.size === 0}
+          className="flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-700 disabled:opacity-40 dark:text-ink-400 dark:hover:text-ink-200"
+        >
+          <Delete size={14} /> Oxirgi harfni o'chirish
+        </button>
+        <button
+          onClick={clearAll}
+          disabled={checked !== null || usedTileIds.size === 0}
+          className="flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-700 disabled:opacity-40 dark:text-ink-400 dark:hover:text-ink-200"
+        >
+          <Eraser size={14} /> Очистить
+        </button>
+      </div>
     </div>
   );
 }
