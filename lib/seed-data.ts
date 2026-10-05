@@ -183,13 +183,7 @@ export const UNITS: UnitSeed[] = [
     icon: "headphones",
     locked: 0,
     date: "",
-    clip: {
-      url: "https://www.youtube.com/watch?v=6U6_5G7FPew",
-      title: "Смешарики — первый сезон",
-      kind: "multfilm",
-      start: 0,
-      end: 540,
-    },
+    clip: null,
   },
   {
     code: "R01",
