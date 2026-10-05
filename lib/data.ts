@@ -484,27 +484,6 @@ export async function getExerciseQuestions(userId: number, exerciseId: number): 
   return rows.map(({ options_json, ...q }) => ({ ...q, options: JSON.parse(options_json) as string[] }));
 }
 
-// ---------- Baholar ----------
-
-export interface MarkRecord {
-  id: number;
-  subject: string;
-  score: number;
-  max_score: number;
-  date: string;
-  unit_title: string | null;
-}
-
-export async function getMarksForUser(userId: number): Promise<MarkRecord[]> {
-  return sql<MarkRecord[]>`
-    SELECT m.id, m.subject, m.score, m.max_score, m.date, u.subtitle as unit_title
-    FROM marks m
-    LEFT JOIN units u ON u.id = m.unit_id
-    WHERE m.user_id = ${userId}
-    ORDER BY m.date DESC
-  `;
-}
-
 // ---------- Daraja jadvali (baholar va reyting) ----------
 
 export interface BoardStudent {
@@ -518,6 +497,9 @@ export interface BoardStudent {
   average: number;
   /** Reyting bali — darslar foizlari yig'indisi. */
   points: number;
+  /** Shu daraja imtihoni: topshirilganmi va o'tganmi. Foiz faqat o'quvchining
+   *  o'ziga beriladi — boshqalarga faqat o'tdi/o'tmadi ko'rinadi. */
+  exam: { attempted: boolean; passed: boolean; pct: number | null };
 }
 
 export interface LevelBoard {
@@ -551,7 +533,7 @@ export async function getLevelBoard(userId: number): Promise<LevelBoard> {
   if (users.length === 0 || withContent.length === 0) return { level, units: [], students: [] };
 
   const userIds = users.map((u) => u.id);
-  const [learnedRows, exerciseRows] = await Promise.all([
+  const [learnedRows, exerciseRows, examRows] = await Promise.all([
     sql<{ user_id: number; unit_id: number; n: number }[]>`
       SELECT p.user_id, r.unit_id, count(*)::int AS n
       FROM user_word_progress p
@@ -567,7 +549,14 @@ export async function getLevelBoard(userId: number): Promise<LevelBoard> {
       WHERE p.user_id IN ${sql(userIds)}
       GROUP BY p.user_id, e.unit_id
     `,
+    sql<{ user_id: number; best: number; passed: boolean }[]>`
+      SELECT user_id, max(round(score * 100.0 / total))::int AS best, bool_or(passed = 1) AS passed
+      FROM exam_attempts
+      WHERE level_code = ${level} AND finished_at IS NOT NULL AND user_id IN ${sql(userIds)}
+      GROUP BY user_id
+    `,
   ]);
+  const exams = new Map(examRows.map((r) => [r.user_id, r]));
   const learned = new Map(learnedRows.map((r) => [`${r.user_id}:${r.unit_id}`, r.n]));
   const exercised = new Map(exerciseRows.map((r) => [`${r.user_id}:${r.unit_id}`, r]));
 
@@ -587,6 +576,11 @@ export async function getLevelBoard(userId: number): Promise<LevelBoard> {
       ...user,
       is_current_user: user.id === userId,
       percents,
+      exam: {
+        attempted: exams.has(user.id),
+        passed: !!exams.get(user.id)?.passed,
+        pct: user.id === userId ? exams.get(user.id)?.best ?? null : null,
+      },
       average: Math.round(points / withContent.length),
       points,
     };

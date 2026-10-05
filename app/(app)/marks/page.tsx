@@ -1,12 +1,6 @@
 import { getSession } from "@/lib/auth";
-import { getLevelBoard, getMarksForUser } from "@/lib/data";
+import { getLevelBoard } from "@/lib/data";
 import { Avatar } from "@/components/Avatar";
-
-function scoreColor(pct: number) {
-  if (pct >= 90) return "text-ink-700 bg-ink-50 dark:bg-ink-900/40 dark:text-ink-200";
-  if (pct >= 70) return "text-gold-700 bg-gold-50 dark:bg-gold-950/40 dark:text-gold-300";
-  return "text-rose-700 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-300";
-}
 
 /** Dars natijasi doirasining rangi: 80%+ — yashil, 50–79% — sariq, undan past — qizil. */
 function cellColor(pct: number) {
@@ -22,6 +16,32 @@ function shortLabel(title: string) {
 
 type Board = Awaited<ReturnType<typeof getLevelBoard>>;
 type Student = Board["students"][number];
+
+/** Daraja imtihoni natijasi: o'quvchining o'zida foiz, boshqalarda faqat
+ *  o'tdi (✓) / o'tmadi (✗); topshirilmagan bo'lsa — «—». */
+function ExamBadge({ exam }: { exam: Student["exam"] }) {
+  if (!exam.attempted) return <span className="text-ink-300 dark:text-ink-600">—</span>;
+  if (exam.pct !== null) {
+    return (
+      <span
+        title={exam.passed ? "Imtihondan o'tgan" : "Imtihondan o'tmagan"}
+        className={`inline-flex h-9 min-w-9 items-center justify-center rounded-full px-1.5 text-xs font-bold ${cellColor(exam.pct)}`}
+      >
+        {exam.pct}
+      </span>
+    );
+  }
+  return (
+    <span
+      title={exam.passed ? "Imtihondan o'tgan" : "Imtihondan o'tmagan"}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-base font-bold ${
+        exam.passed ? "bg-mint-500 text-white" : "bg-rose-500 text-white"
+      }`}
+    >
+      {exam.passed ? "✓" : "✗"}
+    </span>
+  );
+}
 
 /** Telefon uchun o'quvchi kartasi: darslar raqamlangan kataklar to'rida —
  *  gorizontal aylantirishsiz hammasi bir qarashda ko'rinadi. */
@@ -71,6 +91,11 @@ function StudentCard({ student, units, rank }: { student: Student; units: Board[
           );
         })}
       </div>
+
+      <div className="mt-3 flex items-center justify-between rounded-xl bg-ink-50/70 px-3 py-2 dark:bg-white/5">
+        <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">Daraja imtihoni</span>
+        <ExamBadge exam={student.exam} />
+      </div>
     </li>
   );
 }
@@ -82,16 +107,14 @@ function Legend() {
       <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-gold-400" /> 50–79%</span>
       <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-rose-500" /> 50% dan past</span>
       <span className="flex items-center gap-1.5"><span className="text-ink-300 dark:text-ink-600">—</span> boshlanmagan</span>
+      <span className="flex items-center gap-1.5"><span className="font-bold text-mint-600">✓</span>/<span className="font-bold text-rose-500">✗</span> imtihondan o'tgan / o'tmagan</span>
     </div>
   );
 }
 
 export default async function MarksPage() {
   const session = await getSession();
-  const [board, marks] = await Promise.all([
-    getLevelBoard(session!.userId),
-    getMarksForUser(session!.userId),
-  ]);
+  const board = await getLevelBoard(session!.userId);
   // Telefonda o'z kartangiz doim birinchi.
   const mobileStudents = [
     ...board.students.filter((s) => s.is_current_user),
@@ -103,7 +126,8 @@ export default async function MarksPage() {
       <div className="animate-fade-up">
         <h1 className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">Baholar</h1>
         <p className="text-sm text-ink-700/60 dark:text-ink-300/60">
-          {board.level} darajasidagi o'quvchilarning har bir dars bo'yicha natijasi (lug'at va mashqlar).
+          {board.level} darajasidagi o'quvchilarning har bir dars bo'yicha natijasi (lug'at va mashqlar) va
+          daraja imtihoni.
         </p>
       </div>
 
@@ -146,6 +170,9 @@ export default async function MarksPage() {
                     {unit.title}
                   </th>
                 ))}
+                <th className="whitespace-nowrap border-b border-ink-100 px-3 py-3 text-center font-semibold dark:border-white/10">
+                  Imtihon
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -188,11 +215,18 @@ export default async function MarksPage() {
                       )}
                     </td>
                   ))}
+                  <td
+                    className={`border-b border-ink-50 px-3 py-2.5 text-center dark:border-white/5 ${
+                      student.is_current_user ? "bg-gold-50/60 dark:bg-gold-950/20" : ""
+                    }`}
+                  >
+                    <ExamBadge exam={student.exam} />
+                  </td>
                 </tr>
               ))}
               {board.students.length === 0 && (
                 <tr>
-                  <td colSpan={board.units.length + 1} className="px-4 py-8 text-center text-ink-400 dark:text-ink-600">
+                  <td colSpan={board.units.length + 2} className="px-4 py-8 text-center text-ink-400 dark:text-ink-600">
                     Hozircha natijalar yo'q.
                   </td>
                 </tr>
@@ -204,32 +238,6 @@ export default async function MarksPage() {
           <Legend />
         </div>
       </div>
-
-      <div className="animate-fade-up">
-        <h2 className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">Test va imtihonlar</h2>
-      </div>
-      <ul className="animate-fade-up divide-y divide-ink-50 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink-950/5 dark:divide-white/5 dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
-        {marks.map((m) => {
-          const pct = Math.round((m.score / m.max_score) * 100);
-          return (
-            <li key={m.id} className="flex items-center gap-3 px-4 py-3.5 sm:px-6">
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-ink-950 dark:text-ink-50">{m.subject}</p>
-                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
-                  {new Date(m.date).toLocaleDateString("uz-UZ", { day: "2-digit", month: "long" })}
-                  {m.unit_title ? ` · ${m.unit_title}` : ""}
-                </p>
-              </div>
-              <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${scoreColor(pct)}`}>
-                {m.score}/{m.max_score}
-              </span>
-            </li>
-          );
-        })}
-        {marks.length === 0 && (
-          <li className="px-4 py-8 text-center text-sm text-ink-400 dark:text-ink-600">Hozircha test natijalari yo'q.</li>
-        )}
-      </ul>
     </div>
   );
 }
