@@ -36,8 +36,62 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+/** Yozma javobni solishtirish uchun: kichik harf, «ё» = «е» (ko'p
+ *  klaviaturada «ё» yo'q), Unicode bir xil shaklga keltiriladi (ba'zi
+ *  telefon klaviaturalari «ё» ni «е» + ikki nuqta belgisi qilib yuboradi). */
 function normalize(s: string) {
-  return s.toLowerCase().trim().replace(/[^a-zа-яё\s-]/gi, "");
+  return s
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .trim()
+    .replace(/[^a-zа-я\s-]/gi, "");
+}
+
+/** Javobdan keyin: to'g'ri/xato xabari va «Keyingisi» tugmasi — o'quvchi
+ *  bosmaguncha keyingi savolga o'tilmaydi. */
+function StageNext({
+  correct,
+  answer,
+  onNext,
+}: {
+  correct: boolean;
+  answer: string;
+  onNext: () => void;
+}) {
+  const [sent, setSent] = useState(false);
+  return (
+    <div className="flex animate-fade-up flex-col gap-3">
+      <div
+        className={`rounded-2xl px-4 py-3 text-center text-sm ${
+          correct
+            ? "bg-mint-50 text-mint-900 dark:bg-mint-950/40 dark:text-mint-100"
+            : "bg-rose-50 text-rose-900 dark:bg-rose-950/40 dark:text-rose-100"
+        }`}
+      >
+        <p className="font-bold">
+          {correct ? (
+            "To'g'ri!"
+          ) : (
+            <>
+              To'g'ri javob: <span lang="ru">{answer}</span>
+            </>
+          )}
+        </p>
+      </div>
+      <button
+        autoFocus
+        onClick={() => {
+          if (sent) return;
+          setSent(true);
+          onNext();
+        }}
+        className="btn-press rounded-full bg-azure-600 py-3 text-sm font-bold text-white hover:bg-azure-500"
+      >
+        Keyingisi
+      </button>
+    </div>
+  );
 }
 
 function stagePassed(word: VocabWord, stage: VocabStage): boolean {
@@ -597,10 +651,7 @@ function SpellingStage({
           f === "space" ? " " : tileLetters.find((t) => t.id === f)?.ch ?? ""
         )
         .join("");
-      const correct = typed.toLowerCase() === target.toLowerCase();
-      setChecked(correct);
-      const t = setTimeout(() => onResult(correct), 900);
-      return () => clearTimeout(t);
+      setChecked(normalize(typed) === normalize(target));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isComplete]);
@@ -703,6 +754,7 @@ function SpellingStage({
       >
         <Delete size={14} /> Oxirgi harfni o'chirish
       </button>
+      {checked !== null && <StageNext correct={checked} answer={word.word} onNext={() => onResult(checked)} />}
     </div>
   );
 }
@@ -745,7 +797,6 @@ function DefinitionStage({
     setSelected(opt);
     const correct = opt === word.word;
     setChecked(correct);
-    setTimeout(() => onResult(correct), 900);
   }
 
   return (
@@ -779,6 +830,7 @@ function DefinitionStage({
           );
         })}
       </div>
+      {checked !== null && <StageNext correct={checked} answer={word.word} onNext={() => onResult(checked)} />}
     </div>
   );
 }
@@ -819,7 +871,6 @@ function PronunciationStage({
 
   function finish(correct: boolean) {
     setChecked(correct);
-    setTimeout(() => onResult(correct), 1000);
   }
 
   function startListening() {
@@ -968,6 +1019,7 @@ function PronunciationStage({
           </div>
         </div>
       )}
+      {checked !== null && <StageNext correct={checked} answer={word.word} onNext={() => onResult(checked)} />}
     </div>
   );
 }
@@ -992,9 +1044,7 @@ function SentenceStage({
 
   function submit() {
     if (checked !== null || !value.trim()) return;
-    const correct = normalize(value) === normalize(word.word);
-    setChecked(correct);
-    setTimeout(() => onResult(correct), 900);
+    setChecked(normalize(value) === normalize(word.word));
   }
 
   return (
@@ -1040,13 +1090,16 @@ function SentenceStage({
             : "border-ink-200 bg-white text-ink-900 focus:border-ink-500 dark:border-white/10 dark:bg-white/5 dark:text-ink-50"
         }`}
       />
-      <button
-        onClick={submit}
-        disabled={checked !== null || !value.trim()}
-        className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-40"
-      >
-        Tekshirish
-      </button>
+      {checked === null && (
+        <button
+          onClick={submit}
+          disabled={!value.trim()}
+          className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-40"
+        >
+          Tekshirish
+        </button>
+      )}
+      {checked !== null && <StageNext correct={checked} answer={word.word} onNext={() => onResult(checked)} />}
     </div>
   );
 }
