@@ -15,12 +15,88 @@ function cellColor(pct: number) {
   return "bg-rose-500 text-white";
 }
 
+/** Telefondagi katak yorlig'i: «12-dars» → «12», «Takrorlash» → «T». */
+function shortLabel(title: string) {
+  return title.match(/^\d+/)?.[0] ?? title.slice(0, 1).toUpperCase();
+}
+
+type Board = Awaited<ReturnType<typeof getLevelBoard>>;
+type Student = Board["students"][number];
+
+/** Telefon uchun o'quvchi kartasi: darslar raqamlangan kataklar to'rida —
+ *  gorizontal aylantirishsiz hammasi bir qarashda ko'rinadi. */
+function StudentCard({ student, units, rank }: { student: Student; units: Board["units"]; rank: number }) {
+  const started = student.percents.filter((p) => p !== null).length;
+  const done = student.percents.filter((p) => p !== null && p >= 80).length;
+  return (
+    <li
+      className={`rounded-2xl p-4 shadow-sm ring-1 ${
+        student.is_current_user
+          ? "bg-gold-50 ring-gold-300/60 dark:bg-[#2a2517] dark:ring-gold-700/40"
+          : "bg-white ring-ink-950/5 dark:bg-[#161b26] dark:ring-white/10"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <span className="w-5 shrink-0 text-center text-xs font-semibold text-ink-400">{rank}</span>
+        <Avatar name={student.name} photoUrl={student.avatar_url} size={40} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold text-ink-950 dark:text-ink-50">
+            {student.name}
+            {student.is_current_user && (
+              <span className="ml-1.5 rounded-full bg-gold-400 px-2 py-0.5 align-middle text-[10px] font-bold text-ink-950">
+                siz
+              </span>
+            )}
+          </p>
+          <p className="text-xs text-ink-500 dark:text-ink-400">
+            {started === 0 ? "Hali boshlanmagan" : `${started} ta dars boshlangan · ${done} tasi 80%+`}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-6 gap-1.5">
+        {units.map((unit, j) => {
+          const pct = student.percents[j];
+          return (
+            <div
+              key={unit.id}
+              title={`${unit.title}: ${unit.subtitle}`}
+              className={`flex aspect-square flex-col items-center justify-center rounded-xl ${
+                pct === null ? "bg-ink-100/70 text-ink-400 dark:bg-white/5 dark:text-ink-500" : cellColor(pct)
+              }`}
+            >
+              <span className="text-[10px] font-semibold leading-none opacity-75">{shortLabel(unit.title)}</span>
+              <span className="mt-0.5 text-sm font-bold leading-none">{pct === null ? "—" : pct}</span>
+            </div>
+          );
+        })}
+      </div>
+    </li>
+  );
+}
+
+function Legend() {
+  return (
+    <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-ink-500 dark:text-ink-400">
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-mint-500" /> 80%+</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-gold-400" /> 50–79%</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-rose-500" /> 50% dan past</span>
+      <span className="flex items-center gap-1.5"><span className="text-ink-300 dark:text-ink-600">—</span> boshlanmagan</span>
+    </div>
+  );
+}
+
 export default async function MarksPage() {
   const session = await getSession();
   const [board, marks] = await Promise.all([
     getLevelBoard(session!.userId),
     getMarksForUser(session!.userId),
   ]);
+  // Telefonda o'z kartangiz doim birinchi.
+  const mobileStudents = [
+    ...board.students.filter((s) => s.is_current_user),
+    ...board.students.filter((s) => !s.is_current_user),
+  ];
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -31,7 +107,29 @@ export default async function MarksPage() {
         </p>
       </div>
 
-      <div className="animate-fade-up overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink-950/5 dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
+      {/* Telefon: o'quvchi kartalari */}
+      <div className="flex animate-fade-up flex-col gap-3 md:hidden">
+        <Legend />
+        {mobileStudents.length > 0 ? (
+          <ul className="flex flex-col gap-3">
+            {mobileStudents.map((student) => (
+              <StudentCard
+                key={student.id}
+                student={student}
+                units={board.units}
+                rank={board.students.indexOf(student) + 1}
+              />
+            ))}
+          </ul>
+        ) : (
+          <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-ink-400 dark:bg-[#161b26] dark:text-ink-600">
+            Hozircha natijalar yo'q.
+          </p>
+        )}
+      </div>
+
+      {/* Kompyuter: jadval */}
+      <div className="hidden animate-fade-up overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink-950/5 md:block dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
         <div className="overflow-x-auto">
           <table className="w-full border-separate border-spacing-0 text-sm">
             <thead>
@@ -102,58 +200,36 @@ export default async function MarksPage() {
             </tbody>
           </table>
         </div>
-        <div className="flex flex-wrap gap-4 border-t border-ink-100 px-4 py-3 text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-mint-500" /> 80% va yuqori</span>
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-gold-400" /> 50–79%</span>
-          <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-rose-500" /> 50% dan past</span>
-          <span className="flex items-center gap-1.5"><span className="text-ink-300 dark:text-ink-600">—</span> hali boshlanmagan</span>
+        <div className="border-t border-ink-100 px-4 py-3 dark:border-white/10">
+          <Legend />
         </div>
       </div>
 
       <div className="animate-fade-up">
         <h2 className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">Test va imtihonlar</h2>
       </div>
-      <div className="animate-fade-up overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink-950/5 dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-ink-100 text-left text-xs uppercase text-ink-400 dark:border-white/10 dark:text-ink-500">
-              <th className="px-3 py-3 sm:px-6 font-semibold">Fan</th>
-              <th className="hidden px-3 py-3 font-semibold sm:table-cell sm:px-6">Dars</th>
-              <th className="px-3 py-3 sm:px-6 font-semibold">Sana</th>
-              <th className="px-3 py-3 sm:px-6 text-right font-semibold">Natija</th>
-            </tr>
-          </thead>
-          <tbody>
-            {marks.map((m) => {
-              const pct = Math.round((m.score / m.max_score) * 100);
-              return (
-                <tr
-                  key={m.id}
-                  className="border-b border-ink-50 transition-colors last:border-0 hover:bg-ink-50/40 dark:border-white/5 dark:hover:bg-white/5"
-                >
-                  <td className="px-3 py-3.5 sm:px-6 sm:py-4 font-medium text-ink-950 dark:text-ink-50">{m.subject}</td>
-                  <td className="hidden px-3 py-3.5 text-ink-700/60 sm:table-cell sm:px-6 sm:py-4 dark:text-ink-300/60">{m.unit_title || "—"}</td>
-                  <td className="px-3 py-3.5 sm:px-6 sm:py-4 text-ink-700/60 dark:text-ink-300/60">
-                    {new Date(m.date).toLocaleDateString("uz-UZ", { day: "2-digit", month: "long" })}
-                  </td>
-                  <td className="px-3 py-3.5 sm:px-6 sm:py-4 text-right">
-                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${scoreColor(pct)}`}>
-                      {m.score}/{m.max_score}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-            {marks.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-3 py-8 sm:px-6 text-center text-ink-400 dark:text-ink-600">
-                  Hozircha test natijalari yo'q.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ul className="animate-fade-up divide-y divide-ink-50 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink-950/5 dark:divide-white/5 dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
+        {marks.map((m) => {
+          const pct = Math.round((m.score / m.max_score) * 100);
+          return (
+            <li key={m.id} className="flex items-center gap-3 px-4 py-3.5 sm:px-6">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-ink-950 dark:text-ink-50">{m.subject}</p>
+                <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                  {new Date(m.date).toLocaleDateString("uz-UZ", { day: "2-digit", month: "long" })}
+                  {m.unit_title ? ` · ${m.unit_title}` : ""}
+                </p>
+              </div>
+              <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${scoreColor(pct)}`}>
+                {m.score}/{m.max_score}
+              </span>
+            </li>
+          );
+        })}
+        {marks.length === 0 && (
+          <li className="px-4 py-8 text-center text-sm text-ink-400 dark:text-ink-600">Hozircha test natijalari yo'q.</li>
+        )}
+      </ul>
     </div>
   );
 }
