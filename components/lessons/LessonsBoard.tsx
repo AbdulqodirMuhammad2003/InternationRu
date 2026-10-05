@@ -258,11 +258,11 @@ export function LessonsBoard({
     return Math.round((unit.learnedWords / unit.totalWords) * 100);
   }
 
+  /** «Mashqlar» bo'limining foizi — qoida testi o'z bo'limida hisoblanadi. */
   function unitExercisePercent(unit: UnitDetail) {
-    if (unit.exercises.length === 0) return 0;
-    return Math.round(
-      unit.exercises.reduce((s, e) => s + e.score_pct, 0) / unit.exercises.length
-    );
+    const exercises = unit.exercises.filter((e) => e.kind !== "rule");
+    if (exercises.length === 0) return 0;
+    return Math.round(exercises.reduce((s, e) => s + e.score_pct, 0) / exercises.length);
   }
 
   /** "Ruscha tomosha" faqat shu darsdagi barcha mashqlar kamida bir marta
