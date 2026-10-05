@@ -127,6 +127,9 @@ export interface BoardExam {
   note: string;
 }
 
+/** Lug'at shu foizga yetgach dars keyingi bosqichi (qoida, mashqlar) ochiladi. */
+const VOCAB_PASS_PCT = 86;
+
 type CarouselItem = { kind: "unit"; unit: UnitDetail } | { kind: "exam"; level: string };
 
 export function LessonsBoard({
@@ -207,7 +210,7 @@ export function LessonsBoard({
     // Lug'at tugallangan bo'lsa — qoida (hali ishlanmagan bo'lsa), keyin mashqlar.
     const ruleLeft = !unitRuleDone(unit);
     setOpenSection(
-      unitVocabPercent(unit) < 100 || unit.exercises.length === 0 ? "vocab" : ruleLeft ? "rule" : "exercises"
+      !unitVocabDone(unit) || unit.exercises.length === 0 ? "vocab" : ruleLeft ? "rule" : "exercises"
     );
     setClipNotice(false);
     if (unit.totalWords > 0) fetchUnitWords(unit.id);
@@ -268,10 +271,10 @@ export function LessonsBoard({
     return unit.exercises.length > 0 && unit.exercises.every((e) => e.attempted);
   }
 
-  /** Dars bosqichlari ketma-ket ochiladi: lug'at tugamaguncha qoida, qoida
+  /** Dars bosqichlari ketma-ket ochiladi: lug'at VOCAB_PASS_PCT ga yetmaguncha qoida, qoida
    *  testidan kamida RULE_PASS_PCT natija olinmaguncha mashqlar yopiq. */
   function unitVocabDone(unit: UnitDetail) {
-    return unit.totalWords === 0 || unitVocabPercent(unit) === 100;
+    return unit.totalWords === 0 || unitVocabPercent(unit) >= VOCAB_PASS_PCT;
   }
 
   function unitRuleDone(unit: UnitDetail) {
@@ -594,7 +597,7 @@ export function LessonsBoard({
                       lockNote={
                         unitVocabDone(openUnit)
                           ? null
-                          : "Qoida lug'atdagi barcha so'zlarni o'rganib bo'lgach ochiladi."
+                          : `Qoida lug'at ${VOCAB_PASS_PCT}% ga yetgach ochiladi.`
                       }
                       onToggle={() => setOpenSection(openSection === "rule" ? null : "rule")}
                       delay={60}
@@ -702,7 +705,7 @@ export function LessonsBoard({
                     disabled={openUnit.exercises.length === 0}
                     lockNote={
                       !unitVocabDone(openUnit)
-                        ? "Mashqlar lug'atdagi barcha so'zlarni o'rganib bo'lgach ochiladi."
+                        ? `Mashqlar lug'at ${VOCAB_PASS_PCT}% ga yetgach ochiladi.`
                         : !unitRuleDone(openUnit)
                           ? `Mashqlar qoida testidan kamida ${RULE_PASS_PCT}% olgach ochiladi.`
                           : null
