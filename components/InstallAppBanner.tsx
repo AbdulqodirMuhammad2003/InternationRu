@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { Download, Share, X } from "lucide-react";
 
-const DISMISS_KEY = "avangard-install-dismissed";
+/** Ilova o'rnatilgan — taklif boshqa ko'rsatilmaydi. */
+const INSTALLED_KEY = "avangard-app-installed";
+/** × bosilgan — faqat shu tashrif davomida yashiriladi (keyingi kirishda yana chiqadi). */
+const SESSION_HIDE_KEY = "avangard-install-hidden";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -12,22 +15,27 @@ interface BeforeInstallPromptEvent extends Event {
 
 /** Telefonda saytni ilova sifatida o'rnatish taklifi: Android/Chrome'da
  *  «O'rnatish» tugmasi (brauzerning o'rnatish oynasini ochadi), iPhone
- *  Safari'da — «Ulashish → Bosh ekranga» ko'rsatmasi. Ilova ichida
- *  (o'rnatilgan holda) yoki yopilgandan keyin ko'rinmaydi. */
+ *  Safari'da — «Ulashish → Bosh ekranga» ko'rsatmasi. Faqat ilovani
+ *  o'rnatganlarga ko'rinmaydi; × bilan yopilsa, keyingi kirishda yana chiqadi. */
 export function InstallAppBanner() {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [showIosHint, setShowIosHint] = useState(false);
   const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
-    let dismissed = false;
-    try {
-      dismissed = localStorage.getItem(DISMISS_KEY) === "1";
-    } catch {}
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true;
-    if (dismissed || standalone) return;
+    let installed = false;
+    let hiddenThisVisit = false;
+    try {
+      // O'rnatilgan ilova ichida ochilgan bo'lsa — eslab qolinadi (Android'da
+      // ilova va brauzer bir xil xotiradan foydalanadi).
+      if (standalone) localStorage.setItem(INSTALLED_KEY, "1");
+      installed = localStorage.getItem(INSTALLED_KEY) === "1";
+      hiddenThisVisit = sessionStorage.getItem(SESSION_HIDE_KEY) === "1";
+    } catch {}
+    if (standalone || installed || hiddenThisVisit) return;
 
     const ua = navigator.userAgent;
     const isIos = /iPhone|iPad|iPod/.test(ua) && !/CriOS|FxiOS/.test(ua);
@@ -43,17 +51,28 @@ export function InstallAppBanner() {
       setPromptEvent(e as BeforeInstallPromptEvent);
       setHidden(false);
     };
+    const onInstalled = () => markInstalled();
     window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("appinstalled", onInstalled);
     return () => {
       if (timer) clearTimeout(timer);
       window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
 
+  function markInstalled() {
+    setHidden(true);
+    try {
+      localStorage.setItem(INSTALLED_KEY, "1");
+    } catch {}
+  }
+
+  /** × — faqat shu tashrifga yashirish. */
   function dismiss() {
     setHidden(true);
     try {
-      localStorage.setItem(DISMISS_KEY, "1");
+      sessionStorage.setItem(SESSION_HIDE_KEY, "1");
     } catch {}
   }
 
@@ -62,7 +81,9 @@ export function InstallAppBanner() {
     await promptEvent.prompt();
     const { outcome } = await promptEvent.userChoice;
     setPromptEvent(null);
-    if (outcome === "accepted") dismiss();
+    // «Отмена» bosilsa — shu safar yashiriladi, keyingi kirishda yana chiqadi.
+    if (outcome === "accepted") markInstalled();
+    else dismiss();
   }
 
   if (hidden || (!promptEvent && !showIosHint)) return null;
