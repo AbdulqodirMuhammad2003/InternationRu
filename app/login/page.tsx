@@ -8,6 +8,8 @@ const GOOGLE_ERRORS: Record<string, string> = {
   google: "Google orqali kirib bo'lmadi. Qaytadan urinib ko'ring.",
   google_email: "Google hisobingizning emaili tasdiqlanmagan.",
   google_config: "Google orqali kirish hali sozlanmagan.",
+  google_unknown:
+    "Bu Google hisobi ro'yxatda yo'q. Login va parolni o'qituvchingizdan oling (yoki o'qituvchi emailingizni qo'shsin).",
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {

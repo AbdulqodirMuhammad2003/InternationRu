@@ -2,17 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS } from "./Sidebar";
+import { NAV_ITEMS, TEACHER_NAV_ITEM } from "./Sidebar";
 
 /** Telefon va planshet uchun pastki navigatsiya paneli (katta ekranlarda
  *  uning o'rnini chap yon panel — Sidebar egallaydi). */
-export function MobileNav() {
+export function MobileNav({ isTeacher = false }: { isTeacher?: boolean }) {
   const pathname = usePathname();
+  const items = isTeacher ? [...NAV_ITEMS, TEACHER_NAV_ITEM] : NAV_ITEMS;
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-ink-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden dark:border-white/10 dark:bg-[#121620]/95">
       <div className="mx-auto flex max-w-md items-stretch justify-around">
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
           return (

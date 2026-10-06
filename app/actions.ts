@@ -7,7 +7,7 @@ import { sql } from "@/lib/db";
 import {
   getExerciseQuestions,
   getUnitWords,
-  getUserByEmail,
+  getUserByLogin,
   REVIEW_INTERVAL_DAYS,
   MAX_REVIEW_BOX,
   type ExerciseQuestion,
@@ -29,20 +29,20 @@ export async function loginAction(
   _prevState: LoginState,
   formData: FormData
 ): Promise<LoginState> {
-  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const login = String(formData.get("login") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
 
-  if (!email || !password) {
-    return { error: "Email va parolni kiriting." };
+  if (!login || !password) {
+    return { error: "Login va parolni kiriting." };
   }
 
-  const user = await getUserByEmail(email);
+  const user = await getUserByLogin(login);
   if (!user) {
-    return { error: "Bunday email bilan foydalanuvchi topilmadi." };
+    return { error: "Bunday login topilmadi. Login va parolni o'qituvchingizdan oling." };
   }
 
   if (!user.password_hash) {
-    return { error: "Bu hisob Google orqali ochilgan — «Google orqali kirish» tugmasini bosing." };
+    return { error: "Bu hisobga parol berilmagan — «Google orqali kirish» tugmasini bosing." };
   }
 
   const valid = await verifyPassword(password, user.password_hash);
@@ -52,7 +52,7 @@ export async function loginAction(
 
   const token = createSessionToken({
     userId: user.id,
-    email: user.email,
+    email: user.email ?? user.username ?? "",
     name: user.name,
   });
 

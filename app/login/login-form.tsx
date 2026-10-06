@@ -12,13 +12,16 @@ export function LoginForm() {
     <form action={action} className="flex flex-col gap-4">
       <div>
         <label className="mb-1 block text-sm font-medium text-ink-800">
-          Elektron pochta
+          Login yoki email
         </label>
         <input
-          type="email"
-          name="email"
+          type="text"
+          name="login"
           required
-          placeholder="you@example.com"
+          autoCapitalize="none"
+          autoCorrect="off"
+          autoComplete="username"
+          placeholder="O'qituvchi bergan login"
           className="w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-300 focus:border-azure-500 focus:ring-2 focus:ring-azure-100"
         />
       </div>

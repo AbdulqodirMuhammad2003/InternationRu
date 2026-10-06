@@ -10,7 +10,9 @@ export type { ExerciseKind };
 export interface UserRecord {
   id: number;
   name: string;
-  email: string;
+  email: string | null;
+  /** «student» yoki «teacher» (o'qituvchi paneliga kira oladi). */
+  role: string;
   avatar_url: string | null;
   course: string;
   level: string;
@@ -149,17 +151,20 @@ export const PREVIEW_ALL_LEVELS_EMAILS: string[] = [];
 
 // ---------- Foydalanuvchi ----------
 
-export async function getUserByEmail(email: string) {
+/** Kirish: o'qituvchi bergan login yoki email bo'yicha (katta-kichik harf farqsiz). */
+export async function getUserByLogin(login: string) {
   const rows = await sql<
     {
       id: number;
       name: string;
-      email: string;
-      /** Google orqali yaratilgan hisobda parol yo'q. */
+      email: string | null;
+      username: string | null;
+      /** Google orqali kiradigan hisobda parol bo'lmasligi mumkin. */
       password_hash: string | null;
       avatar_url: string | null;
     }[]
-  >`SELECT id, name, email, password_hash, avatar_url FROM users WHERE email = ${email}`;
+  >`SELECT id, name, email, username, password_hash, avatar_url FROM users
+     WHERE lower(username) = ${login} OR lower(email) = ${login}`;
   return rows[0];
 }
 
@@ -167,7 +172,7 @@ export async function getUserByEmail(email: string) {
  *  chaqirsa ham bazaga faqat bir marta murojaat qilinadi. */
 export const getUserStats = cache(async (userId: number): Promise<UserRecord | undefined> => {
   const rows = await sql<UserRecord[]>`
-    SELECT id, name, email, CASE WHEN avatar_url LIKE 'data:%' THEN '/avatar/' || id || '?v=' || length(avatar_url) ELSE avatar_url END AS avatar_url, course, level, coins, stars, branch_rank, group_rank,
+    SELECT id, name, email, role, CASE WHEN avatar_url LIKE 'data:%' THEN '/avatar/' || id || '?v=' || length(avatar_url) ELSE avatar_url END AS avatar_url, course, level, coins, stars, branch_rank, group_rank,
            battle_wins, august_average, reading_pct, writing_pct, listening_pct, speaking_pct
     FROM users WHERE id = ${userId}
   `;
@@ -317,7 +322,7 @@ export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
  *  natijalar shu yerda yig'iladi (avval har bir bosqich/mashq uchun alohida
  *  so'rov ketardi — ~50 ta ketma-ket so'rov). */
 export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]> {
-  const [units, rounds, wordCounts, exerciseRows, questionCounts] = await Promise.all([
+  const [units, rounds, wordCounts, exerciseRows, questionCounts, levelRows, placementRows] = await Promise.all([
     getUnitsForUser(userId),
     sql<{ id: number; unit_id: number; title: string; order_index: number }[]>`
       SELECT id, unit_id, title, order_index FROM vocabulary_rounds ORDER BY order_index ASC
@@ -356,7 +361,27 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
     sql<{ exercise_id: number; n: number }[]>`
       SELECT exercise_id, count(*)::int AS n FROM exercise_questions GROUP BY exercise_id
     `,
+    sql<{ code: string; order_index: number }[]>`SELECT code, order_index FROM levels`,
+    // O'qituvchi o'quvchini qaysi darajaning qaysi darsidan boshlatgan.
+    sql<{ level: string; start_order: number | null }[]>`
+      SELECT u.level, su.order_index AS start_order
+      FROM users u
+      LEFT JOIN levels lv ON lv.code = u.level
+      LEFT JOIN units su ON su.id = u.start_unit_id AND su.level_id = lv.id
+      WHERE u.id = ${userId}
+    `,
   ]);
+  const levelOrder = new Map(levelRows.map((l) => [l.code, l.order_index]));
+  const placement = placementRows[0];
+  /** O'qituvchi joylashtirgan joygacha bo'lgan darslar (oldingi darajalar va
+   *  joriy darajaning boshlanish darsigacha) 80 % qoidasisiz ochiq. */
+  const placedOpen = (unit: UnitRecord) => {
+    if (!placement) return false;
+    const unitLevel = levelOrder.get(unit.level_code) ?? 0;
+    const userLevel = levelOrder.get(placement.level) ?? 0;
+    if (unitLevel < userLevel) return true;
+    return unit.level_code === placement.level && placement.start_order !== null && unit.order_index <= placement.start_order;
+  };
 
   function groupBy<T, K>(rows: readonly T[], key: (row: T) => K) {
     const map = new Map<K, T[]>();
@@ -404,7 +429,7 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
     unit.percent = parts.length > 0 ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length) : 0;
 
     if (parts.length === 0) unit.lock_reason = "Tez orada";
-    else if (UNLOCK_RULE_ENABLED && previous && previous.percent < UNLOCK_THRESHOLD)
+    else if (UNLOCK_RULE_ENABLED && previous && previous.percent < UNLOCK_THRESHOLD && !placedOpen(unit))
       unit.lock_reason = `${previous.title}ni ${UNLOCK_THRESHOLD}% ga yetkazing`;
     unit.locked = unit.lock_reason ? 1 : 0;
     previous = unit;
@@ -517,7 +542,7 @@ export async function getLevelBoard(userId: number): Promise<LevelBoard> {
   const [users, units] = await Promise.all([
     sql<{ id: number; name: string; avatar_url: string | null }[]>`
       SELECT id, name, CASE WHEN avatar_url LIKE 'data:%' THEN '/avatar/' || id || '?v=' || length(avatar_url) ELSE avatar_url END AS avatar_url
-      FROM users WHERE level = ${level} ORDER BY name
+      FROM users WHERE level = ${level} AND role = 'student' ORDER BY name
     `,
     sql<{ id: number; title: string; subtitle: string; words: number; exercises: number }[]>`
       SELECT u.id, u.title, u.subtitle,

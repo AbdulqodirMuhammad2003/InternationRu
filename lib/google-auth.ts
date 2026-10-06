@@ -66,14 +66,14 @@ export async function fetchGoogleProfile(code: string, origin: string): Promise<
   return (await infoRes.json()) as GoogleProfile;
 }
 
-/** Google hisobiga mos foydalanuvchini topadi yoki yaratadi:
+/** Google hisobiga mos foydalanuvchini topadi (yangi hisob yaratmaydi —
+ *  hisoblarni faqat o'qituvchi ochadi):
  *  1) avval shu Google hisobi bilan kirgan bo'lsa — o'sha hisob;
- *  2) shu email bilan eski (parolli) hisob bo'lsa — unga bog'lanadi,
- *     darajasi va butun progressi saqlanib qoladi;
- *  3) aks holda yangi o'quvchi yaratiladi (A1 darajadan boshlaydi). */
-export async function findOrCreateGoogleUser(profile: GoogleProfile) {
+ *  2) o'qituvchi shu emailni o'quvchiga yozib qo'ygan bo'lsa — unga
+ *     bog'lanadi, darajasi va progressi saqlanib qoladi;
+ *  3) aks holda null — kirish rad etiladi. */
+export async function findGoogleUser(profile: GoogleProfile) {
   const email = profile.email.trim().toLowerCase();
-  const name = profile.name?.trim() || email.split("@")[0];
 
   const [bySub] = await sql<{ id: number; name: string; email: string }[]>`
     SELECT id, name, email FROM users WHERE google_sub = ${profile.sub}
@@ -86,18 +86,11 @@ export async function findOrCreateGoogleUser(profile: GoogleProfile) {
     WHERE lower(email) = ${email} AND google_sub IS NULL
     RETURNING id, name, email
   `;
-  if (byEmail) return byEmail;
-
-  const [created] = await sql<{ id: number; name: string; email: string }[]>`
-    INSERT INTO users (name, email, password_hash, google_sub, avatar_url, level)
-    VALUES (${name}, ${email}, NULL, ${profile.sub}, ${profile.picture ?? null}, 'A1')
-    RETURNING id, name, email
-  `;
-  return created;
+  return byEmail ?? null;
 }
 
-export async function setSessionCookie(user: { id: number; name: string; email: string }) {
-  const token = createSessionToken({ userId: user.id, email: user.email, name: user.name });
+export async function setSessionCookie(user: { id: number; name: string; email: string | null }) {
+  const token = createSessionToken({ userId: user.id, email: user.email ?? "", name: user.name });
   const cookieStore = await cookies();
   cookieStore.set(AUTH_COOKIE, token, {
     httpOnly: true,

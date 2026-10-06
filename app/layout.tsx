@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 
@@ -20,6 +20,15 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Avangard | Rus tili kursi",
   description: "O'zbek o'quvchilari uchun rus tilini o'rgatuvchi platforma — darslar, mashqlar, baholar va reyting.",
+  applicationName: "Avangard",
+  // iPhone: «Bosh ekranga qo'shish» dan keyin ilova kabi ochiladi.
+  appleWebApp: { capable: true, title: "Avangard", statusBarStyle: "black" },
+  icons: { apple: "/apple-touch-icon.png" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f131c",
+  viewportFit: "cover",
 };
 
 const THEME_INIT_SCRIPT = `

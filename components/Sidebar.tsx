@@ -8,6 +8,7 @@ import {
   ListChecks,
   Trophy,
   LogOut,
+  Presentation,
 } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { LogoMark } from "./Logo";
@@ -19,8 +20,12 @@ export const NAV_ITEMS = [
   { href: "/ranking", label: "Reyting", icon: Trophy },
 ];
 
-export function Sidebar() {
+/** O'qituvchi uchun qo'shimcha bo'lim. */
+export const TEACHER_NAV_ITEM = { href: "/teacher", label: "O'qituvchi", icon: Presentation };
+
+export function Sidebar({ isTeacher = false }: { isTeacher?: boolean }) {
   const pathname = usePathname();
+  const items = isTeacher ? [...NAV_ITEMS, TEACHER_NAV_ITEM] : NAV_ITEMS;
 
   return (
     <aside
@@ -40,7 +45,7 @@ export function Sidebar() {
       </div>
 
       <nav className="relative flex flex-1 flex-col gap-1">
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const active =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;

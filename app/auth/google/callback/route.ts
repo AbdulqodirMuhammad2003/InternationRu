@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 import {
   GOOGLE_STATE_COOKIE,
   fetchGoogleProfile,
-  findOrCreateGoogleUser,
+  findGoogleUser,
   googleConfigured,
   setSessionCookie,
 } from "@/lib/google-auth";
@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
   }
   if (!profile.email || !profile.email_verified) redirect("/login?error=google_email");
 
-  const user = await findOrCreateGoogleUser(profile);
+  const user = await findGoogleUser(profile);
+  if (!user) redirect("/login?error=google_unknown");
 
   await setSessionCookie(user);
   redirect("/lessons");

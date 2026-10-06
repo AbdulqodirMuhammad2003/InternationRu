@@ -7,6 +7,7 @@ import { EditableAvatar } from "@/components/EditableAvatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CommandPalette } from "@/components/CommandPalette";
 import { MobileNav } from "@/components/MobileNav";
+import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { LogoMark } from "@/components/Logo";
 import { logoutAction } from "@/app/actions";
 import { LogOut } from "lucide-react";
@@ -23,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-[#f5f7fb] dark:bg-[#0d1017]">
-      <Sidebar />
+      <Sidebar isTeacher={user.role === "teacher"} />
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-ink-100 bg-white/80 px-4 py-2.5 backdrop-blur-sm sm:px-6 lg:static lg:px-8 lg:py-3 dark:border-white/10 dark:bg-[#121620]/80">
           <div className="flex items-center gap-3">
@@ -62,10 +63,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </header>
         <main className="min-w-0 flex-1 overflow-x-hidden px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-8 lg:pt-6">
+          <InstallAppBanner />
           {children}
         </main>
       </div>
-      <MobileNav />
+      <MobileNav isTeacher={user.role === "teacher"} />
     </div>
   );
 }

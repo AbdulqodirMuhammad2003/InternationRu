@@ -11,9 +11,11 @@
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
+  email TEXT UNIQUE, -- o'qituvchi faqat login bergan o'quvchida NULL
+  username TEXT UNIQUE, -- o'qituvchi bergan login
   password_hash TEXT, -- Google orqali yaratilgan hisobda NULL
   google_sub TEXT UNIQUE, -- Google hisobining doimiy ID si
+  role TEXT NOT NULL DEFAULT 'student', -- student | teacher
   avatar_url TEXT,
   course TEXT DEFAULT 'Rus tili kursi',
   level TEXT DEFAULT 'A1',
@@ -60,6 +62,9 @@ CREATE TABLE IF NOT EXISTS units (
   clip_start INTEGER,
   clip_end INTEGER
 );
+
+-- O'qituvchi o'quvchini qaysi darsdan boshlatgan (joriy darajadagi dars).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS start_unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS vocabulary_rounds (
   id SERIAL PRIMARY KEY,
