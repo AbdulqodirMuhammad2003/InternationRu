@@ -25,6 +25,8 @@ export interface TeacherStudent {
   username: string | null;
   email: string | null;
   hasPassword: boolean;
+  /** Parolning o'qituvchi ko'ra oladigan nusxasi saqlanganmi. */
+  passwordViewable: boolean;
   googleLinked: boolean;
   level: string;
   startUnitId: number | null;
@@ -63,9 +65,10 @@ export async function getTeacherStudents(): Promise<TeacherStudent[]> {
   const [users, units, learned, exercised, activity] = await Promise.all([
     sql<{
       id: number; name: string; username: string | null; email: string | null; has_password: boolean;
-      google_linked: boolean; level: string; start_unit_id: number | null; created_at: Date;
+      google_linked: boolean; password_viewable: boolean; level: string; start_unit_id: number | null; created_at: Date;
     }[]>`
       SELECT id, name, username, email, password_hash IS NOT NULL AS has_password,
+             password_view IS NOT NULL AS password_viewable,
              google_sub IS NOT NULL AS google_linked, level, start_unit_id, created_at
       FROM users WHERE role = 'student' ORDER BY created_at DESC
     `,
@@ -124,6 +127,7 @@ export async function getTeacherStudents(): Promise<TeacherStudent[]> {
       username: u.username,
       email: u.email,
       hasPassword: u.has_password,
+      passwordViewable: u.password_viewable,
       googleLinked: u.google_linked,
       level: u.level,
       startUnitId: u.start_unit_id,

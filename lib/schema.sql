@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT, -- Google orqali yaratilgan hisobda NULL
   google_sub TEXT UNIQUE, -- Google hisobining doimiy ID si
   role TEXT NOT NULL DEFAULT 'student', -- student | teacher
+  password_view TEXT, -- o'qituvchi ko'rishi uchun parol nusxasi (AES-GCM, kalit JWT_SECRET dan)
   avatar_url TEXT,
   course TEXT DEFAULT 'Rus tili kursi',
   level TEXT DEFAULT 'A1',

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
 import { requireTeacher } from "@/lib/teacher";
+import { decryptPasswordView, encryptPasswordView } from "@/lib/password-view";
 
 export interface TeacherActionResult {
   ok: boolean;
@@ -59,8 +60,9 @@ export async function createStudentAction(formData: FormData): Promise<TeacherAc
   if (taken) return { ok: false, error: "Bu login yoki email band." };
 
   await sql`
-    INSERT INTO users (name, username, email, password_hash, level, start_unit_id, role)
-    VALUES (${name}, ${username}, ${email}, ${await hashPassword(password)}, ${level}, ${startUnitId}, 'student')
+    INSERT INTO users (name, username, email, password_hash, password_view, level, start_unit_id, role)
+    VALUES (${name}, ${username}, ${email}, ${await hashPassword(password)}, ${encryptPasswordView(password)},
+            ${level}, ${startUnitId}, 'student')
   `;
   revalidatePath("/teacher");
   return { ok: true };
@@ -110,8 +112,26 @@ export async function resetPasswordAction(formData: FormData): Promise<TeacherAc
   const id = Number(formData.get("id"));
   const password = String(formData.get("password") ?? "");
   if (password.length < 6) return { ok: false, error: "Parol kamida 6 belgidan iborat bo'lsin." };
-  await sql`UPDATE users SET password_hash = ${await hashPassword(password)} WHERE id = ${id} AND role = 'student'`;
+  await sql`
+    UPDATE users SET password_hash = ${await hashPassword(password)}, password_view = ${encryptPasswordView(password)}
+    WHERE id = ${id} AND role = 'student'
+  `;
+  revalidatePath("/teacher");
   return { ok: true };
+}
+
+/** O'qituvchi o'quvchining login va parolini qayta ko'radi (o'quvchi unutsa).
+ *  Parol faqat shu tugma bosilganda yuboriladi. Panel qo'shilishidan oldin
+ *  berilgan parollar saqlanmagan — ular uchun null (yangi parol beriladi). */
+export async function revealCredentialsAction(
+  id: number
+): Promise<{ ok: boolean; username?: string | null; password?: string | null }> {
+  await requireTeacher();
+  const [row] = await sql<{ username: string | null; email: string | null; password_view: string | null }[]>`
+    SELECT username, email, password_view FROM users WHERE id = ${id} AND role = 'student'
+  `;
+  if (!row) return { ok: false };
+  return { ok: true, username: row.username ?? row.email, password: decryptPasswordView(row.password_view) };
 }
 
 /** O'quvchini va uning barcha natijalarini o'chirish. */

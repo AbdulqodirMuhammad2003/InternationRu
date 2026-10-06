@@ -3,6 +3,9 @@
 import { useMemo, useState, useTransition } from "react";
 import {
   Check,
+  Copy,
+  Eye,
+  EyeOff,
   KeyRound,
   MapPin,
   Pencil,
@@ -18,6 +21,7 @@ import {
   createStudentAction,
   deleteStudentAction,
   resetPasswordAction,
+  revealCredentialsAction,
   updatePlacementAction,
   updateStudentInfoAction,
   type TeacherActionResult,
@@ -138,7 +142,7 @@ function NewStudentForm({ levels, onClose }: { levels: PlacementLevel[]; onClose
         <p className="flex items-center gap-2 font-bold text-mint-800 dark:text-mint-200">
           <Check size={18} /> O'quvchi qo'shildi
         </p>
-        <p className="text-sm text-ink-700 dark:text-ink-200">Quyidagilarni o'quvchiga bering (parol keyin ko'rinmaydi):</p>
+        <p className="text-sm text-ink-700 dark:text-ink-200">Quyidagilarni o'quvchiga bering (keyin ham o'quvchi kartasidan ko'rish mumkin):</p>
         <div className="grid gap-2 rounded-xl bg-white p-3 font-mono text-sm dark:bg-white/5">
           <span>Sayt: internation-ru.vercel.app</span>
           <span>Login: {created.username}</span>
@@ -322,6 +326,63 @@ function StudentEditor({
   );
 }
 
+/** «Login va parol» qatori: parol faqat «Ko'rsatish» bosilganda serverdan olinadi. */
+function Credentials({ student }: { student: TeacherStudent }) {
+  const [shown, setShown] = useState<{ username: string | null; password: string | null } | null>(null);
+  const [pending, startTransition] = useTransition();
+  const [copied, setCopied] = useState(false);
+
+  function toggle() {
+    if (shown) return setShown(null);
+    startTransition(async () => {
+      const res = await revealCredentialsAction(student.id);
+      if (res.ok) setShown({ username: res.username ?? null, password: res.password ?? null });
+    });
+  }
+
+  function copy() {
+    if (!shown?.password) return;
+    navigator.clipboard?.writeText(
+      `Sayt: https://internation-ru.vercel.app\nLogin: ${shown.username ?? ""}\nParol: ${shown.password}`
+    );
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
+  return (
+    <div className="mt-3 flex items-center gap-2 rounded-xl bg-ink-50/70 px-3 py-2 text-xs dark:bg-white/5">
+      <KeyRound size={14} className="shrink-0 text-ink-400" />
+      <div className="min-w-0 flex-1 font-mono text-ink-800 dark:text-ink-100">
+        <span>{student.username ?? student.email ?? "—"}</span>
+        <span className="mx-1.5 text-ink-300">·</span>
+        {shown ? (
+          shown.password ? (
+            <span className="font-bold">{shown.password}</span>
+          ) : (
+            <span className="font-sans text-ink-500">parol saqlanmagan — «Parol» orqali yangisini bering</span>
+          )
+        ) : (
+          <span className="tracking-widest text-ink-400">••••••</span>
+        )}
+      </div>
+      {shown?.password && (
+        <button onClick={copy} aria-label="Nusxa olish" className="shrink-0 rounded-full p-1 text-ink-500 hover:text-ink-800 dark:hover:text-ink-100">
+          {copied ? <Check size={15} className="text-mint-600" /> : <Copy size={15} />}
+        </button>
+      )}
+      <button
+        onClick={toggle}
+        disabled={pending || (!student.passwordViewable && !shown)}
+        aria-label={shown ? "Yashirish" : "Parolni ko'rsatish"}
+        title={student.passwordViewable ? undefined : "Bu o'quvchining paroli saqlanmagan — yangi parol bering"}
+        className="shrink-0 rounded-full p-1 text-ink-500 hover:text-ink-800 disabled:opacity-40 dark:hover:text-ink-100"
+      >
+        {shown ? <EyeOff size={15} /> : <Eye size={15} />}
+      </button>
+    </div>
+  );
+}
+
 function StudentCard({ student, levels }: { student: TeacherStudent; levels: PlacementLevel[] }) {
   const [mode, setMode] = useState<Mode | null>(null);
   const startUnit = levels.flatMap((l) => l.units).find((u) => u.id === student.startUnitId);
@@ -348,6 +409,8 @@ function StudentCard({ student, levels }: { student: TeacherStudent; levels: Pla
           </p>
         </div>
       </div>
+
+      <Credentials student={student} />
 
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
         <div className="rounded-xl bg-ink-50/70 px-3 py-2 dark:bg-white/5">
