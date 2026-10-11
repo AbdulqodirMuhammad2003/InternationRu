@@ -8,6 +8,7 @@ import {
   type UserRecord,
 } from "@/lib/data";
 import { EditableAvatar } from "./EditableAvatar";
+import { currentUnitOf, levelUnits } from "@/lib/progress";
 
 interface NextStep {
   title: string;
@@ -16,10 +17,17 @@ interface NextStep {
   href: string;
 }
 
-/** O'quvchi to'xtagan joy: birinchi ochiq darsdagi tugallanmagan lug'at
- *  bosqichi, bo'lmasa hali ishlanmagan mashq. */
-function findNextStep(units: UnitDetail[]): NextStep | null {
-  for (const unit of units) {
+/** O'quvchi to'xtagan joy: joriy darsdagi (joriy darajaning oxirgi ochiq
+ *  darsi) tugallanmagan lug'at bosqichi yoki ishlanmagan mashq; u to'liq
+ *  bo'lsa — joriy darajaning boshqa ochiq darslaridan. Oldingi darajalar
+ *  hisobga olinmaydi (o'qituvchi o'quvchini daraja o'rtasidan boshlatishi mumkin). */
+function findNextStep(units: UnitDetail[], level: string): NextStep | null {
+  const current = currentUnitOf(units, level);
+  const ordered = [
+    ...(current ? [current] : []),
+    ...levelUnits(units, level).filter((u) => u !== current),
+  ];
+  for (const unit of ordered) {
     if (unit.locked) continue;
     for (const round of unit.rounds) {
       const left = round.word_count - round.learned_count;
@@ -79,9 +87,10 @@ export function TodayPanel({
   activity: ActivityOverview;
   review: ReviewSummary;
 }) {
-  const next = findNextStep(units);
-  const learned = units.reduce((s, u) => s + u.learnedWords, 0);
-  const totalWords = units.reduce((s, u) => s + u.totalWords, 0);
+  const next = findNextStep(units, user.level);
+  const current = levelUnits(units, user.level);
+  const learned = current.reduce((s, u) => s + u.learnedWords, 0);
+  const totalWords = current.reduce((s, u) => s + u.totalWords, 0);
   const goalReached = activity.todayCorrect >= DAILY_GOAL;
 
   return (
@@ -105,7 +114,7 @@ export function TodayPanel({
           }`}
         >
           <Flame size={20} className={activity.streak > 0 ? "text-gold-600 dark:text-gold-300" : ""} />
-          {activity.streak > 0 ? `${activity.streak} kun ketma-ket` : "Streakni bugun boshlang"}
+          {activity.streak > 0 ? `${activity.streak} kun ketma-ket` : "Bugundan ketma-ket o'qishni boshlang"}
         </div>
       </div>
 
@@ -163,8 +172,8 @@ export function TodayPanel({
               <p className="font-bold text-ink-950 dark:text-ink-50">
                 {review.due > 0 ? `${review.due} ta so'z` : "Hozircha yo'q"}
               </p>
-              <p className="text-[11px] text-ink-400 dark:text-ink-500">
-                O'rganilgan: {learned} / {totalWords}
+              <p className="text-xs text-ink-600 dark:text-ink-300">
+                {user.level}: {learned} / {totalWords} so'z o'rganilgan
               </p>
             </div>
             <ChevronRight size={18} className="shrink-0 text-ink-300 transition-transform group-hover:translate-x-0.5" />
@@ -173,7 +182,7 @@ export function TodayPanel({
       </div>
 
       <div className="mt-5 flex items-center justify-between border-t border-ink-100 pt-4 dark:border-white/10">
-        <span className="text-xs font-semibold text-ink-500 dark:text-ink-400">Bu hafta</span>
+        <span className="text-xs font-semibold text-ink-600 dark:text-ink-300">Bu hafta</span>
         <div className="flex gap-2 sm:gap-3">
           {activity.week.map((d) => (
             <div key={d.label} className="flex flex-col items-center gap-1">
@@ -189,8 +198,8 @@ export function TodayPanel({
                 />
               )}
               <span
-                className={`text-[11px] ${
-                  d.isToday ? "font-bold text-ink-900 dark:text-ink-50" : "text-ink-400 dark:text-ink-500"
+                className={`text-xs ${
+                  d.isToday ? "font-bold text-ink-900 dark:text-ink-50" : "text-ink-600 dark:text-ink-300"
                 }`}
               >
                 {d.label}
