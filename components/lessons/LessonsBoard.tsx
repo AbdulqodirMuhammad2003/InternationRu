@@ -308,6 +308,11 @@ export function LessonsBoard({
   // shu karta bosilganda dars ochiladi; qolganlari bosilsa markazga keladi.
   const [activeCard, setActiveCard] = useState(0);
 
+  /** Laptop/kompyuter: darslar to'r ko'rinishida (lg: 1024 px dan). */
+  function isWide() {
+    return typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+  }
+
   function cardElements() {
     return Array.from(
       scrollerRef.current?.querySelectorAll<HTMLElement>("[data-card]") ?? []
@@ -349,6 +354,8 @@ export function LessonsBoard({
     });
     setActiveCard(current);
     scrollToCard(current, "instant");
+    // Katta ekranda (to'r) sahifa joriy darsga tushiriladi.
+    if (isWide() && current > 0) cardElements()[current]?.scrollIntoView({ block: "center" });
     if (linkedUnit && linkedUnit.totalWords > 0) fetchUnitWords(linkedUnit.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -399,7 +406,7 @@ export function LessonsBoard({
             <div
               ref={scrollerRef}
               onScroll={syncActiveCard}
-              className="no-scrollbar flex min-w-0 snap-x snap-mandatory items-center gap-5 overflow-x-auto scroll-smooth px-[calc(50%-7.5rem)] py-8"
+              className="no-scrollbar flex min-w-0 snap-x snap-mandatory items-center gap-5 overflow-x-auto scroll-smooth px-[calc(50%-7.5rem)] py-8 lg:grid lg:snap-none lg:grid-cols-[repeat(auto-fill,minmax(12.5rem,1fr))] lg:items-stretch lg:overflow-visible lg:px-0 lg:py-2"
             >
               {items.map((item, i) => {
                 if (item.kind === "exam") {
@@ -409,10 +416,10 @@ export function LessonsBoard({
                       level={item.level}
                       exam={exam}
                       active={i === activeCard}
-                      delay={i * 70}
+                      delay={Math.min(i, 8) * 60}
                       onClick={() => {
                         const open = item.level === exam.level && exam.open;
-                        if (i !== activeCard) scrollToCard(i);
+                        if (i !== activeCard && !isWide()) scrollToCard(i);
                         else if (open) router.push("/exam");
                       }}
                     />
@@ -425,10 +432,10 @@ export function LessonsBoard({
                   <button
                     key={unit.id}
                     data-card
-                    onClick={() => (active ? openUnitPanel(unit) : scrollToCard(i))}
+                    onClick={() => (active || isWide() ? openUnitPanel(unit) : scrollToCard(i))}
                     aria-disabled={!!unit.locked}
-                    style={{ animationDelay: `${i * 70}ms` }}
-                    className={`group relative flex h-72 w-60 shrink-0 snap-center animate-fade-up flex-col items-center overflow-hidden rounded-[2rem] bg-gradient-to-br px-5 pb-6 pt-7 text-center text-white ring-1 ring-inset ring-white/10 transition-all duration-500 ease-out ${gradient} ${
+                    style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
+                    className={`group relative flex h-72 w-60 shrink-0 snap-center animate-fade-up flex-col items-center overflow-hidden rounded-[2rem] bg-gradient-to-br px-5 pb-6 pt-7 text-center text-white ring-1 ring-inset ring-white/10 transition-all duration-500 ease-out lg:h-64 lg:w-auto lg:scale-100 lg:opacity-100 lg:shadow-md lg:hover:-translate-y-1 ${gradient} ${
                       active
                         ? "z-10 scale-110 shadow-2xl shadow-black/30"
                         : "scale-95 opacity-60 shadow-md hover:opacity-90"
@@ -452,7 +459,7 @@ export function LessonsBoard({
 
                     <div className="relative mt-auto flex w-full flex-col items-center gap-2">
                       {unit.locked ? (
-                        <span className="flex h-12 items-center gap-2 rounded-full bg-rose-500 px-6 text-base font-bold shadow-lg shadow-rose-900/40">
+                        <span className="flex h-12 items-center gap-2 rounded-full bg-black/25 px-6 text-base font-bold text-white/90 ring-1 ring-inset ring-white/25 backdrop-blur-sm">
                           <LockKeyhole size={20} strokeWidth={2.4} />{" "}
                           {unit.lock_reason === "Tez orada" ? "Tez orada" : "Yopiq"}
                         </span>
@@ -483,7 +490,7 @@ export function LessonsBoard({
             <button
               onClick={() => scrollToCard(activeCard - 1)}
               disabled={activeCard === 0}
-              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
+              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 lg:hidden items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
               aria-label="Chapga aylantirish"
             >
               <ChevronLeft size={20} />
@@ -491,7 +498,7 @@ export function LessonsBoard({
             <button
               onClick={() => scrollToCard(activeCard + 1)}
               disabled={activeCard === items.length - 1}
-              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
+              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 lg:hidden items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
               aria-label="O’ngga aylantirish"
             >
               <ChevronRight size={20} />
@@ -499,7 +506,7 @@ export function LessonsBoard({
           </div>
 
           {/* Sahifa nuqtalari */}
-          <div className="mt-2 flex items-center justify-center gap-1.5">
+          <div className="mt-2 flex items-center justify-center gap-1.5 lg:hidden">
             {items.map((item, i) => (
               <button
                 key={item.kind === "unit" ? item.unit.id : `exam-${item.level}`}
@@ -569,7 +576,7 @@ export function LessonsBoard({
                           onClick={() => openRound(round.id)}
                           aria-busy={loadingRoundId === round.id}
                           style={{ animationDelay: `${i * 50}ms` }}
-                          className={`relative flex w-40 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
+                          className={`relative flex min-w-0 animate-fade-up flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
                             loadingRoundId === round.id ? "animate-pulse opacity-70" : ""
                           }`}
                         >
@@ -628,7 +635,7 @@ export function LessonsBoard({
                             key={ex.id}
                             onClick={() => startExercise(ex.id)}
                             aria-busy={loadingExerciseId === ex.id}
-                            className={`relative flex w-56 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
+                            className={`relative col-span-2 flex min-w-0 animate-fade-up flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
                               loadingExerciseId === ex.id ? "animate-pulse opacity-70" : ""
                             }`}
                           >
@@ -740,7 +747,7 @@ export function LessonsBoard({
                           onClick={() => startExercise(ex.id)}
                           aria-busy={loadingExerciseId === ex.id}
                           style={{ animationDelay: `${i * 50}ms` }}
-                          className={`relative flex w-40 shrink-0 animate-fade-up snap-start flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
+                          className={`relative flex min-w-0 animate-fade-up flex-col rounded-2xl bg-white px-3.5 pb-3.5 pt-9 text-left shadow-sm ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/5 dark:shadow-none dark:ring-white/10 ${
                             loadingExerciseId === ex.id ? "animate-pulse opacity-70" : ""
                           }`}
                         >
@@ -881,7 +888,7 @@ function ExamCarouselCard({
       onClick={onClick}
       aria-disabled={!open}
       style={{ animationDelay: `${delay}ms` }}
-      className={`group relative flex h-72 w-60 shrink-0 snap-center animate-fade-up flex-col items-center overflow-hidden rounded-[2rem] bg-gradient-to-br px-5 pb-6 pt-7 text-center text-white ring-1 ring-inset ring-white/10 transition-all duration-500 ease-out ${
+      className={`group relative flex h-72 w-60 shrink-0 snap-center animate-fade-up flex-col items-center overflow-hidden rounded-[2rem] bg-gradient-to-br px-5 pb-6 pt-7 text-center text-white ring-1 ring-inset ring-white/10 transition-all duration-500 ease-out lg:h-64 lg:w-auto lg:scale-100 lg:opacity-100 lg:shadow-md lg:hover:-translate-y-1 ${
         passed ? "from-gold-400 to-gold-700" : "from-azure-600 to-azure-900"
       } ${active ? "z-10 scale-110 shadow-2xl shadow-black/30" : "scale-95 opacity-60 shadow-md hover:opacity-90"} ${
         active && !open ? "cursor-default" : ""
@@ -909,7 +916,7 @@ function ExamCarouselCard({
             Imtihonga o'tish
           </span>
         ) : (
-          <span className="flex h-12 items-center gap-2 rounded-full bg-rose-500 px-6 text-base font-bold shadow-lg shadow-rose-900/40">
+          <span className="flex h-12 items-center gap-2 rounded-full bg-black/25 px-6 text-base font-bold text-white/90 ring-1 ring-inset ring-white/25 backdrop-blur-sm">
             <LockKeyhole size={20} strokeWidth={2.4} /> Yopiq
           </span>
         )}
@@ -1001,7 +1008,7 @@ function LessonSection({
               {lockNote}
             </p>
           ) : (
-            <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto px-4 pb-4 pt-4">{children}</div>
+            <div className="grid grid-cols-2 gap-3 px-4 pb-4 pt-4">{children}</div>
           )}
         </div>
       </div>

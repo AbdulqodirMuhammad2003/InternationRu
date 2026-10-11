@@ -1,25 +1,23 @@
 import { getSession } from "@/lib/auth";
-import { getUserStats, getAllUnitsDetailed, withoutQuestions, getLevels, getActivityOverview, getReviewSummary } from "@/lib/data";
-import { TodayPanel } from "@/components/TodayPanel";
+import { getAllUnitsDetailed, withoutQuestions, getLevels } from "@/lib/data";
 import { LessonsBoard } from "@/components/lessons/LessonsBoard";
 import { getExamStatus } from "@/lib/exam";
 
+/** «Darslar» — faqat darajalar va darslar. Kunlik panel (salomlashish,
+ *  davom ettirish, maqsad) bosh sahifada turadi — bu yerda takrorlanmaydi,
+ *  shunda telefonda darslar birinchi ekranda ko'rinadi. */
 export default async function LessonsPage() {
   const session = await getSession();
   const userId = session!.userId;
-  const [user, units, levels, activity, review, exam] = await Promise.all([
-    getUserStats(userId),
+  const [units, levels, exam] = await Promise.all([
     getAllUnitsDetailed(userId).then(withoutQuestions),
     getLevels(userId),
-    getActivityOverview(userId),
-    getReviewSummary(userId),
     getExamStatus(userId),
   ]);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4">
       <h1 className="font-display animate-fade-up text-2xl font-bold text-ink-950 dark:text-ink-50">Darslar</h1>
-      <TodayPanel user={user!} units={units} activity={activity} review={review} />
       <LessonsBoard
         units={units}
         levels={levels}

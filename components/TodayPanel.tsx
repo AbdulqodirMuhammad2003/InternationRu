@@ -114,7 +114,7 @@ export function TodayPanel({
           }`}
         >
           <Flame size={20} className={activity.streak > 0 ? "text-gold-600 dark:text-gold-300" : ""} />
-          {activity.streak > 0 ? `${activity.streak} kun ketma-ket` : "Bugundan ketma-ket o'qishni boshlang"}
+          {activity.streak > 0 ? `${activity.streak} kun ketma-ket` : "Ketma-ketlik: 0 kun"}
         </div>
       </div>
 
