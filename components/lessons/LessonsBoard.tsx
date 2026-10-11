@@ -45,7 +45,6 @@ import type {
   VocabRoundWithWords,
 } from "@/lib/data";
 import { loadExerciseQuestions, loadUnitWords, submitExerciseResult } from "@/app/actions";
-import { UNIT_GRADIENTS } from "./unit-style";
 import { VocabRoundFlow } from "./VocabRoundFlow";
 import { ExerciseRun, RULE_PASS_PCT } from "./ExerciseRun";
 
@@ -131,6 +130,17 @@ export interface BoardExam {
 /** Lug'at shu foizga yetgach dars keyingi bosqichi (qoida, mashqlar) ochiladi. */
 const VOCAB_PASS_PCT = 86;
 
+/** Dars shu foizga yetsa — «o'tilgan» (yashil); keyingi dars ham shundan ochiladi. */
+const DONE_PCT = 80;
+
+/** Dars kartasining rangi uning holatini bildiradi: yopiq — kulrang,
+ *  o'tilgan — yashil, joriy (ochiq, hali 80 % ga yetmagan) — ko'k. */
+function unitGradient(unit: UnitDetail) {
+  if (unit.locked) return "from-ink-400 to-ink-700 dark:from-ink-600 dark:to-ink-900";
+  if (unit.percent >= DONE_PCT) return "from-mint-500 to-mint-800";
+  return "from-azure-500 to-azure-900";
+}
+
 type CarouselItem = { kind: "unit"; unit: UnitDetail } | { kind: "exam"; level: string };
 
 export function LessonsBoard({
@@ -160,6 +170,13 @@ export function LessonsBoard({
   const openLevels = levels.filter((l) => !l.locked);
   const currentLevel = openLevels[openLevels.length - 1] ?? levels[0];
 
+  // Ro'yxatda bitta daraja ko'rsatiladi: odatda joriysi; oldingi darajalar
+  // yorliq orqali (takrorlash uchun) ochiladi.
+  const [selectedLevel, setSelectedLevel] = useState<string>(
+    () => linkedUnit?.level_code ?? currentLevel?.code ?? "A1"
+  );
+  const shownLevel = openLevels.find((l) => l.code === selectedLevel) ?? currentLevel;
+
   const [openUnitId, setOpenUnitId] = useState<number | null>(linkedUnit?.id ?? null);
   const [view, setView] = useState<View>("main");
   const [flowRoundId, setFlowRoundId] = useState<number | null>(null);
@@ -171,8 +188,8 @@ export function LessonsBoard({
   // Dars panelida qaysi yig'ma bo'lim ochiq (lug'at yoki mashqlar).
   const [openSection, setOpenSection] = useState<Section | null>("vocab");
 
-  const visibleUnits = units.filter((u) => openLevels.some((l) => l.code === u.level_code));
-  // Har bir darajaning oxirgi darsidan keyin — o'sha darajaning imtihon kartasi.
+  const visibleUnits = units.filter((u) => u.level_code === shownLevel?.code);
+  // Darajaning oxirgi darsidan keyin — o'sha darajaning imtihon kartasi.
   const items: CarouselItem[] = visibleUnits.flatMap((unit, i): CarouselItem[] => {
     const next = visibleUnits[i + 1];
     return !next || next.level_code !== unit.level_code
@@ -345,43 +362,74 @@ export function LessonsBoard({
     setActiveCard(best);
   }
 
-  // Sahifa ochilganda o'quvchining joriy darsini — oxirgi ochiq darsni —
-  // markazga olib kelamiz.
+  // Sahifa ochilganda (va daraja almashganda) o'quvchining joriy darsini —
+  // oxirgi ochiq darsni — markazga olib kelamiz; oldingi darajada — boshidan.
   useEffect(() => {
     let current = 0;
-    items.forEach((item, i) => {
-      if (item.kind === "unit" ? !item.unit.locked : item.level === exam.level && exam.open) current = i;
-    });
+    if (shownLevel?.code === exam.level) {
+      items.forEach((item, i) => {
+        if (item.kind === "unit" ? !item.unit.locked : item.level === exam.level && exam.open) current = i;
+      });
+    }
     setActiveCard(current);
     scrollToCard(current, "instant");
     // Katta ekranda (to'r) sahifa joriy darsga tushiriladi.
-    if (isWide() && current > 0) cardElements()[current]?.scrollIntoView({ block: "center" });
+    if (isWide() && current > 0) cardElements()[current]?.scrollIntoView({ block: "nearest" });
     if (linkedUnit && linkedUnit.totalWords > 0) fetchUnitWords(linkedUnit.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [shownLevel?.code]);
 
   return (
     <div className="relative">
-      {/* Joriy daraja — ruscha rasmiy nomi bilan (ТРКИ shkalasi) */}
-      {currentLevel && (
+      {/* Darajalar yorliqlari (bittadan ko'p ochiq daraja bo'lsa) */}
+      {openLevels.length > 1 && (
+        <div role="tablist" aria-label="Darajalar" className="mb-4 inline-flex rounded-full bg-ink-100 p-1 dark:bg-white/5">
+          {openLevels.map((level) => {
+            const selected = level.code === shownLevel?.code;
+            return (
+              <button
+                key={level.code}
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setSelectedLevel(level.code)}
+                className={`rounded-full px-4 py-1.5 text-sm font-bold transition-colors ${
+                  selected
+                    ? "bg-white text-ink-950 shadow-sm dark:bg-white/15 dark:text-ink-50"
+                    : "text-ink-600 hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-50"
+                }`}
+              >
+                {level.code}
+                {level.code === currentLevel?.code ? (
+                  <span className="ml-1 text-xs font-semibold text-azure-600 dark:text-azure-300">· joriy</span>
+                ) : (
+                  <span className="ml-1 text-xs font-semibold text-mint-600 dark:text-mint-300">✓</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Tanlangan daraja — ruscha rasmiy nomi bilan (ТРКИ shkalasi) */}
+      {shownLevel && (
         <div className="mb-4 flex items-center gap-3">
           <span className="font-display rounded-2xl bg-gradient-to-br from-azure-600 to-azure-900 px-3.5 py-2 text-lg font-bold text-white shadow-sm shadow-azure-900/30">
-            {currentLevel.code}
+            {shownLevel.code}
           </span>
           <div className="min-w-0">
             <p lang="ru" className="font-display text-lg font-bold leading-tight text-ink-950 dark:text-ink-50">
-              {LEVEL_NAMES_RU[currentLevel.code] ?? currentLevel.title}
+              {LEVEL_NAMES_RU[shownLevel.code] ?? shownLevel.title}
             </p>
-            <p className="text-sm text-ink-500 dark:text-ink-400">{currentLevel.description}</p>
+            <p className="text-sm text-ink-600 dark:text-ink-300">{shownLevel.description}</p>
           </div>
         </div>
       )}
 
-      {/* Ochiq darajalarning qo'llanmalari (lug'at, qoidalar, testlar — PDF).
+      {/* Tanlangan darajaning qo'llanmasi (lug'at, qoidalar, testlar — PDF).
           Fayllar scripts/build-handbooks.ts bilan yasaladi. */}
-      {openLevels.length > 0 && (
+      {shownLevel && (
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          {[...openLevels].reverse().map((level) => (
+          {[shownLevel].map((level) => (
             <a
               key={level.code}
               href={`/handbooks/Avangard-${level.code}-qollanma.pdf`}
@@ -426,7 +474,7 @@ export function LessonsBoard({
                   );
                 }
                 const unit = item.unit;
-                const gradient = UNIT_GRADIENTS[unit.color] || UNIT_GRADIENTS.green;
+                const gradient = unitGradient(unit);
                 const active = i === activeCard;
                 return (
                   <button
@@ -889,7 +937,7 @@ function ExamCarouselCard({
       aria-disabled={!open}
       style={{ animationDelay: `${delay}ms` }}
       className={`group relative flex h-72 w-60 shrink-0 snap-center animate-fade-up flex-col items-center overflow-hidden rounded-[2rem] bg-gradient-to-br px-5 pb-6 pt-7 text-center text-white ring-1 ring-inset ring-white/10 transition-all duration-500 ease-out lg:h-64 lg:w-auto lg:scale-100 lg:opacity-100 lg:shadow-md lg:hover:-translate-y-1 ${
-        passed ? "from-gold-400 to-gold-700" : "from-azure-600 to-azure-900"
+        "from-gold-400 to-gold-700"
       } ${active ? "z-10 scale-110 shadow-2xl shadow-black/30" : "scale-95 opacity-60 shadow-md hover:opacity-90"} ${
         active && !open ? "cursor-default" : ""
       }`}
