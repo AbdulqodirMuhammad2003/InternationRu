@@ -375,12 +375,19 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
   const placement = placementRows[0];
   /** O'qituvchi joylashtirgan joygacha bo'lgan darslar (oldingi darajalar va
    *  joriy darajaning boshlanish darsigacha) 80 % qoidasisiz ochiq. */
+  const firstOrder = new Map<string, number>();
+  for (const u of units) {
+    const cur = firstOrder.get(u.level_code);
+    if (cur === undefined || u.order_index < cur) firstOrder.set(u.level_code, u.order_index);
+  }
   const placedOpen = (unit: UnitRecord) => {
     if (!placement) return false;
     const unitLevel = levelOrder.get(unit.level_code) ?? 0;
     const userLevel = levelOrder.get(placement.level) ?? 0;
     if (unitLevel < userLevel) return true;
-    return unit.level_code === placement.level && placement.start_order !== null && unit.order_index <= placement.start_order;
+    if (unit.level_code !== placement.level) return false;
+    // Boshlanish darsi tanlanmagan bo'lsa — darajaning 1-darsidan boshlaydi.
+    return unit.order_index <= (placement.start_order ?? firstOrder.get(unit.level_code) ?? -1);
   };
 
   function groupBy<T, K>(rows: readonly T[], key: (row: T) => K) {
