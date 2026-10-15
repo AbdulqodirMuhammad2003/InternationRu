@@ -374,7 +374,9 @@ export function ExerciseRun({
     const recog = new SR();
     recog.lang = "ru-RU";
     recog.maxAlternatives = 5;
+    let gotResult = false;
     recog.onresult = (e: any) => {
+      gotResult = true;
       const alts: string[] = Array.from(e.results[0]).map((r: any) => String(r.transcript));
       const target = [speechNorm(question.answer_text ?? question.prompt)];
       setHeard(alts.find((a) => matchesPronunciation(a, target)) ?? alts[0] ?? "");
@@ -384,7 +386,12 @@ export function ExerciseRun({
       setListening(false);
       if (e.error !== "aborted") setSpeechError(SPEECH_ERRORS[e.error] ?? "Ovozni tanib bo'lmadi.");
     };
-    recog.onend = () => setListening(false);
+    recog.onend = () => {
+      setListening(false);
+      // Hech narsa eshitilmay tugasa ham xabar va qo'lda belgilash tugmalari
+      // chiqsin — aks holda «Tekshirish» o'chiq qolib, o'quvchi qotib qoladi.
+      if (!gotResult) setSpeechError((prev) => prev ?? SPEECH_ERRORS["no-speech"]);
+    };
     setSpeechError(null);
     setHeard("");
     setListening(true);
@@ -392,6 +399,7 @@ export function ExerciseRun({
       recog.start();
     } catch {
       setListening(false);
+      setSpeechError("Mikrofonni ishga tushirib bo'lmadi. Sahifani yangilab, qayta urinib ko'ring.");
     }
   }
 
