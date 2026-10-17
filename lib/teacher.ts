@@ -2,7 +2,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { UNLOCK_THRESHOLD } from "@/lib/data";
+import { getLevelBoard, UNLOCK_THRESHOLD } from "@/lib/data";
 
 /** Faqat o'qituvchi (users.role = 'teacher') uchun; boshqalarga 404. */
 export async function requireTeacher(): Promise<number> {
@@ -11,6 +11,20 @@ export async function requireTeacher(): Promise<number> {
   const [me] = await sql<{ role: string }[]>`SELECT role FROM users WHERE id = ${session.userId}`;
   if (me?.role !== "teacher") notFound();
   return session.userId;
+}
+
+/** «Baholar» va «Reyting» uchun: o'quvchi — o'z darajasi; o'qituvchi —
+ *  o'quvchisi bor istalgan daraja (?level=A2), yorliqlar bilan. */
+export async function getBoardView(userId: number, requested?: string) {
+  const [me] = await sql<{ role: string; level: string }[]>`SELECT role, level FROM users WHERE id = ${userId}`;
+  if (me?.role !== "teacher") return { board: await getLevelBoard(userId), levels: [] as string[] };
+  const rows = await sql<{ level: string }[]>`
+    SELECT DISTINCT u.level FROM users u JOIN levels l ON l.code = u.level
+    WHERE u.role = 'student' ORDER BY u.level
+  `;
+  const levels = rows.map((r) => r.level);
+  const level = requested && levels.includes(requested) ? requested : levels[0] ?? me.level;
+  return { board: await getLevelBoard(userId, level), levels };
 }
 
 export interface PlacementLevel {

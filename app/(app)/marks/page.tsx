@@ -1,6 +1,8 @@
 import { getSession } from "@/lib/auth";
 import { getLevelBoard } from "@/lib/data";
+import { getBoardView } from "@/lib/teacher";
 import { Avatar } from "@/components/Avatar";
+import { LevelLinks } from "@/components/LevelLinks";
 
 /** Dars natijasi doirasining rangi: 80%+ — yashil, 50–79% — sariq, undan past — qizil. */
 function cellColor(pct: number) {
@@ -112,9 +114,9 @@ function Legend() {
   );
 }
 
-export default async function MarksPage() {
+export default async function MarksPage({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   const session = await getSession();
-  const board = await getLevelBoard(session!.userId);
+  const { board, levels } = await getBoardView(session!.userId, (await searchParams).level);
   // Telefonda o'z kartangiz doim birinchi.
   const mobileStudents = [
     ...board.students.filter((s) => s.is_current_user),
@@ -130,6 +132,8 @@ export default async function MarksPage() {
           daraja imtihoni.
         </p>
       </div>
+
+      <LevelLinks levels={levels} current={board.level} basePath="/marks" />
 
       {/* Telefon: o'quvchi kartalari */}
       <div className="flex animate-fade-up flex-col gap-3 md:hidden">

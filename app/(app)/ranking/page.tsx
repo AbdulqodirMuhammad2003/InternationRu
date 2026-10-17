@@ -1,11 +1,12 @@
 import { Trophy } from "lucide-react";
 import { getSession } from "@/lib/auth";
-import { getLevelBoard } from "@/lib/data";
+import { getBoardView } from "@/lib/teacher";
 import { Avatar } from "@/components/Avatar";
+import { LevelLinks } from "@/components/LevelLinks";
 
-export default async function RankingPage() {
+export default async function RankingPage({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   const session = await getSession();
-  const board = await getLevelBoard(session!.userId);
+  const { board, levels } = await getBoardView(session!.userId, (await searchParams).level);
   // Reyting — darslar foizlari yig'indisi bo'yicha; teng ball bo'lsa, ism bo'yicha.
   const rows = [...board.students].sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
 
@@ -17,6 +18,8 @@ export default async function RankingPage() {
           {board.level} darajasida o'qiyotgan o'quvchilar. Ball — barcha darslar bo'yicha natijalaringiz yig'indisi.
         </p>
       </div>
+
+      <LevelLinks levels={levels} current={board.level} basePath="/ranking" />
 
       <div className="animate-fade-up rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
         <div className="flex flex-col divide-y divide-ink-50 dark:divide-white/5">

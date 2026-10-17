@@ -543,9 +543,10 @@ export interface LevelBoard {
 /** O'quvchi o'qiyotgan darajadagi barcha ro'yxatdan o'tgan o'quvchilarning
  *  har bir dars bo'yicha natijasi. Dars foizi «Darslar» sahifasidagi bilan
  *  bir xil hisoblanadi: lug'at va mashqlar foizining o'rtachasi. */
-export async function getLevelBoard(userId: number): Promise<LevelBoard> {
+/** `levelOverride` — o'qituvchi boshqa darajani ko'rayotganda (getBoardView). */
+export async function getLevelBoard(userId: number, levelOverride?: string): Promise<LevelBoard> {
   const [me] = await sql<{ level: string }[]>`SELECT level FROM users WHERE id = ${userId}`;
-  const level = me?.level ?? "A1";
+  const level = levelOverride ?? me?.level ?? "A1";
   const [users, units] = await Promise.all([
     sql<{ id: number; name: string; avatar_url: string | null }[]>`
       SELECT id, name, CASE WHEN avatar_url LIKE 'data:%' THEN '/avatar/' || id || '?v=' || length(avatar_url) ELSE avatar_url END AS avatar_url
