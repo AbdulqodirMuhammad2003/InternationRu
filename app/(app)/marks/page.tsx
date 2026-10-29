@@ -55,7 +55,7 @@ function StudentCard({ student, units, rank }: { student: Student; units: Board[
       className={`rounded-2xl p-4 shadow-sm ring-1 ${
         student.is_current_user
           ? "bg-gold-50 ring-gold-300/60 dark:bg-[#2a2517] dark:ring-gold-700/40"
-          : "bg-white ring-ink-950/5 dark:bg-[#161b26] dark:ring-white/10"
+          : "bg-white ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -150,19 +150,19 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
             ))}
           </ul>
         ) : (
-          <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-ink-400 dark:bg-[#161b26] dark:text-ink-600">
+          <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-ink-400 dark:bg-white/[0.045] dark:text-ink-600">
             Hozircha natijalar yo'q.
           </p>
         )}
       </div>
 
       {/* Kompyuter: jadval */}
-      <div className="hidden animate-fade-up overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink-950/5 md:block dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
+      <div className="hidden animate-fade-up overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-ink-950/5 md:block dark:bg-white/[0.045] dark:shadow-none dark:ring-white/10">
         <div className="overflow-x-auto">
           <table className="w-full border-separate border-spacing-0 text-sm">
             <thead>
               <tr className="text-xs text-ink-500 dark:text-ink-400">
-                <th className="sticky left-0 z-10 min-w-44 border-b border-ink-100 bg-white px-4 py-3 text-left font-semibold dark:border-white/10 dark:bg-[#161b26]">
+                <th className="sticky left-0 z-10 min-w-44 border-b border-ink-100 bg-white px-4 py-3 text-left font-semibold dark:border-white/10 dark:bg-[#141a2c]">
                   O'quvchilar
                 </th>
                 {board.units.map((unit) => (
@@ -184,7 +184,7 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
                 <tr key={student.id} style={{ animationDelay: `${i * 30}ms` }} className="animate-fade-up">
                   <td
                     className={`sticky left-0 z-10 border-b border-ink-50 px-4 py-2.5 dark:border-white/5 ${
-                      student.is_current_user ? "bg-gold-50 dark:bg-[#2a2517]" : "bg-white dark:bg-[#161b26]"
+                      student.is_current_user ? "bg-gold-50 dark:bg-[#2a2517]" : "bg-white dark:bg-[#141a2c]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">

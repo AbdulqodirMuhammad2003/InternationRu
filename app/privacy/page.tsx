@@ -11,7 +11,7 @@ export const metadata: Metadata = {
  *  talab qilinadigan maxfiylik siyosati. */
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#f5f7fb] px-4 py-10 text-ink-900 dark:bg-[#0d1017] dark:text-ink-100">
+    <div className="min-h-screen bg-[#f4f5fb] px-4 py-10 text-ink-900 dark:bg-[#0b0f1a] dark:text-ink-100">
       <article className="mx-auto max-w-2xl rounded-3xl bg-white p-6 shadow-sm sm:p-10 dark:bg-white/5">
         <div className="mb-6 flex items-center gap-3">
           <LogoMark size={40} />

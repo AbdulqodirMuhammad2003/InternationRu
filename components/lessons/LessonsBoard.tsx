@@ -138,7 +138,7 @@ const DONE_PCT = 80;
 function unitGradient(unit: UnitDetail) {
   if (unit.locked) return "from-ink-400 to-ink-700 dark:from-ink-600 dark:to-ink-900";
   if (unit.percent >= DONE_PCT) return "from-mint-500 to-mint-800";
-  return "from-azure-500 to-azure-900";
+  return "from-azure-500 via-azure-700 to-purple-800";
 }
 
 type CarouselItem = { kind: "unit"; unit: UnitDetail } | { kind: "exam"; level: string };
@@ -444,7 +444,7 @@ export function LessonsBoard({
       )}
 
       {visibleUnits.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-3xl bg-white p-12 text-center shadow-sm dark:bg-[#161b26] dark:shadow-none">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-3xl bg-white p-12 text-center shadow-sm dark:bg-white/[0.045] dark:shadow-none">
           <Lock size={28} className="text-ink-200 dark:text-ink-700" />
           <p className="font-semibold text-ink-700 dark:text-ink-200">Hozircha ochiq darslar yo'q</p>
         </div>
@@ -538,7 +538,7 @@ export function LessonsBoard({
             <button
               onClick={() => scrollToCard(activeCard - 1)}
               disabled={activeCard === 0}
-              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 lg:hidden items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
+              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 lg:hidden items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#141a2c]/90 dark:text-ink-100"
               aria-label="Chapga aylantirish"
             >
               <ChevronLeft size={20} />
@@ -546,7 +546,7 @@ export function LessonsBoard({
             <button
               onClick={() => scrollToCard(activeCard + 1)}
               disabled={activeCard === items.length - 1}
-              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 lg:hidden items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#161b26]/90 dark:text-ink-100"
+              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 lg:hidden items-center justify-center rounded-full bg-white/90 text-ink-800 shadow-lg backdrop-blur transition-all hover:scale-105 disabled:opacity-0 dark:bg-[#141a2c]/90 dark:text-ink-100"
               aria-label="O’ngga aylantirish"
             >
               <ChevronRight size={20} />
@@ -576,7 +576,7 @@ export function LessonsBoard({
 
       {/* Dars yon paneli (mashq bajarilayotganda butun ekranga kengayadi) */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full flex-col bg-white shadow-2xl transition-all duration-300 dark:bg-[#121620] ${
+        className={`fixed right-0 top-0 z-50 flex h-full flex-col bg-white shadow-2xl transition-all duration-300 dark:bg-[#0f1424] ${
           openUnit ? "translate-x-0" : "translate-x-full"
         } ${view === "exercise-run" ? "w-full" : "w-full max-w-md"}`}
       >

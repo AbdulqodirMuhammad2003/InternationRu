@@ -21,7 +21,7 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
 
       <LevelLinks levels={levels} current={board.level} basePath="/ranking" />
 
-      <div className="animate-fade-up rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
+      <div className="animate-fade-up rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-white/10">
         <div className="flex flex-col divide-y divide-ink-50 dark:divide-white/5">
           {rows.map((row, i) => {
             const place = i + 1;

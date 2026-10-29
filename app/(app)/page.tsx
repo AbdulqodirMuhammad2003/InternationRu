@@ -56,7 +56,7 @@ export default async function HomePage() {
                 key={c.label}
                 href={c.href}
                 style={{ animationDelay: `${i * 70}ms` }}
-                className="group flex animate-fade-up flex-col justify-between rounded-2xl bg-white p-5 shadow-sm shadow-ink-950/5 ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-[#161b26] dark:shadow-none dark:ring-white/10"
+                className="group flex animate-fade-up flex-col justify-between rounded-2xl bg-white p-5 shadow-sm shadow-ink-950/5 ring-1 ring-ink-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-white/[0.045] dark:shadow-none dark:ring-white/10"
               >
                 <div>
                   <p className="font-semibold text-ink-950 dark:text-ink-50">{c.label}</p>

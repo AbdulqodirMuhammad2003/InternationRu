@@ -105,7 +105,7 @@ export function InstallAppBanner() {
       {promptEvent && (
         <button
           onClick={install}
-          className="btn-press flex shrink-0 items-center gap-1.5 rounded-full bg-gold-400 px-3 py-2 text-xs font-bold text-ink-950"
+          className="btn-press btn-3d [--btn-glow:rgba(251,191,36,0.45)] flex shrink-0 items-center gap-1.5 rounded-full bg-gold-400 px-3 py-2 text-xs font-bold text-ink-950"
         >
           <Download size={14} /> O&apos;rnatish
         </button>

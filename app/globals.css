@@ -6,18 +6,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f5f7fb;
-  --foreground: #121826;
+  --background: #f4f5fb;
+  --foreground: #0f1324;
   --card: #ffffff;
-  --card-muted: #eef1f7;
-  --line: rgba(18, 24, 38, 0.08);
+  --card-muted: #eef0f8;
+  --line: rgba(15, 19, 36, 0.08);
 }
 
+/* «Premium tungi» — asosiy rejim: chuqur tun foni, shishasimon kartalar. */
 :root.dark {
-  --background: #0d1017;
-  --foreground: #e8ecf4;
-  --card: #161b26;
-  --card-muted: rgba(255, 255, 255, 0.045);
+  --background: #0b0f1a;
+  --foreground: #eef1f8;
+  --card: rgba(255, 255, 255, 0.045);
+  --card-muted: rgba(255, 255, 255, 0.04);
   --line: rgba(255, 255, 255, 0.08);
 }
 
@@ -26,63 +27,64 @@
   --color-foreground: var(--foreground);
 }
 
-/* Avangard palitrasi:
-   - ink   — neytral (matn, fon, chegaralar); ozgina ko'k tusli, uzoq
-             o'qishda ko'zni charchatmaydi.
-   - azure — asosiy harakatlar (tugmalar, faol holatlar), diqqat va ishonch.
-   - mint  — progress va "o'rganildi" holatlari, muvaffaqiyat hissi.
-   - gold  — logodagi oltin; mukofot va urg'u (foizlar, tangalar).
-   - rose  — (Tailwind'ning o'zidagi) yopiq darslar va xatolar, kam ishlatiladi. */
+/* Avangard palitrasi («Premium tungi»):
+   - ink    — neytral; chuqur tun-ko'k tusli, uzoq o'qishda ko'zni charchatmaydi.
+   - azure  — elektr ko'k (indigo): asosiy harakatlar — diqqat, ishonch, fokus.
+   - purple — (Tailwind'dagi) binafsha urg'u: ijod va qiziqish, gradientlarda.
+   - mint   — progress va "o'rganildi": o'sish va muvaffaqiyat hissi.
+   - gold   — oltin: mukofot, foizlar, ketma-ketlik — erishish istagini uyg'otadi.
+   - rose   — (Tailwind'dagi) xatolar, kam ishlatiladi. */
 @theme {
-  --color-ink-50: #f5f7fb;
-  --color-ink-100: #eceff6;
-  --color-ink-200: #d9dfeb;
-  --color-ink-300: #b7c0d3;
-  --color-ink-400: #8b96ae;
-  --color-ink-500: #667189;
-  --color-ink-600: #4d566c;
-  --color-ink-700: #3a4256;
-  --color-ink-800: #272d3d;
-  --color-ink-900: #1a1f2c;
-  --color-ink-950: #0f131c;
+  --color-ink-50: #f4f6fb;
+  --color-ink-100: #e9ecf5;
+  --color-ink-200: #d5dae8;
+  --color-ink-300: #aeb6cb;
+  --color-ink-400: #858fa9;
+  --color-ink-500: #626c86;
+  --color-ink-600: #4a5269;
+  --color-ink-700: #363d52;
+  --color-ink-800: #232a3c;
+  --color-ink-900: #161c2c;
+  --color-ink-950: #0b0f1a;
 
-  --color-gold-50: #fbf7ec;
-  --color-gold-100: #f5ecce;
-  --color-gold-200: #ecd89e;
-  --color-gold-300: #dfbd6c;
-  --color-gold-400: #cfa249;
-  --color-gold-500: #b8873a;
-  --color-gold-600: #996c2e;
-  --color-gold-700: #7a5527;
-  --color-gold-800: #654524;
-  --color-gold-900: #563a22;
-  --color-gold-950: #2f1d10;
+  --color-gold-50: #fffbeb;
+  --color-gold-100: #fef3c7;
+  --color-gold-200: #fde68a;
+  --color-gold-300: #fcd34d;
+  --color-gold-400: #fbbf24;
+  --color-gold-500: #f59e0b;
+  --color-gold-600: #d97706;
+  --color-gold-700: #b45309;
+  --color-gold-800: #92400e;
+  --color-gold-900: #78350f;
+  --color-gold-950: #451a03;
 
-  --color-azure-50: #edf2ff;
-  --color-azure-100: #dbe4ff;
-  --color-azure-200: #bac8ff;
-  --color-azure-300: #91a7ff;
-  --color-azure-400: #748ffc;
-  --color-azure-500: #5c7cfa;
-  --color-azure-600: #4263eb;
-  --color-azure-700: #3b5bdb;
-  --color-azure-800: #364fc7;
-  --color-azure-900: #2b3d9c;
-  --color-azure-950: #1a2463;
+  --color-azure-50: #eef2ff;
+  --color-azure-100: #e0e7ff;
+  --color-azure-200: #c7d2fe;
+  --color-azure-300: #a5b4fc;
+  --color-azure-400: #818cf8;
+  --color-azure-500: #6366f1;
+  --color-azure-600: #4f46e5;
+  --color-azure-700: #4338ca;
+  --color-azure-800: #3730a3;
+  --color-azure-900: #312e81;
+  --color-azure-950: #1e1b4b;
 
-  --color-mint-50: #e6fcf5;
-  --color-mint-100: #c3fae8;
-  --color-mint-200: #96f2d7;
-  --color-mint-300: #63e6be;
-  --color-mint-400: #38d9a9;
-  --color-mint-500: #20c997;
-  --color-mint-600: #12b886;
-  --color-mint-700: #0ca678;
-  --color-mint-800: #099268;
-  --color-mint-900: #087f5b;
-  --color-mint-950: #04402e;
+  --color-mint-50: #ecfdf5;
+  --color-mint-100: #d1fae5;
+  --color-mint-200: #a7f3d0;
+  --color-mint-300: #6ee7b7;
+  --color-mint-400: #34d399;
+  --color-mint-500: #10b981;
+  --color-mint-600: #059669;
+  --color-mint-700: #047857;
+  --color-mint-800: #065f46;
+  --color-mint-900: #064e3b;
+  --color-mint-950: #022c22;
 
-  --font-display: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-unbounded), var(--font-onest), system-ui, sans-serif;
+  --font-sans: var(--font-onest), "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-fade-in: fade-in 0.5s ease both;
@@ -165,13 +167,35 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family:
-    var(--font-inter), "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+    var(--font-onest), "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji";
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* Unbounded keng shrift — sarlavhalarda biroz zichroq va yengilroq. */
 .font-display {
   font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+/* Ilova foni: tun osmonidagi indigo va binafsha nurlar + nozik nuqtali to'r.
+   Shishasimon kartalar ana shu fon ustida «suzadi». */
+.app-bg {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(60rem 40rem at 100% -10%, rgba(99, 102, 241, 0.10), transparent 60%),
+    radial-gradient(50rem 36rem at -10% 110%, rgba(168, 85, 247, 0.07), transparent 60%);
+  background-attachment: fixed;
+}
+.dark .app-bg {
+  background-image:
+    radial-gradient(60rem 40rem at 100% -10%, rgba(99, 102, 241, 0.22), transparent 60%),
+    radial-gradient(50rem 36rem at -10% 110%, rgba(168, 85, 247, 0.16), transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: auto, auto, 22px 22px;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -182,12 +206,59 @@ body {
   scrollbar-width: none;
 }
 
-/* Tactile press feedback for primary controls */
+/* Tugma hissi: ustiga kelganda yengil ko'tariladi, bosilganda cho'kadi va
+   prujina bilan qaytadi — yana bosgisi keladi. */
 .btn-press {
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    background-color 0.2s ease,
+    filter 0.2s ease;
+  will-change: transform;
 }
-.btn-press:active {
-  transform: scale(0.97);
+@media (hover: hover) {
+  .btn-press:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+  }
+}
+.btn-press:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+  transition-duration: 0.08s;
+}
+
+/* Asosiy (rangli) tugmalar — «bosiladigan» 3D tugma: ostida qalin soya
+   va rangli nur; bosganda soya yo'qolib, tugma pastga tushadi. */
+.btn-3d {
+  box-shadow:
+    0 4px 0 0 rgba(0, 0, 0, 0.28),
+    0 10px 28px -8px var(--btn-glow, rgba(99, 102, 241, 0.6));
+}
+.btn-3d:active:not(:disabled) {
+  transform: translateY(4px) scale(0.99);
+  box-shadow:
+    0 0 0 0 rgba(0, 0, 0, 0.28),
+    0 4px 14px -6px var(--btn-glow, rgba(99, 102, 241, 0.6));
+}
+.btn-3d:disabled {
+  box-shadow: none;
+}
+
+/* Klaviatura bilan yurganda aniq ko'rinadigan fokus halqasi. */
+:focus-visible {
+  outline: 2px solid var(--color-azure-400);
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Subtle shimmering sheen used on premium CTA surfaces */

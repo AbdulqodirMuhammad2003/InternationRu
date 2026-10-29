@@ -83,7 +83,7 @@ export function EditableAvatar({
       onClick={() => setOpen(false)}
     >
       <div
-        className="my-auto max-h-[85vh] w-full max-w-sm animate-pop-in overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-[#161b26]"
+        className="my-auto max-h-[85vh] w-full max-w-sm animate-pop-in overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl dark:bg-[#141a2c]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">
@@ -148,7 +148,7 @@ export function EditableAvatar({
           <button
             type="submit"
             disabled={pending}
-            className="btn-press mt-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-semibold text-white shadow-sm shadow-azure-900/30 transition-colors hover:from-azure-500 hover:to-azure-600 disabled:opacity-60"
+            className="btn-press btn-3d mt-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-semibold text-white shadow-sm shadow-azure-900/30 transition-colors hover:from-azure-500 hover:to-azure-600 disabled:opacity-60"
           >
             {pending && <Loader2 size={16} className="animate-spin" />}
             {pending ? "Saqlanmoqda..." : "Saqlash"}
@@ -181,7 +181,7 @@ export function EditableAvatar({
                     type="button"
                     onClick={() => download(cert)}
                     disabled={downloading !== null}
-                    className="btn-press flex shrink-0 items-center gap-1.5 rounded-full bg-azure-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-azure-500 disabled:opacity-60"
+                    className="btn-press btn-3d flex shrink-0 items-center gap-1.5 rounded-full bg-azure-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-azure-500 disabled:opacity-60"
                   >
                     {downloading === cert.level ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                     Yuklab olish

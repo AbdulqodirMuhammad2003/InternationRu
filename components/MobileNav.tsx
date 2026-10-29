@@ -4,33 +4,47 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, TEACHER_NAV_ITEM } from "./Sidebar";
 
-/** Telefon va planshet uchun pastki navigatsiya paneli (katta ekranlarda
- *  uning o'rnini chap yon panel — Sidebar egallaydi). */
+/** Telefon va planshet uchun pastki «dock» (katta ekranda uning o'rnini chap
+ *  yon panel — Sidebar egallaydi). Faol bo'lim ostidagi yorqin «tabletka»
+ *  bo'limlar orasida prujina bilan siljiydi. */
 export function MobileNav({ isTeacher = false }: { isTeacher?: boolean }) {
   const pathname = usePathname();
   const items = isTeacher ? [...NAV_ITEMS, TEACHER_NAV_ITEM] : NAV_ITEMS;
+  const activeIndex = items.findIndex((item) =>
+    item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
+  );
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-ink-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden dark:border-white/10 dark:bg-[#121620]/95">
-      <div className="mx-auto flex max-w-md items-stretch justify-around">
-        {items.map((item) => {
-          const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+    <nav className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] lg:hidden">
+      <div className="relative mx-auto flex max-w-md items-stretch rounded-[1.75rem] border border-ink-950/5 bg-white/80 p-1.5 shadow-[0_12px_40px_-12px_rgba(15,19,36,0.35)] backdrop-blur-xl dark:border-white/10 dark:bg-[#121729]/80 dark:shadow-[0_12px_40px_-10px_rgba(0,0,0,0.8)]">
+        {activeIndex >= 0 && (
+          <span
+            aria-hidden
+            className="absolute inset-y-1.5 left-1.5 rounded-[1.35rem] bg-gradient-to-br from-azure-500 to-purple-600 shadow-[0_8px_20px_-6px_rgba(124,92,250,0.75)] transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            style={{
+              width: `calc((100% - 0.75rem) / ${items.length})`,
+              transform: `translateX(${activeIndex * 100}%)`,
+            }}
+          />
+        )}
+        {items.map((item, i) => {
+          const active = i === activeIndex;
           const Icon = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition-colors ${
-                active ? "text-azure-600 dark:text-azure-300" : "text-ink-400 dark:text-ink-500"
+              aria-current={active ? "page" : undefined}
+              className={`relative z-10 flex flex-1 flex-col items-center gap-0.5 rounded-[1.35rem] py-2 text-[11px] font-semibold transition-colors duration-300 active:scale-95 ${
+                active ? "text-white" : "text-ink-500 dark:text-ink-400"
               }`}
             >
-              <span
-                className={`flex h-8 w-14 items-center justify-center rounded-full transition-colors ${
-                  active ? "bg-azure-50 dark:bg-azure-950/50" : ""
+              <Icon
+                size={21}
+                className={`transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                  active ? "-translate-y-px scale-110" : ""
                 }`}
-              >
-                <Icon size={20} />
-              </span>
+              />
               {item.label}
             </Link>
           );

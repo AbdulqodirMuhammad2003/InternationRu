@@ -271,7 +271,7 @@ export function ExerciseRun({
           </button>
           <button
             onClick={() => onDone(result)}
-            className="btn-press rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
+            className="btn-press btn-3d rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
           >
             Tayyor
           </button>
@@ -299,7 +299,7 @@ export function ExerciseRun({
         </div>
         <button
           onClick={() => setShowRule(false)}
-          className="btn-press self-center rounded-full bg-azure-600 px-7 py-3 text-sm font-bold text-white shadow-md hover:bg-azure-500"
+          className="btn-press btn-3d self-center rounded-full bg-azure-600 px-7 py-3 text-sm font-bold text-white shadow-md hover:bg-azure-500"
         >
           {qIndex > 0 ? "Testga qaytish" : `Testni boshlash (${total} savol)`}
         </button>
@@ -515,7 +515,7 @@ export function ExerciseRun({
           <>
             <button
               onClick={() => question.audio_text && speakRu(question.audio_text)}
-              className="btn-press mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
+              className="btn-press btn-3d [--btn-glow:rgba(251,191,36,0.45)] mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
               aria-label="Eshitish"
             >
               <Volume2 size={34} />
@@ -660,7 +660,7 @@ export function ExerciseRun({
             <div className="flex items-center gap-3 rounded-2xl bg-gold-50 px-4 py-3 dark:bg-gold-950/30">
               <button
                 onClick={() => question.audio_text && speakRu(question.audio_text)}
-                className="btn-press flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
+                className="btn-press btn-3d [--btn-glow:rgba(251,191,36,0.45)] flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
                 aria-label="Matnni eshitish"
               >
                 <Volume2 size={26} />
@@ -698,7 +698,7 @@ export function ExerciseRun({
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={() => question.audio_text && speakRu(question.audio_text)}
-              className="btn-press flex h-16 w-16 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
+              className="btn-press btn-3d [--btn-glow:rgba(251,191,36,0.45)] flex h-16 w-16 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-700/30 hover:bg-gold-400"
               aria-label="Eshitish"
             >
               <Volume2 size={28} />
@@ -933,13 +933,13 @@ export function ExerciseRun({
               <div className="flex gap-2">
                 <button
                   onClick={() => record(true)}
-                  className="btn-press rounded-full bg-azure-600 px-4 py-2 text-xs font-bold text-white hover:bg-azure-500"
+                  className="btn-press btn-3d rounded-full bg-azure-600 px-4 py-2 text-xs font-bold text-white hover:bg-azure-500"
                 >
                   To'g'ri aytdim
                 </button>
                 <button
                   onClick={() => record(false)}
-                  className="btn-press rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-500"
+                  className="btn-press btn-3d [--btn-glow:rgba(244,63,94,0.45)] rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-500"
                 >
                   Xato qildim
                 </button>
@@ -999,7 +999,7 @@ export function ExerciseRun({
           <button
             onClick={checked === null ? check : next}
             disabled={checked === null && !canCheck}
-            className="btn-press mt-1 rounded-full bg-azure-600 py-3 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-40"
+            className="btn-press btn-3d mt-1 rounded-full bg-azure-600 py-3 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-40"
           >
             {checked === null ? "Tekshirish" : qIndex + 1 < total ? "Keyingisi" : "Natijani ko'rish"}
           </button>

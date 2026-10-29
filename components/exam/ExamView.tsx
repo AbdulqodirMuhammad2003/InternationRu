@@ -8,7 +8,7 @@ import type { ExamAnswer, ExamResult, ExamStatus } from "@/lib/exam";
 import { saveExamAnswersAction, startExamAction, submitExamAction } from "@/app/actions";
 
 const CARD =
-  "rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink-950/5 sm:p-7 dark:bg-[#161b26] dark:shadow-none dark:ring-white/10";
+  "rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink-950/5 sm:p-7 dark:bg-white/[0.045] dark:shadow-none dark:ring-white/10";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("uz-UZ", { day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit" });
@@ -153,7 +153,7 @@ function ExamIntro({ status }: { status: ExamStatus }) {
                     <button
                       onClick={start}
                       disabled={pending}
-                      className="btn-press rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-60"
+                      className="btn-press btn-3d rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-60"
                     >
                       {pending ? "Tayyorlanmoqda…" : "Ha, boshlash"}
                     </button>
@@ -168,7 +168,7 @@ function ExamIntro({ status }: { status: ExamStatus }) {
               ) : (
                 <button
                   onClick={() => setConfirming(true)}
-                  className="btn-press mt-6 inline-flex items-center gap-2 rounded-full bg-azure-600 px-6 py-3 text-sm font-bold text-white hover:bg-azure-500"
+                  className="btn-press btn-3d mt-6 inline-flex items-center gap-2 rounded-full bg-azure-600 px-6 py-3 text-sm font-bold text-white hover:bg-azure-500"
                 >
                   Imtihonni boshlash <ArrowRight size={18} />
                 </button>
@@ -307,7 +307,7 @@ function ExamRun({
           {index < total - 1 ? (
             <button
               onClick={() => go(index + 1)}
-              className="btn-press inline-flex items-center gap-1.5 rounded-full bg-azure-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
+              className="btn-press btn-3d inline-flex items-center gap-1.5 rounded-full bg-azure-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
             >
               Keyingisi <ArrowRight size={16} />
             </button>
@@ -315,7 +315,7 @@ function ExamRun({
             <button
               onClick={() => (unanswered > 0 ? setConfirmFinish(true) : submit())}
               disabled={submitting}
-              className="btn-press rounded-full bg-mint-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-mint-500 disabled:opacity-60"
+              className="btn-press btn-3d [--btn-glow:rgba(16,185,129,0.5)] rounded-full bg-mint-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-mint-500 disabled:opacity-60"
             >
               {submitting ? "Tekshirilmoqda…" : "Imtihonni yakunlash"}
             </button>
@@ -326,7 +326,7 @@ function ExamRun({
           <div className="mt-4 rounded-2xl bg-gold-50 p-4 text-sm text-gold-900 dark:bg-gold-950/40 dark:text-gold-100">
             {unanswered} ta savolga javob berilmagan — ular xato hisoblanadi. Baribir yakunlaysizmi?
             <div className="mt-3 flex gap-2">
-              <button onClick={submit} className="btn-press rounded-full bg-mint-600 px-4 py-2 font-bold text-white">
+              <button onClick={submit} className="btn-press btn-3d [--btn-glow:rgba(16,185,129,0.5)] rounded-full bg-mint-600 px-4 py-2 font-bold text-white">
                 Ha, yakunlash
               </button>
               <button
@@ -419,7 +419,7 @@ function ExamResultView({ result }: { result: ExamResult }) {
         )}
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <Link href="/lessons" className="btn-press rounded-full bg-azure-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-azure-500">
+          <Link href="/lessons" className="btn-press btn-3d rounded-full bg-azure-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-azure-500">
             Darslarga qaytish
           </Link>
           {!result.passed && (

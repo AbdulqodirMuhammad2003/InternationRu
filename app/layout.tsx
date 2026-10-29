@@ -1,19 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Onest, Unbounded } from "next/font/google";
 import "./globals.css";
 
-// Ikkalasi ham kirill harflarini to'liq qo'llab-quvvatlaydi (ruscha matn
-// uchun muhim). Manrope — sarlavhalar uchun zamonaviy, do'stona geometrik
-// shrift; Inter — ekranda o'qish uchun eng qulay matn shriftlaridan biri.
-const manrope = Manrope({
+// Ikkalasi ham kirill va lotin harflarini to'liq qo'llaydi. Onest — rus
+// tili uchun yaratilgan matn shrifti: kirillda ravon, ko'zni charchatmaydi.
+// Unbounded — sarlavhalar uchun zamonaviy, ifodali (reklamalar bilan bir xil).
+const onest = Onest({
   subsets: ["latin", "cyrillic"],
-  variable: "--font-manrope",
+  variable: "--font-onest",
   display: "swap",
 });
 
-const inter = Inter({
+const unbounded = Unbounded({
   subsets: ["latin", "cyrillic"],
-  variable: "--font-inter",
+  weight: ["500", "600", "700"],
+  variable: "--font-unbounded",
   display: "swap",
 });
 
@@ -27,21 +28,22 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f131c",
+  themeColor: "#0b0f1a",
   viewportFit: "cover",
 };
 
 const THEME_INIT_SCRIPT = `
   try {
     var stored = localStorage.getItem('avangard-theme');
-    var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // «Premium tungi» — asosiy rejim; kunduzgi rejim faqat o'quvchi tanlasa.
+    var isDark = stored ? stored === 'dark' : true;
     if (isDark) document.documentElement.classList.add('dark');
   } catch (e) {}
 `;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`h-full antialiased ${manrope.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="ru" className={`h-full antialiased ${onest.variable} ${unbounded.variable}`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {/* next/script'ning "beforeInteractive" strategiyasi o'rniga oddiy
             inline <script> ishlatilmoqda — u HTML parse qilinayotganda,

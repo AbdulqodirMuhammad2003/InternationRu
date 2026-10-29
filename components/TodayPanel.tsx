@@ -94,7 +94,7 @@ export function TodayPanel({
   const goalReached = activity.todayCorrect >= DAILY_GOAL;
 
   return (
-    <div className="animate-fade-up rounded-3xl bg-white p-5 shadow-sm shadow-ink-950/5 ring-1 ring-ink-950/5 sm:p-6 dark:bg-[#161b26] dark:shadow-none dark:ring-white/10">
+    <div className="animate-fade-up rounded-3xl bg-white p-5 shadow-sm shadow-ink-950/5 ring-1 ring-ink-950/5 sm:p-6 dark:bg-white/[0.045] dark:shadow-none dark:ring-white/10">
       <div className="mb-5 flex flex-wrap items-center gap-4">
         <EditableAvatar name={user.name} avatarUrl={user.avatar_url} size={52} triggerClassName="items-center gap-3">
           <div className="text-left">

@@ -86,7 +86,7 @@ function StageNext({
           setSent(true);
           onNext();
         }}
-        className="btn-press rounded-full bg-azure-600 py-3 text-sm font-bold text-white hover:bg-azure-500"
+        className="btn-press btn-3d rounded-full bg-azure-600 py-3 text-sm font-bold text-white hover:bg-azure-500"
       >
         Keyingisi
       </button>
@@ -289,7 +289,7 @@ export function VocabRoundFlow({
   if (round.words.length === 0) return null;
 
   const content = (
-    <div className="fixed inset-0 z-[200] flex animate-fade-in flex-col bg-gradient-to-br from-[#f5f7fb] to-[#e9edf6] dark:from-[#0d1017] dark:to-[#121620]">
+    <div className="fixed inset-0 z-[200] flex animate-fade-in flex-col bg-gradient-to-br from-[#f5f7fb] to-[#e9edf6] dark:from-[#0b0f1a] dark:to-[#141a2c]">
       {/* Tepa panel */}
       <div className="flex items-center justify-between border-b border-ink-900/10 px-5 py-4 dark:border-white/10 sm:px-8">
         <div>
@@ -377,7 +377,7 @@ export function VocabRoundFlow({
               </button>
               <button
                 onClick={startChecking}
-                className="btn-press flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
+                className="btn-press btn-3d flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
               >
                 Tekshiruvni boshlash <ArrowRight size={16} />
               </button>
@@ -445,7 +445,7 @@ export function VocabRoundFlow({
             <button
               onClick={close}
               disabled={closing}
-              className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-70"
+              className="btn-press btn-3d rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-70"
             >
               {closing ? "Saqlanmoqda…" : "Tugatish"}
             </button>
@@ -476,7 +476,7 @@ function LearnCard({
   return (
     <div
       key={word.id}
-      className="flex w-full max-w-md animate-pop-in flex-col gap-4 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none"
+      className="flex w-full max-w-md animate-pop-in flex-col gap-4 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-1 dark:ring-white/10"
     >
       <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         So'z {index + 1} / {total}
@@ -487,7 +487,7 @@ function LearnCard({
       <div className="flex items-center gap-3 rounded-2xl bg-ink-50/70 p-4 dark:bg-white/5">
         <button
           onClick={() => speak(word.word)}
-          className="btn-press flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-500 text-white shadow-sm shadow-gold-700/30 hover:bg-gold-400"
+          className="btn-press btn-3d [--btn-glow:rgba(251,191,36,0.45)] flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-500 text-white shadow-sm shadow-gold-700/30 hover:bg-gold-400"
           aria-label="Talaffuzni eshitish"
         >
           <Volume2 size={18} />
@@ -524,7 +524,7 @@ function LearnCard({
       </div>
       <button
         onClick={onNext}
-        className="btn-press flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
+        className="btn-press btn-3d flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
       >
         {index + 1 < total ? "Keyingisi" : "Tayyor"} <ArrowRight size={16} />
       </button>
@@ -564,7 +564,7 @@ function RoundSummary({
         {mistakeCount > 0 && (
           <button
             onClick={onReview}
-            className="btn-press flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-rose-600 to-rose-800 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-rose-900/30 hover:from-rose-500 hover:to-rose-700"
+            className="btn-press btn-3d [--btn-glow:rgba(244,63,94,0.45)] flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-rose-600 to-rose-800 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-rose-900/30 hover:from-rose-500 hover:to-rose-700"
           >
             Xatolarni qayta ko'rish
           </button>
@@ -688,7 +688,7 @@ function SpellingStage({
   }
 
   return (
-    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
+    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-1 dark:ring-white/10">
       <div className="flex h-28 items-center justify-center rounded-2xl bg-gradient-to-br from-ink-50 to-gold-50 text-5xl dark:from-white/5 dark:to-gold-950/30">
         {word.emoji}
       </div>
@@ -800,7 +800,7 @@ function DefinitionStage({
   }
 
   return (
-    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
+    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-1 dark:ring-white/10">
       <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         Ta'rifga mos so'zni tanlang
       </p>
@@ -939,14 +939,14 @@ function PronunciationStage({
   const showManual = unsupported || (error !== null && !error.startsWith("Ovoz eshitilmadi"));
 
   return (
-    <div className="flex animate-pop-in flex-col items-center gap-5 rounded-3xl bg-white p-6 text-center shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
+    <div className="flex animate-pop-in flex-col items-center gap-5 rounded-3xl bg-white p-6 text-center shadow-xl shadow-ink-900/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-1 dark:ring-white/10">
       <p className="text-xs font-semibold text-ink-500 dark:text-ink-400">
         So'zni to'g'ri talaffuz qiling
       </p>
 
       <button
         onClick={() => speak(targets[0] ?? word.word)}
-        className="btn-press flex h-11 w-11 items-center justify-center rounded-full bg-gold-500 text-white shadow-sm shadow-gold-700/30 hover:bg-gold-400"
+        className="btn-press btn-3d [--btn-glow:rgba(251,191,36,0.45)] flex h-11 w-11 items-center justify-center rounded-full bg-gold-500 text-white shadow-sm shadow-gold-700/30 hover:bg-gold-400"
         aria-label="Namunani eshitish"
       >
         <Volume2 size={20} />
@@ -1005,14 +1005,14 @@ function PronunciationStage({
             <button
               onClick={() => finish(true)}
               disabled={checked !== null}
-              className="btn-press rounded-full bg-azure-600 px-4 py-2 text-xs font-bold text-white hover:bg-azure-500"
+              className="btn-press btn-3d rounded-full bg-azure-600 px-4 py-2 text-xs font-bold text-white hover:bg-azure-500"
             >
               To'g'ri aytdim
             </button>
             <button
               onClick={() => finish(false)}
               disabled={checked !== null}
-              className="btn-press rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-500"
+              className="btn-press btn-3d [--btn-glow:rgba(244,63,94,0.45)] rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-500"
             >
               Xato qildim
             </button>
@@ -1048,7 +1048,7 @@ function SentenceStage({
   }
 
   return (
-    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-[#161b26] dark:shadow-none">
+    <div className="flex animate-pop-in flex-col gap-5 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-1 dark:ring-white/10">
       <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         Bo'sh joyga mos so'zni yozing
       </p>
@@ -1094,7 +1094,7 @@ function SentenceStage({
         <button
           onClick={submit}
           disabled={!value.trim()}
-          className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-40"
+          className="btn-press btn-3d rounded-full bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-40"
         >
           Tekshirish
         </button>

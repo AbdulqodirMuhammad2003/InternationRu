@@ -155,7 +155,7 @@ function NewStudentForm({ levels, onClose }: { levels: PlacementLevel[]; onClose
                 `Sayt: https://internation-ru.vercel.app\nLogin: ${created.username}\nParol: ${created.password}`
               )
             }
-            className="btn-press rounded-full bg-mint-600 px-4 py-2 text-sm font-bold text-white hover:bg-mint-500"
+            className="btn-press btn-3d [--btn-glow:rgba(16,185,129,0.5)] rounded-full bg-mint-600 px-4 py-2 text-sm font-bold text-white hover:bg-mint-500"
           >
             Nusxa olish
           </button>
@@ -176,7 +176,7 @@ function NewStudentForm({ levels, onClose }: { levels: PlacementLevel[]; onClose
           else setError(res.error);
         })
       }
-      className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink-950/5 dark:bg-[#161b26] dark:ring-white/10"
+      className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10"
     >
       <div className="flex items-center justify-between">
         <p className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">Yangi o'quvchi</p>
@@ -218,7 +218,7 @@ function NewStudentForm({ levels, onClose }: { levels: PlacementLevel[]; onClose
       <ErrorText error={error} />
       <button
         disabled={pending}
-        className="btn-press rounded-full bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white hover:from-azure-500 hover:to-azure-600 disabled:opacity-60"
+        className="btn-press btn-3d rounded-full bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white hover:from-azure-500 hover:to-azure-600 disabled:opacity-60"
       >
         {pending ? "Saqlanmoqda…" : "O'quvchini qo'shish"}
       </button>
@@ -258,7 +258,7 @@ function StudentEditor({
 
   const box = "mt-3 flex flex-col gap-3 rounded-xl bg-ink-50/70 p-3 dark:bg-white/5";
   const saveBtn =
-    "btn-press rounded-full bg-azure-600 px-4 py-2 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-60";
+    "btn-press btn-3d rounded-full bg-azure-600 px-4 py-2 text-sm font-bold text-white hover:bg-azure-500 disabled:opacity-60";
 
   if (mode === "placement") {
     return (
@@ -319,7 +319,7 @@ function StudentEditor({
         <b>{student.name}</b> va uning barcha natijalari butunlay o'chiriladi. Buni qaytarib bo'lmaydi.
       </p>
       <ErrorText error={error} />
-      <button disabled={pending} className="btn-press rounded-full bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-500 disabled:opacity-60">
+      <button disabled={pending} className="btn-press btn-3d [--btn-glow:rgba(244,63,94,0.45)] rounded-full bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-500 disabled:opacity-60">
         {pending ? "O'chirilmoqda…" : "Ha, o'chirish"}
       </button>
     </form>
@@ -395,7 +395,7 @@ function StudentCard({ student, levels }: { student: TeacherStudent; levels: Pla
   ];
 
   return (
-    <li className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-[#161b26] dark:ring-white/10">
+    <li className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
       <div className="flex items-start gap-3">
         <span className="font-display flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-azure-600 to-azure-900 text-sm font-bold text-white">
           {student.level}
@@ -484,17 +484,17 @@ export function TeacherPanel({ students, levels }: { students: TeacherStudent[];
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-[#161b26] dark:ring-white/10">
+        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
           <p className="flex items-center gap-1.5 text-xs text-ink-500 dark:text-ink-400"><Users size={14} /> O'quvchilar</p>
           <p className="font-display mt-1 text-2xl font-bold text-ink-950 dark:text-ink-50">{students.length}</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-[#161b26] dark:ring-white/10">
+        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
           <p className="text-xs text-ink-500 dark:text-ink-400">Shu hafta faol</p>
           <p className="font-display mt-1 text-2xl font-bold text-ink-950 dark:text-ink-50">{activeWeek}</p>
         </div>
         <button
           onClick={() => setAdding(true)}
-          className="btn-press col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-azure-600 to-azure-800 p-4 text-sm font-bold text-white shadow-sm sm:col-span-1"
+          className="btn-press btn-3d col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-azure-600 to-azure-800 p-4 text-sm font-bold text-white shadow-sm sm:col-span-1"
         >
           <UserPlus size={18} /> Yangi o'quvchi
         </button>
@@ -519,7 +519,7 @@ export function TeacherPanel({ students, levels }: { students: TeacherStudent[];
           ))}
         </ul>
       ) : (
-        <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-10 text-center text-sm text-ink-500 dark:bg-[#161b26] dark:text-ink-400">
+        <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-10 text-center text-sm text-ink-500 dark:bg-white/[0.045] dark:text-ink-400">
           {students.length === 0 ? (
             <>
               <p>Hali o'quvchi yo'q.</p>
