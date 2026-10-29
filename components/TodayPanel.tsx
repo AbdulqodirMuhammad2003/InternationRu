@@ -8,6 +8,7 @@ import {
   type UserRecord,
 } from "@/lib/data";
 import { EditableAvatar } from "./EditableAvatar";
+import { ActivityHeatmap } from "./ActivityHeatmap";
 import { currentUnitOf, levelUnits } from "@/lib/progress";
 
 interface NextStep {
@@ -207,6 +208,10 @@ export function TodayPanel({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="mt-4 border-t border-ink-100 pt-4 dark:border-white/10">
+        <ActivityHeatmap heatmap={activity.heatmap} />
       </div>
     </div>
   );

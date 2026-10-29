@@ -5,6 +5,8 @@ import { BookOpen, Delete, GraduationCap, Info, MapPin, Mic, PlayCircle, Snail, 
 import type { UnitDetail } from "@/lib/data";
 import { toCyrillicLookalikes } from "@/lib/cyrillic";
 import { matchesPronunciation, speechNorm, SPEECH_ERRORS } from "@/lib/russian-speech";
+import { buzz, spark } from "@/lib/celebrate";
+import { Celebrate, CountUp } from "@/components/CountUp";
 
 function speakRu(text: string, rate = 0.85) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -235,6 +237,7 @@ export function ExerciseRun({
     const rulePassed = result >= RULE_PASS_PCT;
     return (
       <div className="flex animate-pop-in flex-col items-center gap-4 py-10 text-center">
+        <Celebrate when={great} />
         <div
           className={`flex h-24 w-24 items-center justify-center rounded-full text-white shadow-lg ${
             great
@@ -244,7 +247,9 @@ export function ExerciseRun({
         >
           {great ? <Trophy size={40} /> : <PlayCircle size={40} />}
         </div>
-        <p className="font-display text-4xl font-bold text-ink-950 dark:text-ink-50">{result}%</p>
+        <p className="font-display text-4xl font-bold text-ink-950 dark:text-ink-50">
+          <CountUp value={result} suffix="%" />
+        </p>
         <p className="text-sm text-ink-600 dark:text-ink-300">
           {great ? "Ajoyib natija!" : "Xato qilingan savollarni yana bir marta ishlab ko'ring."}{" "}
           To'g'ri javoblar: {alreadyCorrect + correctCount} / {exercise.questions.length}
@@ -329,6 +334,10 @@ export function ExerciseRun({
   const ending = kind === "ending" ? parseEnding(question.prompt) : null;
 
   function record(ok: boolean) {
+    if (ok) {
+      spark();
+      buzz(12);
+    } else buzz([25, 40, 25]);
     setChecked(ok);
     setAnswers((a) => [...a, { questionId: question.id, correct: ok }]);
   }

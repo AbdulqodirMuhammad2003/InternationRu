@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock, GraduationCap, RotateCcw, Trophy, XCircle } from "lucide-react";
 import type { ExamAnswer, ExamResult, ExamStatus } from "@/lib/exam";
 import { saveExamAnswersAction, startExamAction, submitExamAction } from "@/app/actions";
+import { Celebrate, CountUp } from "@/components/CountUp";
 
 const CARD =
   "rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink-950/5 sm:p-7 dark:bg-white/[0.045] dark:shadow-none dark:ring-white/10";
@@ -373,6 +374,7 @@ function ExamRun({
 function ExamResultView({ result }: { result: ExamResult }) {
   return (
     <div className="flex flex-col gap-5">
+      <Celebrate when={result.passed} />
       <div className={CARD}>
         <div className="flex items-center gap-3">
           {result.passed ? (
@@ -388,7 +390,7 @@ function ExamResultView({ result }: { result: ExamResult }) {
         <div className="mt-5 grid grid-cols-3 gap-3">
           <div className="rounded-2xl bg-ink-50 p-4 dark:bg-white/5">
             <p className="text-xs text-ink-500 dark:text-ink-400">Umumiy natija</p>
-            <p className={`font-display text-3xl font-bold ${result.passed ? "text-mint-600" : "text-rose-500"}`}>{result.pct}%</p>
+            <p className={`font-display text-3xl font-bold ${result.passed ? "text-mint-600" : "text-rose-500"}`}><CountUp value={result.pct} suffix="%" /></p>
             <p className="text-xs text-ink-500 dark:text-ink-400">{result.score} / {result.total} · kerak 80%</p>
           </div>
           <div className="rounded-2xl bg-ink-50 p-4 dark:bg-white/5">

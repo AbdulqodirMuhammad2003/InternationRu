@@ -189,7 +189,11 @@ export interface ActivityOverview {
   todayCorrect: number;
   /** Joriy hafta, dushanbadan yakshanbagacha. */
   week: { label: string; active: boolean; isToday: boolean; isFuture: boolean }[];
+  /** Faollik xaritasi: oxirgi HEATMAP_WEEKS hafta, har ustun — bir hafta (Du…Ya). */
+  heatmap: { day: string; count: number; isFuture: boolean }[][];
 }
+
+const HEATMAP_WEEKS = 17;
 
 const WEEKDAY_LABELS = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
 
@@ -227,10 +231,19 @@ export async function getActivityOverview(userId: number): Promise<ActivityOverv
     return { label, active: activeDays.has(day), isToday: day === today, isFuture: day > today };
   });
 
+  const counts = new Map(rows.map((r) => [r.day, r.correct_answers]));
+  const heatmap = Array.from({ length: HEATMAP_WEEKS }, (_, w) =>
+    Array.from({ length: 7 }, (_, d) => {
+      const day = shiftDay(monday, (w - (HEATMAP_WEEKS - 1)) * 7 + d);
+      return { day, count: counts.get(day) ?? 0, isFuture: day > today };
+    })
+  );
+
   return {
     streak,
     todayCorrect: rows.find((r) => r.day === today)?.correct_answers ?? 0,
     week,
+    heatmap,
   };
 }
 

@@ -17,6 +17,8 @@ import type { VocabRoundWithWords, VocabWord } from "@/lib/data";
 import { setWordStagePassed, type VocabStage } from "@/app/actions";
 import { toCyrillicLookalikes } from "@/lib/cyrillic";
 import { matchesPronunciation, pronunciationTargets, SPEECH_ERRORS } from "@/lib/russian-speech";
+import { buzz, spark } from "@/lib/celebrate";
+import { Celebrate, CountUp } from "@/components/CountUp";
 
 // ---------- Yordamchi funksiyalar ----------
 
@@ -254,6 +256,8 @@ export function VocabRoundFlow({
     }
 
     if (correct) {
+      spark();
+      buzz(12);
       persistStage(item.word.id, stage, true);
       setQueue(rest);
       if (rest.length === 0) advanceStage(stageIdx);
@@ -547,8 +551,11 @@ function RoundSummary({
 }) {
   return (
     <div className="flex animate-pop-in flex-col items-center gap-4 text-center">
+      <Celebrate when={percent >= 86} />
       <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-mint-600 to-mint-900 text-white shadow-lg shadow-mint-900/30">
-        <span className="font-display text-3xl font-bold">{percent}%</span>
+        <span className="font-display text-3xl font-bold">
+          <CountUp value={percent} suffix="%" />
+        </span>
       </div>
       <div>
         <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
