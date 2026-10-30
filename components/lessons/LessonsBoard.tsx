@@ -329,12 +329,13 @@ export function LessonsBoard({
 
   /** Dars bosqichlari ketma-ket ochiladi: lug'at VOCAB_PASS_PCT ga yetmaguncha qoida, qoida
    *  testidan kamida RULE_PASS_PCT natija olinmaguncha mashqlar yopiq. */
+  // Qoralama (kitob) darsni o'qituvchi tekshiradi — bo'limlari qulfsiz.
   function unitVocabDone(unit: UnitDetail) {
-    return unit.totalWords === 0 || unitVocabPercent(unit) >= VOCAB_PASS_PCT;
+    return unit.draft || unit.totalWords === 0 || unitVocabPercent(unit) >= VOCAB_PASS_PCT;
   }
 
   function unitRuleDone(unit: UnitDetail) {
-    return unit.exercises.every((e) => e.kind !== "rule" || e.score_pct >= RULE_PASS_PCT);
+    return unit.draft || unit.exercises.every((e) => e.kind !== "rule" || e.score_pct >= RULE_PASS_PCT);
   }
 
   function finishExercise(exerciseId: number, answers: { questionId: number; correct: boolean }[]) {
@@ -826,7 +827,7 @@ export function LessonsBoard({
                         ? `${group.name} lug'at ${VOCAB_PASS_PCT}% ga yetgach ochiladi.`
                         : !unitRuleDone(openUnit)
                           ? `${group.name} qoida testidan kamida ${RULE_PASS_PCT}% olgach ochiladi.`
-                          : prev && groupPercent(prev.items) < SECTION_PASS_PCT
+                          : prev && !openUnit.draft && groupPercent(prev.items) < SECTION_PASS_PCT
                             ? `«${group.name}» — «${prev.name}» ${SECTION_PASS_PCT}% ga yetgach ochiladi.`
                             : null
                     }
