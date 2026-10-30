@@ -7,6 +7,8 @@ import { toCyrillicLookalikes } from "@/lib/cyrillic";
 import { matchesPronunciation, speechNorm, SPEECH_ERRORS } from "@/lib/russian-speech";
 import { buzz, spark } from "@/lib/celebrate";
 import { Celebrate, CountUp } from "@/components/CountUp";
+import { AudioCard } from "./AudioCard";
+import { BookSheet, SHEET_KINDS } from "./BookSheet";
 
 function speakRu(text: string, rate = 0.85) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -176,44 +178,22 @@ const OPTION_STATE_CLASSES = {
 /** Qoida testidan o'tish (mashqlar ochilishi) uchun kerakli natija. */
 export const RULE_PASS_PCT = 60;
 
-/** Kitob topshirig'ining audiosi (tezligini sekinlatish mumkin) va
- *  darslikdagi rasmi (bosilsa — kattalashadi). */
+/** Kitob topshirig'ining audiosi (AudioCard) va darslikdagi rasmi (bosilsa — kattalashadi). */
 function BookMedia({ audioUrl, imageUrl, bookRef }: { audioUrl: string | null; imageUrl: string | null; bookRef: string | null }) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [rate, setRate] = useState(1);
   const [zoom, setZoom] = useState(false);
   return (
-    <div className="flex flex-col gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
+    <>
+      {audioUrl && <AudioCard src={audioUrl} />}
       {imageUrl && (
-        <button type="button" onClick={() => setZoom(true)} className="overflow-hidden rounded-xl bg-white" aria-label="Rasmni kattalashtirish">
+        <button
+          type="button"
+          onClick={() => setZoom(true)}
+          className="overflow-hidden rounded-2xl bg-white p-2 shadow-sm ring-1 ring-ink-950/5 dark:ring-white/10"
+          aria-label="Rasmni kattalashtirish"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imageUrl} alt={bookRef ? `Darslik, ${bookRef}` : "Darslik"} className="max-h-72 w-full object-contain" />
         </button>
-      )}
-      {audioUrl && (
-        <div className="flex flex-col gap-2">
-          <audio ref={audioRef} src={audioUrl} controls preload="metadata" className="w-full" />
-          <div className="flex items-center justify-center gap-1.5 text-xs">
-            <span className="text-ink-500 dark:text-ink-400">Tezlik:</span>
-            {[0.75, 1].map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => {
-                  setRate(r);
-                  if (audioRef.current) audioRef.current.playbackRate = r;
-                }}
-                className={`rounded-full px-2.5 py-1 font-semibold transition-colors ${
-                  rate === r
-                    ? "bg-azure-600 text-white"
-                    : "bg-ink-100 text-ink-700 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-200"
-                }`}
-              >
-                {r === 1 ? "Oddiy" : "Sekin"}
-              </button>
-            ))}
-          </div>
-        </div>
       )}
       {zoom && imageUrl && (
         <button
@@ -226,7 +206,7 @@ function BookMedia({ audioUrl, imageUrl, bookRef }: { audioUrl: string | null; i
           <img src={imageUrl} alt="" className="max-h-full max-w-full rounded-xl bg-white object-contain" />
         </button>
       )}
-    </div>
+    </>
   );
 }
 
@@ -335,6 +315,34 @@ export function ExerciseRun({
             Tayyor
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Audioli kitob topshirig'i — kitobdagidek: bitta audio, ostida barcha savollar.
+  if (exercise.audio_url && SHEET_KINDS.has(kind)) {
+    return (
+      <div className="flex flex-col gap-4">
+        {exercise.instructions && (
+          <div className="flex gap-2.5 rounded-2xl bg-azure-50 px-4 py-3 text-sm leading-relaxed text-azure-900 dark:bg-azure-950/40 dark:text-azure-100">
+            <Info size={18} className="mt-0.5 shrink-0" />
+            <p>
+              <span className="font-bold">Shart: </span>
+              {exercise.instructions}
+            </p>
+          </div>
+        )}
+        <BookMedia audioUrl={exercise.audio_url} imageUrl={exercise.image_url ?? null} bookRef={exercise.book_ref ?? null} />
+        <BookSheet
+          kind={kind}
+          questions={pending}
+          onComplete={(sheetAnswers) => {
+            const ok = sheetAnswers.filter((x) => x.correct).length;
+            setAnswers(sheetAnswers);
+            setResult(Math.round(((alreadyCorrect + ok) / exercise.questions.length) * 100));
+            onFinish(sheetAnswers);
+          }}
+        />
       </div>
     );
   }
