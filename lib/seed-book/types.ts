@@ -15,14 +15,15 @@ export interface BookExercise extends SeedExercise {
   image?: string;
 }
 
-/** Kitobning bitta darsi (урок) — saytda bitta dars. */
+/** Saytdagi bitta dars — kitob urokining yarmi: 1-qism = Модуль 1–2,
+ *  2-qism = Модуль 3 + «Повторяем!» + «Свобода слова». Qoida testidan
+ *  tashqari ko'pi bilan MAX_TASKS ta topshiriq. */
 export interface BookLesson {
-  /** Sayt kodi: «KA1-01» (K — kitob; eski darslar kodlari bilan to'qnashmaydi). */
+  /** Sayt kodi: «KA1-01A» (K — kitob, 01 — urok, A/B — qism). Karta
+   *  sarlavhasi («3-dars») daraja ichidagi tartibdan avtomatik qo'yiladi. */
   code: string;
   level: "A1" | "A2" | "B1" | "B2";
-  /** Karta sarlavhasi, masalan «1-dars». */
-  title: string;
-  /** Kitobdagi nomi, masalan «Привет!». */
+  /** Kitobdagi nomi va qismi, masalan «Привет! · 1-qism». */
   subtitle: string;
   /** Kitob sahifalari (izoh uchun), masalan «6–15». */
   pages: string;
@@ -31,3 +32,6 @@ export interface BookLesson {
   /** Qoida testi va modullar topshiriqlari, kitob tartibida. */
   exercises: BookExercise[];
 }
+
+/** Bitta darsdagi topshiriqlar chegarasi (qoida testi hisobga kirmaydi). */
+export const MAX_TASKS = 18;

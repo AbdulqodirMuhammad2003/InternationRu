@@ -10,6 +10,12 @@
  * yo'q). Qoralama bo'lmagan (o'quvchilarga ochilgan) darsga bu skript
  * tegmaydi — buni alohida, ehtiyotkor ko'chirish qiladi.
  *
+ *   npm run db:add-book -- --all --prune --apply
+ *
+ * --all — koddagi barcha darslar; --prune — bazadagi, lekin kodda yo'q
+ * qoralama darslarni o'chiradi (masalan, dars ikkiga bo'linganda eski kod).
+ * Har bir darsda qoida testidan tashqari ko'pi bilan MAX_TASKS topshiriq.
+ *
  * Audio manzili: BOOK_AUDIO_BASE (bo'lmasa — DATABASE_URL'dagi Supabase
  * loyihasining ochiq «book-audio» papkasi).
  */
@@ -19,13 +25,17 @@ loadEnvConfig(process.cwd());
 import { getDb } from "../lib/db";
 import { insertRound } from "../lib/seed-data";
 import { BOOK_LESSONS } from "../lib/seed-book";
+import { MAX_TASKS } from "../lib/seed-book/types";
 import { toStorageKey } from "../lib/seed-book/storage-key";
 
 const apply = process.argv.includes("--apply");
-const codes = process.argv
-  .filter((a) => a.startsWith("--code="))
-  .flatMap((a) => a.slice("--code=".length).split(","))
-  .filter(Boolean);
+const prune = process.argv.includes("--prune");
+const codes = process.argv.includes("--all")
+  ? BOOK_LESSONS.map((l) => l.code)
+  : process.argv
+      .filter((a) => a.startsWith("--code="))
+      .flatMap((a) => a.slice("--code=".length).split(","))
+      .filter(Boolean);
 
 /** Kitob darslari darajaning eski darslaridan keyin turadi. */
 const ORDER_BASE = 100;
@@ -38,15 +48,27 @@ function audioBase() {
 }
 
 async function main() {
-  if (codes.length === 0) throw new Error("--code=KA1-01 kabi dars kodini bering.");
+  if (codes.length === 0 && !prune) throw new Error("--code=KA1-01A, --all yoki --prune bering.");
   const sql = getDb();
   const base = audioBase();
+
+  // Kodda yo'q qoralamalar (faqat qoralama — o'quvchiga ochilgan darsga tegilmaydi).
+  if (prune) {
+    const drafts = await sql<{ id: number; code: string }[]>`SELECT id, code FROM units WHERE draft`;
+    for (const d of drafts.filter((d) => !BOOK_LESSONS.some((l) => l.code === d.code))) {
+      console.log(`${d.code}: kodda yo'q qoralama — ${apply ? "o'chirildi" : "o'chiriladi"}`);
+      if (apply) await sql`DELETE FROM units WHERE id = ${d.id} AND draft`;
+    }
+  }
 
   for (const code of codes) {
     const lesson = BOOK_LESSONS.find((l) => l.code === code);
     if (!lesson) throw new Error(`${code}: lib/seed-book'da bunday dars yo'q.`);
     const levelLessons = BOOK_LESSONS.filter((l) => l.level === lesson.level);
     const orderIndex = ORDER_BASE + levelLessons.indexOf(lesson) + 1;
+    const title = `${levelLessons.indexOf(lesson) + 1}-dars`;
+    const tasks = lesson.exercises.filter((e) => e.kind !== "rule").length;
+    if (tasks > MAX_TASKS) throw new Error(`${code}: ${tasks} ta topshiriq — chegara ${MAX_TASKS}.`);
 
     const [level] = await sql<{ id: number }[]>`SELECT id FROM levels WHERE code = ${lesson.level}`;
     if (!level) throw new Error(`${lesson.level} darajasi bazada yo'q.`);
@@ -60,7 +82,7 @@ async function main() {
     const questions = lesson.exercises.reduce((n, e) => n + e.questions.length, 0);
     const withAudio = lesson.exercises.filter((e) => e.audio).length;
     console.log(
-      `\n${code} «${lesson.subtitle}» (${lesson.level}, kitob ${lesson.pages}-betlar): ` +
+      `\n${code} «${title} · ${lesson.subtitle}» (${lesson.level}, kitob ${lesson.pages}-betlar): ` +
         `${unit ? "qoralama yangilanadi" : "yangi qoralama yaratiladi"}\n` +
         `  lug'at: ${lesson.rounds.length} bosqich, ${words} so'z\n` +
         `  topshiriqlar: ${lesson.exercises.length} ta (${questions} savol), audio bilan: ${withAudio}`
@@ -77,12 +99,12 @@ async function main() {
       if (!unitId) {
         const [row] = await t<{ id: number }[]>`
           INSERT INTO units (level_id, code, title, subtitle, color, icon, order_index, locked, date_label, draft)
-          VALUES (${level.id}, ${code}, ${lesson.title}, ${lesson.subtitle}, 'blue', 'book', ${orderIndex}, 1, '', true)
+          VALUES (${level.id}, ${code}, ${title}, ${lesson.subtitle}, 'blue', 'book', ${orderIndex}, 1, '', true)
           RETURNING id
         `;
         unitId = row.id;
       } else {
-        await t`UPDATE units SET title = ${lesson.title}, subtitle = ${lesson.subtitle}, order_index = ${orderIndex} WHERE id = ${unitId}`;
+        await t`UPDATE units SET title = ${title}, subtitle = ${lesson.subtitle}, order_index = ${orderIndex} WHERE id = ${unitId}`;
         await t`DELETE FROM vocabulary_rounds WHERE unit_id = ${unitId}`;
         await t`DELETE FROM exercises WHERE unit_id = ${unitId}`;
       }
