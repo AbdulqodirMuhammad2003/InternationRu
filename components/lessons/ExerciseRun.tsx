@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BookOpen, Delete, GraduationCap, Info, MapPin, Mic, PlayCircle, Snail, Trophy, Volume2 } from "lucide-react";
 import type { UnitDetail } from "@/lib/data";
 import { toCyrillicLookalikes } from "@/lib/cyrillic";
@@ -175,6 +175,60 @@ const OPTION_STATE_CLASSES = {
 
 /** Qoida testidan o'tish (mashqlar ochilishi) uchun kerakli natija. */
 export const RULE_PASS_PCT = 60;
+
+/** Kitob topshirig'ining audiosi (tezligini sekinlatish mumkin) va
+ *  darslikdagi rasmi (bosilsa — kattalashadi). */
+function BookMedia({ audioUrl, imageUrl, bookRef }: { audioUrl: string | null; imageUrl: string | null; bookRef: string | null }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [rate, setRate] = useState(1);
+  const [zoom, setZoom] = useState(false);
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
+      {imageUrl && (
+        <button type="button" onClick={() => setZoom(true)} className="overflow-hidden rounded-xl bg-white" aria-label="Rasmni kattalashtirish">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imageUrl} alt={bookRef ? `Darslik, ${bookRef}` : "Darslik"} className="max-h-72 w-full object-contain" />
+        </button>
+      )}
+      {audioUrl && (
+        <div className="flex flex-col gap-2">
+          <audio ref={audioRef} src={audioUrl} controls preload="metadata" className="w-full" />
+          <div className="flex items-center justify-center gap-1.5 text-xs">
+            <span className="text-ink-500 dark:text-ink-400">Tezlik:</span>
+            {[0.75, 1].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => {
+                  setRate(r);
+                  if (audioRef.current) audioRef.current.playbackRate = r;
+                }}
+                className={`rounded-full px-2.5 py-1 font-semibold transition-colors ${
+                  rate === r
+                    ? "bg-azure-600 text-white"
+                    : "bg-ink-100 text-ink-700 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-200"
+                }`}
+              >
+                {r === 1 ? "Oddiy" : "Sekin"}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {zoom && imageUrl && (
+        <button
+          type="button"
+          onClick={() => setZoom(false)}
+          className="fixed inset-0 z-[300] flex animate-fade-in items-center justify-center bg-black/85 p-3"
+          aria-label="Yopish"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imageUrl} alt="" className="max-h-full max-w-full rounded-xl bg-white object-contain" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export function ExerciseRun({
   exercise,
@@ -505,6 +559,9 @@ export function ExerciseRun({
             {exercise.instructions}
           </p>
         </div>
+      )}
+      {(exercise.audio_url || exercise.image_url) && (
+        <BookMedia audioUrl={exercise.audio_url ?? null} imageUrl={exercise.image_url ?? null} bookRef={exercise.book_ref ?? null} />
       )}
 
       <div key={qIndex} className="flex animate-fade-up flex-col gap-4">

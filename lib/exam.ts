@@ -144,7 +144,7 @@ async function levelUnits(level: string) {
   return sql<{ id: number; code: string; title: string; order_index: number }[]>`
     SELECT u.id, u.code, u.title, u.order_index
     FROM units u JOIN levels l ON l.id = u.level_id
-    WHERE l.code = ${level}
+    WHERE l.code = ${level} AND NOT u.draft
     ORDER BY u.order_index
   `;
 }

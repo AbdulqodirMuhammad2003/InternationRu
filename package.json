@@ -9,7 +9,9 @@
     "lint": "eslint",
     "db:seed": "tsx scripts/seed.ts",
     "db:add-lessons": "tsx scripts/add-lessons.ts",
-    "handbooks": "tsx scripts/build-handbooks.ts"
+    "handbooks": "tsx scripts/build-handbooks.ts",
+    "db:add-book": "tsx scripts/add-book.ts",
+    "book:upload-audio": "tsx scripts/upload-book-audio.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

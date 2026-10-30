@@ -52,6 +52,8 @@ export interface UnitRecord {
   locked: number;
   date_label: string;
   percent: number;
+  /** Qoralama dars (kitob asosida qurilayotgan) — faqat o'qituvchiga ko'rinadi. */
+  draft: boolean;
   /** Mashqlar tugatilgach ochiladigan "Ruscha tomosha" — haqiqiy ruscha
    *  film, multfilm, hujjatli film yoki intervyudan 5-10 daqiqalik parcha
    *  (YouTube). Parcha tanlanmagan darslar uchun `clip_url` — `null`. */
@@ -129,6 +131,12 @@ export interface ExerciseRecord {
    *  belgi — masalan, 0% bilan tugatilgan mashq ham "urinilgan"). */
   attempted: boolean;
   questions: ExerciseQuestion[];
+  /** Kitob topshirig'i: kitobdagi raqami («1.1.3»), audiosi, rasmi va dars
+   *  ichidagi bo'limi («Модуль 1», «Повторяем!»…). Oddiy mashqlarda — null. */
+  book_ref?: string | null;
+  audio_url?: string | null;
+  image_url?: string | null;
+  section?: string | null;
 }
 
 export interface UnitDetail extends UnitRecord {
@@ -320,11 +328,12 @@ export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
   return sql<UnitRecord[]>`
     SELECT u.id, u.level_id, l.code as level_code, u.code, u.title, u.subtitle, u.color, u.icon,
            u.order_index, u.locked, u.date_label,
-           u.clip_url, u.clip_title, u.clip_kind, u.clip_start, u.clip_end,
+           u.clip_url, u.clip_title, u.clip_kind, u.clip_start, u.clip_end, u.draft,
            COALESCE(p.percent, 0) as percent
     FROM units u
     JOIN levels l ON l.id = u.level_id
     LEFT JOIN user_unit_progress p ON p.unit_id = u.id AND p.user_id = ${userId}
+    WHERE NOT u.draft OR EXISTS (SELECT 1 FROM users t WHERE t.id = ${userId} AND t.role = 'teacher')
     ORDER BY l.order_index ASC, u.order_index ASC
   `;
 }
@@ -360,9 +369,14 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
         order_index: number;
         score_pct: number;
         attempted: boolean;
+        book_ref: string | null;
+        audio_url: string | null;
+        image_url: string | null;
+        section: string | null;
       }[]
     >`
       SELECT e.id, e.unit_id, e.title, e.skill_label, e.kind, e.instructions, e.order_index,
+             e.book_ref, e.audio_url, e.image_url, e.section,
              COALESCE(p.score_pct, 0) as score_pct,
              (p.exercise_id IS NOT NULL) as attempted
       FROM exercises e
@@ -449,10 +463,12 @@ export async function getAllUnitsDetailed(userId: number): Promise<UnitDetail[]>
     unit.percent = parts.length > 0 ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length) : 0;
 
     if (parts.length === 0) unit.lock_reason = "Tez orada";
+    // Qoralama darslarni faqat o'qituvchi ko'radi — u ularni qulfsiz tekshiradi.
+    else if (unit.draft) unit.lock_reason = null;
     else if (UNLOCK_RULE_ENABLED && previous && previous.percent < UNLOCK_THRESHOLD && !placedOpen(unit))
       unit.lock_reason = `${previous.title}ni ${UNLOCK_THRESHOLD}% ga yetkazing`;
     unit.locked = unit.lock_reason ? 1 : 0;
-    previous = unit;
+    if (!unit.draft) previous = unit;
   }
   return detailed;
 }
@@ -571,7 +587,7 @@ export async function getLevelBoard(userId: number, levelOverride?: string): Pro
                WHERE r.unit_id = u.id) AS words,
              (SELECT count(*)::int FROM exercises e WHERE e.unit_id = u.id) AS exercises
       FROM units u JOIN levels l ON l.id = u.level_id
-      WHERE l.code = ${level}
+      WHERE l.code = ${level} AND NOT u.draft
       ORDER BY u.order_index
     `,
   ]);

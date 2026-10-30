@@ -49,7 +49,41 @@ import { VocabRoundFlow } from "./VocabRoundFlow";
 import { ExerciseRun, RULE_PASS_PCT } from "./ExerciseRun";
 
 type View = "main" | "exercise-run" | "clip";
-type Section = "vocab" | "rule" | "exercises";
+/** "vocab", "rule" yoki mashqlar guruhi: "ex:Mashqlar", "ex:Модуль 1"… */
+type Section = string;
+
+/** Kitob darsida modullar ketma-ket ochiladi: oldingisi shu foizga yetsa. */
+const SECTION_PASS_PCT = 60;
+
+type ExerciseGroup = { name: string; book: boolean; items: UnitDetail["exercises"] };
+
+/** Qoidadan tashqari mashqlarni bo'limlarga ajratadi (kitob darsida —
+ *  «Модуль 1», «Повторяем!»…, oddiy darsda — bitta «Mashqlar»). */
+function exerciseGroups(unit: UnitDetail): ExerciseGroup[] {
+  const groups: ExerciseGroup[] = [];
+  for (const ex of unit.exercises) {
+    if (ex.kind === "rule") continue;
+    const name = ex.section ?? "Mashqlar";
+    let g = groups.find((x) => x.name === name);
+    if (!g) groups.push((g = { name, book: !!ex.book_ref, items: [] }));
+    g.items.push(ex);
+  }
+  return groups;
+}
+const groupKey = (name: string) => `ex:${name}`;
+function groupPercent(items: UnitDetail["exercises"]) {
+  return items.length === 0 ? 0 : Math.round(items.reduce((s, e) => s + e.score_pct, 0) / items.length);
+}
+
+const GROUP_STYLES: Record<string, { gradient: string; badge: string; icon: React.ReactNode }> = {
+  Mashqlar: { gradient: "from-mint-500 to-mint-900", badge: "bg-mint-500", icon: <ListChecks size={22} /> },
+  "Модуль 1": { gradient: "from-azure-500 to-azure-900", badge: "bg-azure-500", icon: <BookOpenText size={22} /> },
+  "Модуль 2": { gradient: "from-purple-500 to-purple-900", badge: "bg-purple-500", icon: <BookOpenText size={22} /> },
+  "Модуль 3": { gradient: "from-mint-500 to-mint-900", badge: "bg-mint-500", icon: <BookOpenText size={22} /> },
+  "Модуль 4": { gradient: "from-azure-400 to-purple-800", badge: "bg-azure-400", icon: <BookOpenText size={22} /> },
+  "Повторяем!": { gradient: "from-gold-400 to-gold-700", badge: "bg-gold-500", icon: <BookOpenCheck size={22} /> },
+  "Свобода слова": { gradient: "from-rose-400 to-purple-800", badge: "bg-rose-500", icon: <MessagesSquare size={22} /> },
+};
 
 const EXERCISE_KIND_ICONS: Record<ExerciseKind, LucideIcon> = {
   listen: Headphones,
@@ -228,7 +262,11 @@ export function LessonsBoard({
     // Lug'at tugallangan bo'lsa — qoida (hali ishlanmagan bo'lsa), keyin mashqlar.
     const ruleLeft = !unitRuleDone(unit);
     setOpenSection(
-      !unitVocabDone(unit) || unit.exercises.length === 0 ? "vocab" : ruleLeft ? "rule" : "exercises"
+      !unitVocabDone(unit) || unit.exercises.length === 0
+        ? "vocab"
+        : ruleLeft
+          ? "rule"
+          : firstOpenGroupKey(unit)
     );
     setClipNotice(false);
     if (unit.totalWords > 0) fetchUnitWords(unit.id);
@@ -276,11 +314,11 @@ export function LessonsBoard({
     return Math.round((unit.learnedWords / unit.totalWords) * 100);
   }
 
-  /** «Mashqlar» bo'limining foizi — qoida testi o'z bo'limida hisoblanadi. */
-  function unitExercisePercent(unit: UnitDetail) {
-    const exercises = unit.exercises.filter((e) => e.kind !== "rule");
-    if (exercises.length === 0) return 0;
-    return Math.round(exercises.reduce((s, e) => s + e.score_pct, 0) / exercises.length);
+  /** Ochiq bo'limlarning eng birinchi tugallanmagani (yo'q bo'lsa — oxirgisi). */
+  function firstOpenGroupKey(unit: UnitDetail) {
+    const groups = exerciseGroups(unit);
+    const next = groups.find((g, i) => groupPercent(g.items) < SECTION_PASS_PCT || i === groups.length - 1);
+    return next ? groupKey(next.name) : null;
   }
 
   /** "Ruscha tomosha" faqat shu darsdagi barcha mashqlar kamida bir marta
@@ -496,7 +534,7 @@ export function LessonsBoard({
                     <span className="pointer-events-none absolute -left-6 top-24 h-16 w-16 rounded-full bg-white/5" />
 
                     <span className="relative rounded-full bg-white/15 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-                      {unit.level_code}
+                      {unit.draft ? `${unit.level_code} · Kitob · qoralama` : unit.level_code}
                     </span>
                     <p className="font-display relative mt-3 text-3xl font-bold tracking-tight">
                       {unit.title}
@@ -769,26 +807,34 @@ export function LessonsBoard({
                     </>
                   )}
 
+                  {exerciseGroups(openUnit).map((group, gi, groups) => {
+                    const key = groupKey(group.name);
+                    const prev = groups[gi - 1];
+                    const style = GROUP_STYLES[group.name] ?? GROUP_STYLES.Mashqlar;
+                    return (
                   <LessonSection
-                    title="Mashqlar"
-                    subtitle={`${openUnit.exercises.filter((ex) => ex.kind !== "rule").length} ta mashq`}
-                    percent={unitExercisePercent(openUnit)}
-                    icon={<ListChecks size={22} />}
-                    gradient="from-mint-500 to-mint-900"
-                    open={openSection === "exercises"}
-                    disabled={openUnit.exercises.length === 0}
+                    key={key}
+                    title={group.name}
+                    subtitle={`${group.items.length} ta ${group.book ? "topshiriq" : "mashq"}`}
+                    percent={groupPercent(group.items)}
+                    icon={style.icon}
+                    gradient={style.gradient}
+                    open={openSection === key}
+                    disabled={group.items.length === 0}
                     lockNote={
                       !unitVocabDone(openUnit)
-                        ? `Mashqlar lug'at ${VOCAB_PASS_PCT}% ga yetgach ochiladi.`
+                        ? `${group.name} lug'at ${VOCAB_PASS_PCT}% ga yetgach ochiladi.`
                         : !unitRuleDone(openUnit)
-                          ? `Mashqlar qoida testidan kamida ${RULE_PASS_PCT}% olgach ochiladi.`
-                          : null
+                          ? `${group.name} qoida testidan kamida ${RULE_PASS_PCT}% olgach ochiladi.`
+                          : prev && groupPercent(prev.items) < SECTION_PASS_PCT
+                            ? `«${group.name}» — «${prev.name}» ${SECTION_PASS_PCT}% ga yetgach ochiladi.`
+                            : null
                     }
-                    onToggle={() => setOpenSection(openSection === "exercises" ? null : "exercises")}
-                    delay={120}
+                    onToggle={() => setOpenSection(openSection === key ? null : key)}
+                    delay={120 + gi * 40}
                   >
-                    {openUnit.exercises.filter((ex) => ex.kind !== "rule").map((ex, i) => {
-                      const KindIcon = EXERCISE_KIND_ICONS[ex.kind] ?? ListChecks;
+                    {group.items.map((ex, i) => {
+                      const KindIcon = ex.audio_url ? Headphones : (EXERCISE_KIND_ICONS[ex.kind] ?? ListChecks);
                       return (
                         <button
                           key={ex.id}
@@ -799,8 +845,10 @@ export function LessonsBoard({
                             loadingExerciseId === ex.id ? "animate-pulse opacity-70" : ""
                           }`}
                         >
-                          <span className="absolute left-0 top-0 rounded-br-xl rounded-tl-2xl bg-mint-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-                            {ex.skill_label}
+                          <span
+                            className={`absolute left-0 top-0 rounded-br-xl rounded-tl-2xl px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${style.badge}`}
+                          >
+                            {ex.book_ref ? `${ex.book_ref} · ${ex.skill_label}` : ex.skill_label}
                           </span>
                           {ex.score_pct === 100 ? (
                             <Medal size={26} className="absolute right-2.5 top-2 text-gold-500" />
@@ -808,7 +856,7 @@ export function LessonsBoard({
                             <KindIcon size={22} className="absolute right-3 top-2.5 text-ink-400 dark:text-ink-500" />
                           )}
                           <p className="font-semibold leading-snug text-ink-950 dark:text-ink-50">
-                            {i + 1}. {ex.title}
+                            {ex.book_ref ? ex.title : `${i + 1}. ${ex.title}`}
                           </p>
                           <p className="mb-3 mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                             {ex.question_count} ta savol
@@ -828,6 +876,8 @@ export function LessonsBoard({
                       );
                     })}
                   </LessonSection>
+                    );
+                  })}
                 </div>
               )}
 
@@ -841,7 +891,7 @@ export function LessonsBoard({
                     onDone={(resultPct) => {
                       setView("main");
                       // Qoida testidan o'tilgach navbat — mashqlar.
-                      if (activeExercise.kind === "rule" && resultPct >= RULE_PASS_PCT) setOpenSection("exercises");
+                      if (activeExercise.kind === "rule" && resultPct >= RULE_PASS_PCT && openUnit) setOpenSection(firstOpenGroupKey(openUnit));
                     }}
                   />
                 </div>

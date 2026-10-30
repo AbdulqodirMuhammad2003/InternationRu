@@ -59,8 +59,9 @@ export async function getPlacementLevels(): Promise<PlacementLevel[]> {
   const rows = await sql<{ level: string; level_title: string; id: number; title: string; subtitle: string; order_index: number }[]>`
     SELECT l.code AS level, l.title AS level_title, u.id, u.title, u.subtitle, u.order_index
     FROM units u JOIN levels l ON l.id = u.level_id
-    WHERE EXISTS (SELECT 1 FROM exercises e WHERE e.unit_id = u.id)
-       OR EXISTS (SELECT 1 FROM vocabulary_rounds r WHERE r.unit_id = u.id)
+    WHERE NOT u.draft
+      AND (EXISTS (SELECT 1 FROM exercises e WHERE e.unit_id = u.id)
+        OR EXISTS (SELECT 1 FROM vocabulary_rounds r WHERE r.unit_id = u.id))
     ORDER BY l.order_index, u.order_index
   `;
   const levels: PlacementLevel[] = [];
@@ -91,6 +92,7 @@ export async function getTeacherStudents(): Promise<TeacherStudent[]> {
              (SELECT count(*)::int FROM vocabulary_words w JOIN vocabulary_rounds r ON r.id = w.round_id WHERE r.unit_id = u.id) AS words,
              (SELECT count(*)::int FROM exercises e WHERE e.unit_id = u.id) AS exercises
       FROM units u JOIN levels l ON l.id = u.level_id
+      WHERE NOT u.draft
       ORDER BY l.order_index, u.order_index
     `,
     sql<{ user_id: number; unit_id: number; n: number }[]>`
