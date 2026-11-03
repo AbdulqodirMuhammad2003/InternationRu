@@ -189,6 +189,7 @@ export function LessonsBoard({
   const router = useRouter();
   const searchParams = useSearchParams();
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const panelScrollRef = useRef<HTMLDivElement>(null);
   const [, startTransition] = useTransition();
 
   // "Joriy dars" kartasidan ?unit=ID bilan kelingan bo'lsa, mos darsni
@@ -355,6 +356,8 @@ export function LessonsBoard({
       setActiveExerciseId(exerciseId);
       setRunKey((k) => k + 1);
       setView("exercise-run");
+      // Mashq ro'yxatdagi joydan emas, boshidan ochilsin.
+      requestAnimationFrame(() => panelScrollRef.current?.scrollTo({ top: 0 }));
     } finally {
       setLoadingExerciseId(null);
     }
@@ -638,10 +641,11 @@ export function LessonsBoard({
               </button>
             </div>
 
+            {/* Mashq kontenti ekrandan baland bo'lsa ham boshidan ko'rinsin:
+                markazlash `my-auto` bilan (items-center tepasini kesib qo'yardi). */}
             <div
-              className={`flex-1 overflow-y-auto px-6 py-5 ${
-                view === "exercise-run" ? "flex items-center justify-center" : ""
-              }`}
+              ref={panelScrollRef}
+              className={`flex-1 overflow-y-auto px-6 py-5 ${view === "exercise-run" ? "flex flex-col" : ""}`}
             >
               {view === "main" && (
                 <div className="flex flex-col gap-4">
@@ -883,7 +887,7 @@ export function LessonsBoard({
               )}
 
               {view === "exercise-run" && activeExercise && (
-                <div className="mx-auto w-full max-w-xl py-4">
+                <div className="mx-auto my-auto w-full max-w-xl py-4">
                   <ExerciseRun
                     key={runKey}
                     exercise={activeExercise}
