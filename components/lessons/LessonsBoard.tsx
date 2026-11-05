@@ -81,6 +81,7 @@ const GROUP_STYLES: Record<string, { gradient: string; badge: string; icon: Reac
   "Модуль 2": { gradient: "from-purple-500 to-purple-900", badge: "bg-purple-500", icon: <BookOpenText size={22} /> },
   "Модуль 3": { gradient: "from-mint-500 to-mint-900", badge: "bg-mint-500", icon: <BookOpenText size={22} /> },
   "Модуль 4": { gradient: "from-azure-400 to-purple-800", badge: "bg-azure-400", icon: <BookOpenText size={22} /> },
+  "Спрашиваем время": { gradient: "from-purple-500 to-azure-800", badge: "bg-purple-500", icon: <Hash size={22} /> },
   "Повторяем!": { gradient: "from-gold-400 to-gold-700", badge: "bg-gold-500", icon: <BookOpenCheck size={22} /> },
   "Свобода слова": { gradient: "from-rose-400 to-purple-800", badge: "bg-rose-500", icon: <MessagesSquare size={22} /> },
 };
