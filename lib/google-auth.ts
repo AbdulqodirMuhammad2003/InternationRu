@@ -66,12 +66,13 @@ export async function fetchGoogleProfile(code: string, origin: string): Promise<
   return (await infoRes.json()) as GoogleProfile;
 }
 
-/** Google hisobiga mos foydalanuvchini topadi (yangi hisob yaratmaydi —
- *  hisoblarni faqat o'qituvchi ochadi):
+/** Google hisobiga mos foydalanuvchini topadi (GOOGLE_OPEN_SIGNUP o'chiq
+ *  bo'lsa yangi hisob yaratmaydi — hisoblarni faqat o'qituvchi ochadi):
  *  1) avval shu Google hisobi bilan kirgan bo'lsa — o'sha hisob;
  *  2) o'qituvchi shu emailni o'quvchiga yozib qo'ygan bo'lsa — unga
  *     bog'lanadi, darajasi va progressi saqlanib qoladi;
- *  3) aks holda null — kirish rad etiladi. */
+ *  3) GOOGLE_OPEN_SIGNUP yoqilgan bo'lsa — yangi o'quvchi (A1), aks holda
+ *     null — kirish rad etiladi. */
 export async function findGoogleUser(profile: GoogleProfile) {
   const email = profile.email.trim().toLowerCase();
 
@@ -86,8 +87,23 @@ export async function findGoogleUser(profile: GoogleProfile) {
     WHERE lower(email) = ${email} AND google_sub IS NULL
     RETURNING id, name, email
   `;
-  return byEmail ?? null;
+  if (byEmail) return byEmail;
+  if (!GOOGLE_OPEN_SIGNUP || !profile.email_verified) return null;
+
+  // Vaqtincha ochiq ro'yxatdan o'tish: yangi o'quvchi A1 dan boshlaydi.
+  const name = profile.name?.trim() || email.split("@")[0];
+  const [created] = await sql<{ id: number; name: string; email: string }[]>`
+    INSERT INTO users (name, email, password_hash, google_sub, avatar_url, role, level)
+    VALUES (${name}, ${email}, NULL, ${profile.sub}, ${profile.picture ?? null}, 'student', 'A1')
+    RETURNING id, name, email
+  `;
+  return created;
 }
+
+/** Vaqtincha (o'qituvchi so'rovi bilan, 2026-11): login-parol berilmagan
+ *  o'quvchi ham Google orqali kirib, yangi hisob ochishi mumkin. Yana faqat
+ *  o'qituvchi qo'shgan o'quvchilarga ruxsat berish uchun — `false`. */
+export const GOOGLE_OPEN_SIGNUP = true;
 
 export async function setSessionCookie(user: { id: number; name: string; email: string | null }) {
   const token = createSessionToken({ userId: user.id, email: user.email ?? "", name: user.name });
