@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpen, Delete, GraduationCap, Info, MapPin, Mic, PlayCircle, Snail, Trophy, Volume2 } from "lucide-react";
 import type { UnitDetail } from "@/lib/data";
 import { toCyrillicLookalikes } from "@/lib/cyrillic";
@@ -29,60 +29,6 @@ function normalizeAnswer(s: string) {
     .replace(/[.,!?;:«»"'—-]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-// Ko'p o'quvchilarda rus klaviaturasi o'rnatilmagan — yozish savollari
-// uchun ekrandagi kichik klaviatura.
-const RU_KEYBOARD = ["йцукенгшщзхъ", "фывапролджэ", "ячсмитьбюё"];
-
-function RussianKeyboard({
-  onKey,
-  onBackspace,
-  disabled,
-}: {
-  onKey: (ch: string) => void;
-  onBackspace: () => void;
-  disabled: boolean;
-}) {
-  return (
-    <div className="flex w-full flex-col items-center gap-1">
-      {RU_KEYBOARD.map((row, ri) => (
-        <div key={ri} className="flex w-full justify-center gap-1">
-          {row.split("").map((ch) => (
-            <button
-              key={ch}
-              type="button"
-              disabled={disabled}
-              onClick={() => onKey(ch)}
-              className="h-10 min-w-0 max-w-9 flex-1 rounded-lg bg-ink-100 text-sm font-semibold text-ink-800 transition-colors hover:bg-azure-100 active:bg-azure-200 disabled:opacity-40 dark:bg-white/10 dark:text-ink-100 dark:hover:bg-azure-900/50"
-            >
-              {ch}
-            </button>
-          ))}
-          {ri === RU_KEYBOARD.length - 1 && (
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={onBackspace}
-              aria-label="O'chirish"
-              className="flex h-10 w-12 shrink-0 items-center justify-center rounded-lg bg-ink-200 text-ink-700 hover:bg-ink-300 disabled:opacity-40 dark:bg-white/15 dark:text-ink-100"
-            >
-              <Delete size={16} />
-            </button>
-          )}
-        </div>
-      ))}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => onKey(" ")}
-        aria-label="Bo'sh joy"
-        className="h-10 w-1/2 rounded-lg bg-ink-100 text-xs font-semibold text-ink-500 hover:bg-azure-100 disabled:opacity-40 dark:bg-white/10 dark:text-ink-300"
-      >
-        пробел
-      </button>
-    </div>
-  );
 }
 
 /** Har bir savol uchun bir xil tartibda aralashtiradi (sahifa yangilansa ham
@@ -849,11 +795,6 @@ export function ExerciseRun({
                   : "border-ink-200 focus:border-azure-500 dark:border-white/10"
               }`}
             />
-            <RussianKeyboard
-              disabled={checked !== null}
-              onKey={(ch) => setTyped((t) => t + ch)}
-              onBackspace={() => setTyped((t) => t.slice(0, -1))}
-            />
           </div>
         )}
 
@@ -963,11 +904,6 @@ export function ExerciseRun({
               </span>
               {question.prompt.split("___")[1]}
             </p>
-            <RussianKeyboard
-              disabled={checked !== null}
-              onKey={(ch) => setTyped((t) => t + ch)}
-              onBackspace={() => setTyped((t) => t.slice(0, -1))}
-            />
           </div>
         )}
 
@@ -1046,11 +982,6 @@ export function ExerciseRun({
                   ? "border-rose-400"
                   : "border-ink-200 focus:border-azure-500 dark:border-white/10"
               }`}
-            />
-            <RussianKeyboard
-              disabled={checked !== null}
-              onKey={(ch) => setTyped((t) => t + ch)}
-              onBackspace={() => setTyped((t) => t.slice(0, -1))}
             />
           </div>
         )}
