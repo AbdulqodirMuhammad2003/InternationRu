@@ -899,9 +899,22 @@ export function ExerciseRun({
           <div className="flex flex-col gap-3">
             <p className="text-center text-2xl font-semibold leading-relaxed text-ink-950 dark:text-ink-50">
               {question.prompt.split("___")[0]}
-              <span className={`inline-block min-w-16 border-b-2 border-current px-1 ${resultTone}`}>
-                {typed || "\u00a0"}
-              </span>
+              <input
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") (checked === null ? check : next)();
+                }}
+                disabled={checked !== null}
+                lang="ru"
+                autoComplete="off"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                aria-label="Javob"
+                size={Math.max(4, typed.length + 1)}
+                className={`mx-1 inline-block rounded-lg border-b-2 border-current bg-azure-50/60 px-1 text-center outline-none focus:bg-azure-100/70 dark:bg-white/5 dark:focus:bg-white/10 ${resultTone}`}
+              />
               {question.prompt.split("___")[1]}
             </p>
           </div>
