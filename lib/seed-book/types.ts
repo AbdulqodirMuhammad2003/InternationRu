@@ -34,4 +34,4 @@ export interface BookLesson {
 }
 
 /** Bitta darsdagi topshiriqlar chegarasi (qoida testi hisobga kirmaydi). */
-export const MAX_TASKS = 18;
+export const MAX_TASKS = 22;
