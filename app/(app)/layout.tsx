@@ -46,7 +46,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             >
               <div className="hidden leading-tight sm:block">
                 <p className="text-sm font-semibold text-ink-950 dark:text-ink-50">{user.name}</p>
-                <p className="text-xs text-ink-600/70 dark:text-ink-300/60">{user.level}</p>
+                <p className="text-xs text-ink-600 dark:text-ink-300">{user.level}</p>
               </div>
             </EditableAvatar>
 

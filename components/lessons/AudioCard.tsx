@@ -145,7 +145,7 @@ export function AudioCard({ src }: { src: string }) {
           {playing ? <Pause size={22} fill="currentColor" /> : <Play size={22} fill="currentColor" className="ml-0.5" />}
         </button>
         <div className="min-w-0 flex-1">
-          <p className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/75">
+          <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/85">
             <Headphones size={14} />
             {playing ? "Tinglanmoqda" : "Audio"}
           </p>

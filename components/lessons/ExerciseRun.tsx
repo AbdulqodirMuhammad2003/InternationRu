@@ -787,7 +787,7 @@ export function ExerciseRun({
               autoCapitalize="off"
               spellCheck={false}
               placeholder="Eshitganingizni yozing"
-              className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-xl font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-300 dark:bg-white/5 dark:text-ink-50 ${
+              className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-xl font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-400 dark:bg-white/5 dark:text-ink-50 ${
                 checked === true
                   ? "border-mint-500"
                   : checked === false
@@ -974,7 +974,7 @@ export function ExerciseRun({
         {kind === "type" && (
           <div className="flex flex-col gap-3">
             <p className="font-display text-center text-3xl font-bold text-ink-950 dark:text-ink-50">
-              {question.prompt} <span className="text-ink-300 dark:text-ink-600">→ ?</span>
+              {question.prompt} <span className="text-ink-400 dark:text-ink-500">→ ?</span>
             </p>
             <input
               value={typed}
@@ -988,7 +988,7 @@ export function ExerciseRun({
               autoCapitalize="off"
               spellCheck={false}
               placeholder="Javobni ruscha yozing"
-              className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-lg font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-300 dark:bg-white/5 dark:text-ink-50 ${
+              className={`w-full rounded-xl border-2 bg-white px-4 py-3 text-center text-lg font-semibold text-ink-900 outline-none transition-colors placeholder:text-sm placeholder:font-normal placeholder:text-ink-400 dark:bg-white/5 dark:text-ink-50 ${
                 checked === true
                   ? "border-mint-500"
                   : checked === false

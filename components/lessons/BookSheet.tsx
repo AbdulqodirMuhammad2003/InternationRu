@@ -90,8 +90,8 @@ export function BookSheet({
                   !checked
                     ? "bg-gold-400 text-ink-950"
                     : r.correct
-                      ? "bg-mint-500 text-white"
-                      : "bg-rose-500 text-white"
+                      ? "bg-mint-600 text-white"
+                      : "bg-rose-600 text-white"
                 }`}
               >
                 {checked ? r.correct ? <Check size={15} strokeWidth={3} /> : <X size={15} strokeWidth={3} /> : i + 1}

@@ -76,14 +76,14 @@ function groupPercent(items: UnitDetail["exercises"]) {
 }
 
 const GROUP_STYLES: Record<string, { gradient: string; badge: string; icon: React.ReactNode }> = {
-  Mashqlar: { gradient: "from-mint-500 to-mint-900", badge: "bg-mint-500", icon: <ListChecks size={22} /> },
-  "Модуль 1": { gradient: "from-azure-500 to-azure-900", badge: "bg-azure-500", icon: <BookOpenText size={22} /> },
-  "Модуль 2": { gradient: "from-purple-500 to-purple-900", badge: "bg-purple-500", icon: <BookOpenText size={22} /> },
-  "Модуль 3": { gradient: "from-mint-500 to-mint-900", badge: "bg-mint-500", icon: <BookOpenText size={22} /> },
-  "Модуль 4": { gradient: "from-azure-400 to-purple-800", badge: "bg-azure-400", icon: <BookOpenText size={22} /> },
-  "Спрашиваем время": { gradient: "from-purple-500 to-azure-800", badge: "bg-purple-500", icon: <Hash size={22} /> },
-  "Повторяем!": { gradient: "from-gold-400 to-gold-700", badge: "bg-gold-500", icon: <BookOpenCheck size={22} /> },
-  "Свобода слова": { gradient: "from-rose-400 to-purple-800", badge: "bg-rose-500", icon: <MessagesSquare size={22} /> },
+  Mashqlar: { gradient: "from-mint-500 to-mint-900", badge: "bg-mint-700", icon: <ListChecks size={22} /> },
+  "Модуль 1": { gradient: "from-azure-500 to-azure-900", badge: "bg-azure-600", icon: <BookOpenText size={22} /> },
+  "Модуль 2": { gradient: "from-purple-500 to-purple-900", badge: "bg-purple-600", icon: <BookOpenText size={22} /> },
+  "Модуль 3": { gradient: "from-mint-500 to-mint-900", badge: "bg-mint-700", icon: <BookOpenText size={22} /> },
+  "Модуль 4": { gradient: "from-azure-400 to-purple-800", badge: "bg-azure-700", icon: <BookOpenText size={22} /> },
+  "Спрашиваем время": { gradient: "from-purple-500 to-azure-800", badge: "bg-purple-600", icon: <Hash size={22} /> },
+  "Повторяем!": { gradient: "from-gold-400 to-gold-700", badge: "bg-gold-700", icon: <BookOpenCheck size={22} /> },
+  "Свобода слова": { gradient: "from-rose-400 to-purple-800", badge: "bg-rose-600", icon: <MessagesSquare size={22} /> },
 };
 
 const EXERCISE_KIND_ICONS: Record<ExerciseKind, LucideIcon> = {
@@ -364,6 +364,19 @@ export function LessonsBoard({
     }
   }
 
+  // Mashq paytida Esc hech narsa qilmaydi — javoblar tasodifan yo'qolmasin.
+  useEffect(() => {
+    if (openUnitId === null || flowRoundId !== null || view === "exercise-run") return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      if (view !== "main") setView("main");
+      else closePanel();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openUnitId, flowRoundId, view]);
+
   // Karusel markazidagi (faol) karta — u kattaroq ko'rsatiladi va faqat
   // shu karta bosilganda dars ochiladi; qolganlari bosilsa markazga keladi.
   const [activeCard, setActiveCard] = useState(0);
@@ -487,9 +500,12 @@ export function LessonsBoard({
       )}
 
       {visibleUnits.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-3xl bg-white p-12 text-center shadow-sm dark:bg-white/[0.045] dark:shadow-none">
-          <Lock size={28} className="text-ink-200 dark:text-ink-700" />
-          <p className="font-semibold text-ink-700 dark:text-ink-200">Hozircha ochiq darslar yo'q</p>
+        <div className="flex flex-col items-center justify-center gap-2 rounded-3xl bg-white p-12 text-center shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-white/10">
+          <span className="mb-1 flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-100 text-ink-400 dark:bg-white/5">
+            <Lock size={26} />
+          </span>
+          <p className="font-semibold text-ink-800 dark:text-ink-100">Hozircha ochiq darslar yo'q</p>
+          <p className="text-sm text-ink-500 dark:text-ink-400">O'qituvchingiz darslarni ochgach, ular shu yerda paydo bo'ladi.</p>
         </div>
       ) : (
         <div>
@@ -538,13 +554,13 @@ export function LessonsBoard({
                     <span className="pointer-events-none absolute bottom-16 right-10 h-8 w-8 rounded-full bg-black/10" />
                     <span className="pointer-events-none absolute -left-6 top-24 h-16 w-16 rounded-full bg-white/5" />
 
-                    <span className="relative rounded-full bg-white/15 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
+                    <span className="relative rounded-full bg-white/15 px-3 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
                       {unit.draft ? `${unit.level_code} · Kitob · qoralama` : unit.level_code}
                     </span>
                     <p className="font-display relative mt-3 text-3xl font-bold tracking-tight">
                       {unit.title}
                     </p>
-                    <p className="relative mt-2 text-sm leading-snug text-white/80 line-clamp-3">
+                    <p className="relative mt-2 text-sm leading-snug text-white/90 line-clamp-3">
                       {unit.subtitle}
                     </p>
 
@@ -615,29 +631,40 @@ export function LessonsBoard({
       )}
 
       {/* Fon qorong’ulashuvi */}
-      {openUnit && <div className="fixed inset-0 z-40 bg-black/30" onClick={closePanel} />}
+      {openUnit && (
+        <div aria-hidden="true" className="fixed inset-0 z-40 animate-fade-in bg-ink-950/50 backdrop-blur-[2px]" onClick={closePanel} />
+      )}
 
       {/* Dars yon paneli (mashq bajarilayotganda butun ekranga kengayadi) */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full flex-col bg-white shadow-2xl transition-all duration-300 dark:bg-[#0f1424] ${
+        role="dialog"
+        aria-modal={openUnit ? true : undefined}
+        aria-hidden={!openUnit}
+        aria-labelledby="lesson-panel-title"
+        className={`fixed right-0 top-0 z-50 flex h-full flex-col bg-white shadow-2xl transition-all duration-300 dark:bg-[#0f1424] dark:ring-1 dark:ring-white/10 ${
           openUnit ? "translate-x-0" : "translate-x-full"
         } ${view === "exercise-run" ? "w-full" : "w-full max-w-md"}`}
       >
         {openUnit && (
           <>
-            <div className="flex items-center justify-between border-b border-ink-100 px-6 py-4 dark:border-white/10">
-              <h2 className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
+            <div className="flex items-center justify-between gap-2 border-b border-ink-100 py-3 pl-4 pr-3 sm:pl-6 dark:border-white/10">
+              <h2 id="lesson-panel-title" className="font-display flex min-w-0 items-center gap-1 text-lg font-bold text-ink-950 dark:text-ink-50">
                 {view !== "main" ? (
                   <button
                     onClick={() => setView("main")}
-                    className="mr-2 inline-flex items-center text-ink-400 hover:text-ink-700 dark:text-ink-500 dark:hover:text-ink-200"
+                    aria-label="Dars bo'limlariga qaytish"
+                    className="-ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-800 dark:text-ink-300 dark:hover:bg-white/10 dark:hover:text-ink-50"
                   >
-                    <ChevronLeft size={18} />
+                    <ChevronLeft size={20} />
                   </button>
                 ) : null}
-                {openUnit.title}
+                <span className="truncate">{openUnit.title}</span>
               </h2>
-              <button onClick={closePanel} className="rounded-full p-1.5 text-ink-500 transition-colors hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-white/10">
+              <button
+                onClick={closePanel}
+                aria-label="Darsni yopish"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-800 dark:text-ink-300 dark:hover:bg-white/10 dark:hover:text-ink-50"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -646,7 +673,7 @@ export function LessonsBoard({
                 markazlash `my-auto` bilan (items-center tepasini kesib qo'yardi). */}
             <div
               ref={panelScrollRef}
-              className={`flex-1 overflow-y-auto px-6 py-5 ${view === "exercise-run" ? "flex flex-col" : ""}`}
+              className={`flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 ${view === "exercise-run" ? "flex flex-col" : ""}`}
             >
               {view === "main" && (
                 <div className="flex flex-col gap-4">
@@ -673,8 +700,8 @@ export function LessonsBoard({
                           }`}
                         >
                           <span
-                            className={`absolute left-0 top-0 rounded-br-xl rounded-tl-2xl px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${
-                              pct === 100 ? "bg-gold-500" : "bg-mint-500"
+                            className={`absolute left-0 top-0 rounded-br-xl rounded-tl-2xl px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
+                              pct === 100 ? "bg-gold-400 text-ink-950" : "bg-mint-700 text-white"
                             }`}
                           >
                             {pct === 100 ? "Tugallandi" : "Faol"}
@@ -731,7 +758,7 @@ export function LessonsBoard({
                               loadingExerciseId === ex.id ? "animate-pulse opacity-70" : ""
                             }`}
                           >
-                            <span className="absolute left-0 top-0 rounded-br-xl rounded-tl-2xl bg-gold-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                            <span className="absolute left-0 top-0 rounded-br-xl rounded-tl-2xl bg-gold-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-ink-950">
                               Qoida
                             </span>
                             {ex.score_pct === 100 ? (
@@ -852,7 +879,7 @@ export function LessonsBoard({
                           }`}
                         >
                           <span
-                            className={`absolute left-0 top-0 rounded-br-xl rounded-tl-2xl px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white ${style.badge}`}
+                            className={`absolute left-0 top-0 max-w-[calc(100%-2.5rem)] truncate rounded-br-xl rounded-tl-2xl px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white ${style.badge}`}
                           >
                             {ex.book_ref ? `${ex.book_ref} · ${ex.skill_label}` : ex.skill_label}
                           </span>
@@ -923,7 +950,7 @@ export function LessonsBoard({
                     );
                     if (!embedUrl) {
                       return (
-                        <p className="text-sm text-ink-600/70 dark:text-ink-300/60">
+                        <p className="text-sm text-ink-600 dark:text-ink-300">
                           Video havolasi noto'g'ri formatda.
                         </p>
                       );
@@ -1001,14 +1028,14 @@ function ExamCarouselCard({
       <span className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
       <span className="pointer-events-none absolute -bottom-6 -right-4 h-24 w-24 rounded-full bg-black/10" />
 
-      <span className="relative rounded-full bg-white/15 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
+      <span className="relative rounded-full bg-white/15 px-3 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm">
         {level}
       </span>
       <span className="relative mt-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
         {passed ? <Trophy size={28} /> : <GraduationCap size={28} />}
       </span>
       <p className="font-display relative mt-3 text-2xl font-bold tracking-tight">Daraja imtihoni</p>
-      <p className="relative mt-1 text-sm leading-snug text-white/80">40 savol · 40 daqiqa · o'tish bali 80%</p>
+      <p className="relative mt-1 text-sm leading-snug text-white/90">40 savol · 40 daqiqa · o'tish bali 80%</p>
 
       <div className="relative mt-auto flex w-full flex-col items-center gap-2">
         {passed ? (
@@ -1075,12 +1102,12 @@ function LessonSection({
       >
         <span className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
         <span className="pointer-events-none absolute -bottom-8 right-16 h-20 w-20 rounded-full bg-black/10" />
-        <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-gold-500 shadow-sm">
+        <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-gold-600 shadow-sm">
           {icon}
         </span>
         <span className="relative min-w-0 flex-1">
           <span className="font-display block text-xl font-bold">{title}</span>
-          <span className="block text-sm text-white/80">{subtitle}</span>
+          <span className="block text-sm text-white/90">{subtitle}</span>
           <span className="mt-2 flex items-center gap-2">
             <span className="h-2 flex-1 overflow-hidden rounded-full bg-white/25">
               <span
@@ -1088,7 +1115,7 @@ function LessonSection({
                 style={{ width: `${percent}%` }}
               />
             </span>
-            <span className="text-xs font-bold">{percent}%</span>
+            <span className="text-xs font-bold tabular-nums">{percent}%</span>
           </span>
         </span>
         {lockNote ? (

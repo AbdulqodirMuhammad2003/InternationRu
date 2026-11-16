@@ -28,44 +28,44 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   }
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#0f131c] via-[#141925] to-[#1d1a14] px-4">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#0b0f1a] px-4 py-10">
       {/* Premium fon bezaklari */}
-      <div className="pointer-events-none absolute -left-24 top-[-10%] h-80 w-80 animate-float-slow rounded-full bg-gold-500/15 blur-3xl" />
+      <div className="pointer-events-none absolute -left-24 top-[-10%] h-80 w-80 animate-float-slow rounded-full bg-azure-500/25 blur-3xl" />
       <div
-        className="pointer-events-none absolute -right-20 bottom-[-10%] h-96 w-96 animate-float-slow rounded-full bg-ink-400/15 blur-3xl"
+        className="pointer-events-none absolute -right-20 bottom-[-10%] h-96 w-96 animate-float-slow rounded-full bg-purple-500/20 blur-3xl"
         style={{ animationDelay: "1.5s" }}
       />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(207,162,73,0.08),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] bg-[length:22px_22px]" />
 
-      <div className="relative w-full max-w-md animate-fade-up rounded-3xl bg-white/95 p-6 text-ink-950 sm:p-8 shadow-2xl shadow-black/40 backdrop-blur-sm">
+      <div className="relative w-full max-w-md animate-fade-up rounded-3xl bg-white p-6 text-ink-950 shadow-2xl shadow-black/50 ring-1 ring-white/10 sm:p-8">
         <div className="mb-8 flex items-center gap-3">
-          <LogoMark size={46} className="shrink-0 drop-shadow-[0_2px_8px_rgba(30,32,18,0.35)]" />
+          <LogoMark size={46} className="shrink-0 drop-shadow-[0_2px_8px_rgba(30,27,75,0.35)]" />
           <div>
             <p className="font-display text-lg font-bold leading-tight">Avangard</p>
-            <p className="text-xs text-ink-700/60">Rus tili maktabi</p>
+            <p className="text-xs text-ink-600">Rus tili maktabi</p>
           </div>
         </div>
 
-        <h1 className="font-display mb-1 text-2xl font-bold text-ink-950">Shaxsiy kabinetga kirish</h1>
-        <p className="mb-6 text-sm text-ink-700/60">
+        <h1 className="font-display mb-1.5 text-[1.375rem] font-bold leading-tight text-ink-950 sm:text-2xl">Shaxsiy kabinetga kirish</h1>
+        <p className="mb-6 text-sm text-ink-600">
           Rus tilini o'rganishda to'xtagan joyingizdan davom eting.
         </p>
 
         <a
           href="/auth/google"
-          className="btn-press flex w-full items-center justify-center gap-3 rounded-xl border border-ink-200 bg-white py-2.5 text-sm font-semibold text-ink-900 shadow-sm transition-colors hover:bg-ink-50"
+          className="btn-press flex w-full items-center justify-center gap-3 min-h-12 rounded-xl border border-ink-200 bg-white py-2.5 text-[15px] font-semibold text-ink-900 shadow-sm transition-colors hover:border-ink-300 hover:bg-ink-50"
         >
           <GoogleIcon />
           Google orqali kirish
         </a>
         {googleError && (
-          <p className="mt-3 animate-fade-up rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{googleError}</p>
+          <p role="alert" className="mt-3 animate-fade-up rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 ring-1 ring-rose-200">{googleError}</p>
         )}
 
-        <div className="my-5 flex items-center gap-3 text-xs text-ink-700/50">
-          <span className="h-px flex-1 bg-ink-100" />
+        <div className="my-5 flex items-center gap-3 text-xs text-ink-500">
+          <span className="h-px flex-1 bg-ink-200" />
           yoki email bilan
-          <span className="h-px flex-1 bg-ink-100" />
+          <span className="h-px flex-1 bg-ink-200" />
         </div>
 
         <LoginForm />

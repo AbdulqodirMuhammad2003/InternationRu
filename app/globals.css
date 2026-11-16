@@ -22,6 +22,14 @@
   --line: rgba(255, 255, 255, 0.08);
 }
 
+/* Yorug' rejimda ink-400 asosan ikkinchi darajali (izoh, raqam, sana) matn
+   sifatida ishlatiladi; #858fa9 oq fonda ~3.2:1 — WCAG AA dan past. Shu
+   sababli faqat yorug' rejimda biroz to'qroq (oq va #f4f5fb fonda ≥4.6:1);
+   tungi rejimda asl qiymat qoladi (u yerda kontrast yetarli). */
+:root:not(.dark) {
+  --color-ink-400: #646d8a;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

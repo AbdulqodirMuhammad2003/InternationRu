@@ -363,7 +363,7 @@ export function VocabRoundFlow({
               <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
                 Ajoyib!
               </p>
-              <p className="mt-1 text-sm text-ink-700/70 dark:text-ink-300/60">
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
                 {resuming
                   ? `Siz hali o'rganilmagan ${learnWords.length} ta so'zni qayta ko'rib chiqdingiz. Endi faqat shularni tekshiramiz.`
                   : `Siz ${learnWords.length} ta so'zni ko'rib chiqdingiz. Endi bilimingizni tekshirib ko'ramizmi?`}
@@ -439,7 +439,7 @@ export function VocabRoundFlow({
               <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
                 Round yakunlandi
               </p>
-              <p className="mt-1 text-sm text-ink-700/70 dark:text-ink-300/60">
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
                 {fixedMistakes} ta xato tuzatildi
                 {mistakes.length - fixedMistakes > 0
                   ? `, ${mistakes.length - fixedMistakes} tasi keyingi safar takrorlanadi.`
@@ -500,7 +500,7 @@ function LearnCard({
           <p className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
             {word.word}
           </p>
-          <p className="text-sm text-ink-700/60 dark:text-ink-300/60">
+          <p className="text-sm text-ink-600 dark:text-ink-300">
             [{word.transcription}]
           </p>
         </div>
@@ -511,15 +511,15 @@ function LearnCard({
           {word.translation_uz}
         </p>
         <p className="mb-1 text-xs text-ink-500 dark:text-ink-400">Izoh:</p>
-        <p className="mb-3 text-sm text-ink-700 dark:text-ink-200/80">{word.definition}</p>
+        <p className="mb-3 text-sm text-ink-700 dark:text-ink-200">{word.definition}</p>
         {word.example_sentence && (
           <>
             <p className="mb-1 text-xs text-ink-500 dark:text-ink-400">Misol:</p>
-            <p className="text-sm italic text-ink-700 dark:text-ink-200/80">
+            <p className="text-sm italic text-ink-700 dark:text-ink-200">
               {word.example_sentence}
             </p>
             {word.example_translation && (
-              <p className="mt-1 text-sm text-ink-600/80 dark:text-ink-300/70">
+              <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
                 {word.example_translation}
               </p>
             )}
@@ -561,7 +561,7 @@ function RoundSummary({
         <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
           Round yakunlandi!
         </p>
-        <p className="mt-1 text-sm text-ink-700/70 dark:text-ink-300/60">
+        <p className="mt-1 text-sm text-ink-600 dark:text-ink-300">
           {mistakeCount > 0
             ? `${mistakeCount} ta savolda ikkinchi marta xato qildingiz — ularni qayta ko'rib chiqishingiz mumkin.`
             : "Barcha savollarga muvaffaqiyatli javob berdingiz."}
@@ -963,7 +963,7 @@ function PronunciationStage({
         <p className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">
           {word.word}
         </p>
-        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">[{word.transcription}]</p>
+        <p className="text-sm text-ink-600 dark:text-ink-300">[{word.transcription}]</p>
       </div>
 
       {!unsupported && (
@@ -1078,7 +1078,7 @@ function SentenceStage({
         )}
       </p>
       {checked !== null && word.example_translation && (
-        <p className="-mt-2 text-center text-sm text-ink-600/80 dark:text-ink-300/70">
+        <p className="-mt-2 text-center text-sm text-ink-600 dark:text-ink-300">
           {word.example_translation}
         </p>
       )}

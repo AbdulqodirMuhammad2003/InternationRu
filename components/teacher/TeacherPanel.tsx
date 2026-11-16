@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useId, useMemo, useState, useTransition } from "react";
 import {
+  Activity,
   Check,
   Copy,
   Eye,
@@ -30,7 +31,7 @@ import {
 type Mode = "placement" | "password" | "info" | "delete";
 
 const inputClass =
-  "w-full rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-base sm:text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-300 focus:border-azure-500 focus:ring-2 focus:ring-azure-100 dark:border-white/10 dark:bg-white/5 dark:text-ink-50 dark:focus:ring-azure-900/40";
+  "w-full rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-base sm:text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-azure-500 focus:ring-4 focus:ring-azure-100 dark:border-white/10 dark:bg-white/5 dark:text-ink-50 dark:focus:ring-azure-900/40";
 const labelClass = "mb-1 block text-xs font-semibold text-ink-600 dark:text-ink-300";
 
 /** Chalkashtiriladigan belgilarsiz (0/O, 1/l) tasodifiy parol. */
@@ -60,8 +61,8 @@ function PlacementFields({
   const units = levels.find((l) => l.code === level)?.units ?? [];
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] gap-3">
-      <div className="min-w-0">
-        <label className={labelClass}>Daraja</label>
+      <label className="min-w-0">
+        <span className={labelClass}>Daraja</span>
         <select
           name="level"
           value={level}
@@ -74,9 +75,9 @@ function PlacementFields({
             </option>
           ))}
         </select>
-      </div>
-      <div className="min-w-0">
-        <label className={labelClass}>Qaysi darsdan</label>
+      </label>
+      <label className="min-w-0">
+        <span className={labelClass}>Qaysi darsdan</span>
         <select
           name="startUnitId"
           value={startUnitId ?? ""}
@@ -90,17 +91,19 @@ function PlacementFields({
             </option>
           ))}
         </select>
-      </div>
+      </label>
     </div>
   );
 }
 
 function PasswordField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const id = useId();
   return (
     <div>
-      <label className={labelClass}>Parol</label>
+      <label htmlFor={id} className={labelClass}>Parol</label>
       <div className="flex gap-2">
         <input
+          id={id}
           name="password"
           type="text"
           value={value}
@@ -112,7 +115,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (v: strin
         <button
           type="button"
           onClick={() => onChange(generatePassword())}
-          className="btn-press shrink-0 rounded-xl bg-ink-100 px-3 text-xs font-bold text-ink-700 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-200"
+          className="btn-press shrink-0 rounded-xl bg-ink-100 px-3.5 text-sm font-bold text-ink-700 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-200 dark:hover:bg-white/15"
         >
           Yaratish
         </button>
@@ -123,7 +126,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (v: strin
 
 function ErrorText({ error }: { error?: string }) {
   if (!error) return null;
-  return <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">{error}</p>;
+  return <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:ring-rose-900/50">{error}</p>;
 }
 
 /** Yangi o'quvchi formasi. Saqlangach login va parol ko'rsatiladi — o'qituvchi
@@ -143,7 +146,7 @@ function NewStudentForm({ levels, onClose }: { levels: PlacementLevel[]; onClose
           <Check size={18} /> O'quvchi qo'shildi
         </p>
         <p className="text-sm text-ink-700 dark:text-ink-200">Quyidagilarni o'quvchiga bering (keyin ham o'quvchi kartasidan ko'rish mumkin):</p>
-        <div className="grid gap-2 rounded-xl bg-white p-3 font-mono text-sm dark:bg-white/5">
+        <div className="grid gap-2 break-all rounded-xl bg-white p-3 font-mono text-sm text-ink-900 dark:bg-white/5 dark:text-ink-50">
           <span>Sayt: internation-ru.vercel.app</span>
           <span>Login: {created.username}</span>
           <span>Parol: {created.password}</span>
@@ -180,17 +183,17 @@ function NewStudentForm({ levels, onClose }: { levels: PlacementLevel[]; onClose
     >
       <div className="flex items-center justify-between">
         <p className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">Yangi o'quvchi</p>
-        <button type="button" onClick={onClose} className="rounded-full p-1.5 text-ink-500 hover:bg-ink-50 dark:hover:bg-white/10">
+        <button type="button" onClick={onClose} aria-label="Yopish" className="flex h-10 w-10 items-center justify-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-white/10">
           <X size={18} />
         </button>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
-        <div>
-          <label className={labelClass}>Ism familiya</label>
-          <input name="name" required className={inputClass} placeholder="Ali Valiyev" />
-        </div>
-        <div>
-          <label className={labelClass}>Login</label>
+        <label>
+          <span className={labelClass}>Ism familiya</span>
+          <input name="name" required autoComplete="off" className={inputClass} placeholder="Ali Valiyev" />
+        </label>
+        <label>
+          <span className={labelClass}>Login</span>
           <input
             name="username"
             required
@@ -199,12 +202,12 @@ function NewStudentForm({ levels, onClose }: { levels: PlacementLevel[]; onClose
             className={inputClass}
             placeholder="ali.valiyev"
           />
-        </div>
+        </label>
         <PasswordField value={password} onChange={setPassword} />
-        <div>
-          <label className={labelClass}>Email (ixtiyoriy — Google bilan kirish uchun)</label>
-          <input name="email" type="email" className={inputClass} placeholder="ali@gmail.com" />
-        </div>
+        <label>
+          <span className={labelClass}>Email (ixtiyoriy — Google bilan kirish uchun)</span>
+          <input name="email" type="email" autoComplete="off" className={inputClass} placeholder="ali@gmail.com" />
+        </label>
       </div>
       <PlacementFields
         levels={levels}
@@ -284,7 +287,7 @@ function StudentEditor({
     return saved ? (
       <div className={box}>
         <p className="text-sm font-semibold text-mint-700 dark:text-mint-300">Yangi parol saqlandi:</p>
-        <p className="font-mono text-sm">
+        <p className="break-all font-mono text-sm text-ink-900 dark:text-ink-50">
           Login: {student.username ?? student.email} · Parol: {password}
         </p>
         <button type="button" onClick={onDone} className={saveBtn}>Yopish</button>
@@ -300,14 +303,14 @@ function StudentEditor({
   if (mode === "info") {
     return (
       <form action={run(updateStudentInfoAction)} className={box}>
-        <div>
-          <label className={labelClass}>Ism familiya</label>
+        <label>
+          <span className={labelClass}>Ism familiya</span>
           <input name="name" defaultValue={student.name} required className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>Email (Google bilan kirish uchun)</label>
+        </label>
+        <label>
+          <span className={labelClass}>Email (Google bilan kirish uchun)</span>
           <input name="email" type="email" defaultValue={student.email ?? ""} className={inputClass} />
-        </div>
+        </label>
         <ErrorText error={error} />
         <button disabled={pending} className={saveBtn}>{pending ? "Saqlanmoqda…" : "Saqlash"}</button>
       </form>
@@ -352,9 +355,9 @@ function Credentials({ student }: { student: TeacherStudent }) {
   return (
     <div className="mt-3 flex items-center gap-2 rounded-xl bg-ink-50/70 px-3 py-2 text-xs dark:bg-white/5">
       <KeyRound size={14} className="shrink-0 text-ink-400" />
-      <div className="min-w-0 flex-1 font-mono text-ink-800 dark:text-ink-100">
+      <div className="min-w-0 flex-1 break-all font-mono text-ink-800 dark:text-ink-100">
         <span>{student.username ?? student.email ?? "—"}</span>
-        <span className="mx-1.5 text-ink-300">·</span>
+        <span className="mx-1.5 text-ink-400">·</span>
         {shown ? (
           shown.password ? (
             <span className="font-bold">{shown.password}</span>
@@ -366,7 +369,7 @@ function Credentials({ student }: { student: TeacherStudent }) {
         )}
       </div>
       {shown?.password && (
-        <button onClick={copy} aria-label="Nusxa olish" className="shrink-0 rounded-full p-1 text-ink-500 hover:text-ink-800 dark:hover:text-ink-100">
+        <button onClick={copy} aria-label="Nusxa olish" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-800 dark:text-ink-300 dark:hover:bg-white/10 dark:hover:text-ink-100">
           {copied ? <Check size={15} className="text-mint-600" /> : <Copy size={15} />}
         </button>
       )}
@@ -375,7 +378,7 @@ function Credentials({ student }: { student: TeacherStudent }) {
         disabled={pending || (!student.passwordViewable && !shown)}
         aria-label={shown ? "Yashirish" : "Parolni ko'rsatish"}
         title={student.passwordViewable ? undefined : "Bu o'quvchining paroli saqlanmagan — yangi parol bering"}
-        className="shrink-0 rounded-full p-1 text-ink-500 hover:text-ink-800 disabled:opacity-40 dark:hover:text-ink-100"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-800 disabled:opacity-40 dark:text-ink-300 dark:hover:bg-white/10 dark:hover:text-ink-100"
       >
         {shown ? <EyeOff size={15} /> : <Eye size={15} />}
       </button>
@@ -395,7 +398,7 @@ function StudentCard({ student, levels }: { student: TeacherStudent; levels: Pla
   ];
 
   return (
-    <li className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
+    <li className="min-w-0 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
       <div className="flex items-start gap-3">
         <span className="font-display flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-azure-600 to-azure-900 text-sm font-bold text-white">
           {student.level}
@@ -426,12 +429,12 @@ function StudentCard({ student, levels }: { student: TeacherStudent; levels: Pla
       </div>
 
       <div className="mt-3">
-        <div className="mb-1 flex justify-between text-xs">
+        <div className="mb-1.5 flex justify-between gap-3 text-xs">
           <span className="text-ink-500 dark:text-ink-400">
             {student.level}: {student.done}/{student.total} dars 80%+
             {student.currentUnit ? ` · hozir: ${student.currentUnit}` : ""}
           </span>
-          <span className="font-bold text-ink-800 dark:text-ink-100">{student.average}%</span>
+          <span className="shrink-0 font-bold tabular-nums text-ink-800 dark:text-ink-100">{student.average}%</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-ink-100 dark:bg-white/10">
           <div className="h-full rounded-full bg-mint-500" style={{ width: `${pct}%` }} />
@@ -446,14 +449,15 @@ function StudentCard({ student, levels }: { student: TeacherStudent; levels: Pla
             <button
               key={a.mode}
               onClick={() => setMode(active ? null : a.mode)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+              aria-expanded={active}
+              className={`btn-press flex min-h-9 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                 active
                   ? a.mode === "delete"
                     ? "bg-rose-600 text-white"
                     : "bg-azure-600 text-white"
                   : a.mode === "delete"
                   ? "bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-300"
-                  : "bg-ink-100 text-ink-700 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-200"
+                  : "bg-ink-100 text-ink-700 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-200 dark:hover:bg-white/15"
               }`}
             >
               <Icon size={13} /> {a.label}
@@ -485,11 +489,11 @@ export function TeacherPanel({ students, levels }: { students: TeacherStudent[];
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
-          <p className="flex items-center gap-1.5 text-xs text-ink-500 dark:text-ink-400"><Users size={14} /> O'quvchilar</p>
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-ink-500 dark:text-ink-400"><Users size={14} /> O'quvchilar</p>
           <p className="font-display mt-1 text-2xl font-bold text-ink-950 dark:text-ink-50">{students.length}</p>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
-          <p className="text-xs text-ink-500 dark:text-ink-400">Shu hafta faol</p>
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-ink-500 dark:text-ink-400"><Activity size={14} /> Shu hafta faol</p>
           <p className="font-display mt-1 text-2xl font-bold text-ink-950 dark:text-ink-50">{activeWeek}</p>
         </div>
         <button
@@ -503,8 +507,10 @@ export function TeacherPanel({ students, levels }: { students: TeacherStudent[];
       {adding && <NewStudentForm levels={levels} onClose={() => setAdding(false)} />}
 
       <div className="relative">
-        <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
+        <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
         <input
+          type="search"
+          aria-label="O'quvchilarni qidirish"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Ism, login yoki email bo'yicha qidirish"
@@ -519,11 +525,14 @@ export function TeacherPanel({ students, levels }: { students: TeacherStudent[];
           ))}
         </ul>
       ) : (
-        <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-10 text-center text-sm text-ink-500 dark:bg-white/[0.045] dark:text-ink-400">
+        <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-10 text-center text-sm text-ink-600 shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:text-ink-300 dark:ring-white/10">
+          <span className="mb-1 flex h-12 w-12 items-center justify-center rounded-2xl bg-ink-100 text-ink-400 dark:bg-white/5">
+            {students.length === 0 ? <Users size={22} /> : <Search size={22} />}
+          </span>
           {students.length === 0 ? (
             <>
               <p>Hali o'quvchi yo'q.</p>
-              <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 font-semibold text-azure-600">
+              <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 rounded-full px-3 py-1.5 font-semibold text-azure-700 hover:bg-azure-50 dark:text-azure-300 dark:hover:bg-white/10">
                 <Plus size={16} /> Birinchi o'quvchini qo'shing
               </button>
             </>

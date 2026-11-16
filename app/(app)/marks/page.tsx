@@ -3,12 +3,13 @@ import { getLevelBoard } from "@/lib/data";
 import { getBoardView } from "@/lib/teacher";
 import { Avatar } from "@/components/Avatar";
 import { LevelLinks } from "@/components/LevelLinks";
+import { ClipboardList } from "lucide-react";
 
 /** Dars natijasi doirasining rangi: 80%+ — yashil, 50–79% — sariq, undan past — qizil. */
 function cellColor(pct: number) {
-  if (pct >= 80) return "bg-mint-500 text-white";
+  if (pct >= 80) return "bg-mint-500 text-ink-950";
   if (pct >= 50) return "bg-gold-400 text-ink-950";
-  return "bg-rose-500 text-white";
+  return "bg-rose-600 text-white";
 }
 
 /** Telefondagi katak yorlig'i: «12-dars» → «12», «Takrorlash» → «T». */
@@ -22,7 +23,7 @@ type Student = Board["students"][number];
 /** Daraja imtihoni natijasi: o'quvchining o'zida foiz, boshqalarda faqat
  *  o'tdi (✓) / o'tmadi (✗); topshirilmagan bo'lsa — «—». */
 function ExamBadge({ exam }: { exam: Student["exam"] }) {
-  if (!exam.attempted) return <span className="text-ink-300 dark:text-ink-600">—</span>;
+  if (!exam.attempted) return <span className="text-ink-400 dark:text-ink-500">—</span>;
   if (exam.pct !== null) {
     return (
       <span
@@ -37,7 +38,7 @@ function ExamBadge({ exam }: { exam: Student["exam"] }) {
     <span
       title={exam.passed ? "Imtihondan o'tgan" : "Imtihondan o'tmagan"}
       className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-base font-bold ${
-        exam.passed ? "bg-mint-500 text-white" : "bg-rose-500 text-white"
+        exam.passed ? "bg-mint-500 text-ink-950" : "bg-rose-600 text-white"
       }`}
     >
       {exam.passed ? "✓" : "✗"}
@@ -54,12 +55,12 @@ function StudentCard({ student, units, rank }: { student: Student; units: Board[
     <li
       className={`rounded-2xl p-4 shadow-sm ring-1 ${
         student.is_current_user
-          ? "bg-gold-50 ring-gold-300/60 dark:bg-[#2a2517] dark:ring-gold-700/40"
+          ? "bg-gold-50 ring-gold-300/70 dark:bg-gold-400/[0.07] dark:ring-gold-400/30"
           : "bg-white ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10"
       }`}
     >
       <div className="flex items-center gap-3">
-        <span className="w-5 shrink-0 text-center text-xs font-semibold text-ink-400">{rank}</span>
+        <span className="w-5 shrink-0 text-center text-xs font-bold tabular-nums text-ink-400">{rank}</span>
         <Avatar name={student.name} photoUrl={student.avatar_url} size={40} />
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-ink-950 dark:text-ink-50">
@@ -84,11 +85,11 @@ function StudentCard({ student, units, rank }: { student: Student; units: Board[
               key={unit.id}
               title={`${unit.title}: ${unit.subtitle}`}
               className={`flex aspect-square flex-col items-center justify-center rounded-xl ${
-                pct === null ? "bg-ink-100/70 text-ink-400 dark:bg-white/5 dark:text-ink-500" : cellColor(pct)
+                pct === null ? "bg-ink-100/80 text-ink-400 dark:bg-white/5 dark:text-ink-400" : cellColor(pct)
               }`}
             >
               <span className="text-[10px] font-semibold leading-none opacity-75">{shortLabel(unit.title)}</span>
-              <span className="mt-0.5 text-sm font-bold leading-none">{pct === null ? "—" : pct}</span>
+              <span className="mt-0.5 text-sm font-bold leading-none tabular-nums">{pct === null ? "—" : pct}</span>
             </div>
           );
         })}
@@ -107,9 +108,9 @@ function Legend() {
     <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-ink-500 dark:text-ink-400">
       <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-mint-500" /> 80%+</span>
       <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-gold-400" /> 50–79%</span>
-      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-rose-500" /> 50% dan past</span>
-      <span className="flex items-center gap-1.5"><span className="text-ink-300 dark:text-ink-600">—</span> boshlanmagan</span>
-      <span className="flex items-center gap-1.5"><span className="font-bold text-mint-600">✓</span>/<span className="font-bold text-rose-500">✗</span> imtihondan o'tgan / o'tmagan</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-rose-600" /> 50% dan past</span>
+      <span className="flex items-center gap-1.5"><span className="text-ink-400 dark:text-ink-500">—</span> boshlanmagan</span>
+      <span className="flex items-center gap-1.5"><span className="font-bold text-mint-700 dark:text-mint-400">✓</span>/<span className="font-bold text-rose-600 dark:text-rose-400">✗</span> imtihondan o'tgan / o'tmagan</span>
     </div>
   );
 }
@@ -127,7 +128,7 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <div className="animate-fade-up">
         <h1 className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">Baholar</h1>
-        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">
+        <p className="text-sm text-ink-600 dark:text-ink-300">
           {board.level} darajasidagi o'quvchilarning har bir dars bo'yicha natijasi (lug'at va mashqlar) va
           daraja imtihoni.
         </p>
@@ -150,9 +151,13 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
             ))}
           </ul>
         ) : (
-          <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-ink-400 dark:bg-white/[0.045] dark:text-ink-600">
-            Hozircha natijalar yo'q.
-          </p>
+          <div className="flex flex-col items-center gap-2 rounded-2xl bg-white px-4 py-10 text-center shadow-sm ring-1 ring-ink-950/5 dark:bg-white/[0.045] dark:ring-white/10">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink-100 text-ink-400 dark:bg-white/5">
+              <ClipboardList size={22} />
+            </span>
+            <p className="text-sm font-semibold text-ink-700 dark:text-ink-200">Hozircha natijalar yo'q</p>
+            <p className="text-xs text-ink-500 dark:text-ink-400">Darslar boshlangach natijalar shu yerda ko'rinadi.</p>
+          </div>
         )}
       </div>
 
@@ -181,14 +186,14 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
             </thead>
             <tbody>
               {board.students.map((student, i) => (
-                <tr key={student.id} style={{ animationDelay: `${i * 30}ms` }} className="animate-fade-up">
+                <tr key={student.id} style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }} className="animate-fade-up">
                   <td
                     className={`sticky left-0 z-10 border-b border-ink-50 px-4 py-2.5 dark:border-white/5 ${
-                      student.is_current_user ? "bg-gold-50 dark:bg-[#2a2517]" : "bg-white dark:bg-[#141a2c]"
+                      student.is_current_user ? "bg-gold-50 dark:bg-[#1f1f22]" : "bg-white dark:bg-[#141a2c]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="w-4 text-xs text-ink-400">{i + 1}</span>
+                      <span className="w-4 text-xs font-semibold tabular-nums text-ink-400">{i + 1}</span>
                       <Avatar name={student.name} photoUrl={student.avatar_url} size={32} />
                       <span
                         className={`whitespace-nowrap ${
@@ -208,11 +213,11 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
                       }`}
                     >
                       {pct === null ? (
-                        <span className="text-ink-300 dark:text-ink-600">—</span>
+                        <span className="text-ink-400 dark:text-ink-500">—</span>
                       ) : (
                         <span
                           title={`${board.units[j].title}: ${board.units[j].subtitle}`}
-                          className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ${cellColor(pct)}`}
+                          className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold tabular-nums ${cellColor(pct)}`}
                         >
                           {pct}
                         </span>
@@ -230,7 +235,7 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
               ))}
               {board.students.length === 0 && (
                 <tr>
-                  <td colSpan={board.units.length + 2} className="px-4 py-8 text-center text-ink-400 dark:text-ink-600">
+                  <td colSpan={board.units.length + 2} className="px-4 py-10 text-center text-sm font-semibold text-ink-500 dark:text-ink-400">
                     Hozircha natijalar yo'q.
                   </td>
                 </tr>

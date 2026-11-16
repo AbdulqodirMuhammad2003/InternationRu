@@ -1,4 +1,4 @@
-import { Trophy } from "lucide-react";
+import { Trophy, Users } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { getBoardView } from "@/lib/teacher";
 import { Avatar } from "@/components/Avatar";
@@ -14,7 +14,7 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div className="animate-fade-up">
         <h1 className="font-display text-2xl font-bold text-ink-950 dark:text-ink-50">Reyting</h1>
-        <p className="text-sm text-ink-700/60 dark:text-ink-300/60">
+        <p className="text-sm text-ink-600 dark:text-ink-300">
           {board.level} darajasida o'qiyotgan o'quvchilar. Ball — barcha darslar bo'yicha natijalaringiz yig'indisi.
         </p>
       </div>
@@ -28,21 +28,21 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
             return (
               <div
                 key={row.id}
-                style={{ animationDelay: `${i * 40}ms` }}
+                style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}
                 className={`flex animate-fade-up items-center justify-between gap-3 px-3 py-3 ${
-                  row.is_current_user ? "rounded-xl bg-gold-50 dark:bg-gold-950/30" : ""
+                  row.is_current_user ? "rounded-xl bg-gold-50 ring-1 ring-gold-300/70 dark:bg-gold-400/[0.07] dark:ring-gold-400/30" : ""
                 }`}
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ${
                       place === 1
                         ? "bg-gold-400 text-ink-950"
                         : place === 2
                         ? "bg-ink-200 text-ink-800 dark:bg-white/10 dark:text-ink-200"
                         : place === 3
                         ? "bg-gold-200 text-gold-900 dark:bg-gold-900/40 dark:text-gold-200"
-                        : "bg-ink-50 text-ink-500 dark:bg-white/5 dark:text-ink-400"
+                        : "bg-ink-100 text-ink-600 dark:bg-white/5 dark:text-ink-300"
                     }`}
                   >
                     {place}
@@ -60,15 +60,20 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
                     <p className="text-xs text-ink-500 dark:text-ink-400">O'rtacha natija: {row.average}%</p>
                   </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-1 text-sm font-semibold text-ink-700/70 dark:text-ink-300/70">
-                  <Trophy size={14} className="text-gold-500" />
+                <div className="flex shrink-0 items-center gap-1.5 text-sm font-bold tabular-nums text-ink-800 dark:text-ink-100">
+                  <Trophy size={14} aria-hidden="true" className="text-gold-600 dark:text-gold-400" />
                   {row.points.toLocaleString("ru-RU")}
                 </div>
               </div>
             );
           })}
           {rows.length === 0 && (
-            <p className="px-3 py-8 text-center text-sm text-ink-400 dark:text-ink-600">Hozircha o'quvchilar yo'q.</p>
+            <div className="flex flex-col items-center gap-2 px-3 py-10 text-center">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink-100 text-ink-400 dark:bg-white/5">
+                <Users size={22} />
+              </span>
+              <p className="text-sm font-semibold text-ink-700 dark:text-ink-200">Hozircha o'quvchilar yo'q</p>
+            </div>
           )}
         </div>
       </div>
