@@ -23,7 +23,7 @@ async function checkPlacement(level: string, startUnitId: number | null): Promis
   const [lv] = await sql<{ id: number }[]>`SELECT id FROM levels WHERE code = ${level}`;
   if (!lv) return "Daraja noto'g'ri tanlangan.";
   if (startUnitId !== null) {
-    const [u] = await sql<{ id: number }[]>`SELECT id FROM units WHERE id = ${startUnitId} AND level_id = ${lv.id}`;
+    const [u] = await sql<{ id: number }[]>`SELECT id FROM units WHERE id = ${startUnitId} AND level_id = ${lv.id} AND NOT draft AND NOT archived`;
     if (!u) return "Dars tanlangan darajaga tegishli emas.";
   }
   return null;

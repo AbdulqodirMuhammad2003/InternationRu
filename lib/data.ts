@@ -333,7 +333,8 @@ export async function getUnitsForUser(userId: number): Promise<UnitRecord[]> {
     FROM units u
     JOIN levels l ON l.id = u.level_id
     LEFT JOIN user_unit_progress p ON p.unit_id = u.id AND p.user_id = ${userId}
-    WHERE NOT u.draft OR EXISTS (SELECT 1 FROM users t WHERE t.id = ${userId} AND t.role = 'teacher')
+    WHERE NOT u.archived
+      AND (NOT u.draft OR EXISTS (SELECT 1 FROM users t WHERE t.id = ${userId} AND t.role = 'teacher'))
     ORDER BY l.order_index ASC, u.order_index ASC
   `;
 }
@@ -587,7 +588,7 @@ export async function getLevelBoard(userId: number, levelOverride?: string): Pro
                WHERE r.unit_id = u.id) AS words,
              (SELECT count(*)::int FROM exercises e WHERE e.unit_id = u.id) AS exercises
       FROM units u JOIN levels l ON l.id = u.level_id
-      WHERE l.code = ${level} AND NOT u.draft
+      WHERE l.code = ${level} AND NOT u.draft AND NOT u.archived
       ORDER BY u.order_index
     `,
   ]);

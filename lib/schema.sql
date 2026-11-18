@@ -50,6 +50,12 @@ CREATE TABLE IF NOT EXISTS units (
 -- O'qituvchi o'quvchini qaysi darsdan boshlatgan (joriy darajadagi dars).
 ALTER TABLE users ADD COLUMN IF NOT EXISTS start_unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL;
 
+-- Kitob darslari: qoralama (faqat o'qituvchiga ko'rinadi) va arxiv (daraja
+-- kitob darslariga o'tgach eski darslar — hech kimga ko'rinmaydi, lekin
+-- o'quvchilar natijasi saqlanib qoladi, kerak bo'lsa qaytarish mumkin).
+ALTER TABLE units ADD COLUMN IF NOT EXISTS draft BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE units ADD COLUMN IF NOT EXISTS archived BOOLEAN NOT NULL DEFAULT false;
+
 CREATE TABLE IF NOT EXISTS vocabulary_rounds (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,

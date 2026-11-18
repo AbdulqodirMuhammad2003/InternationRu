@@ -140,18 +140,32 @@ function spreadPick<T>(byLesson: T[][], count: number): { lessonIndex: number; i
   return picked.slice(0, count);
 }
 
+/** Kitob darslari (KA1-NNA/B) eski grammatika bankidan foydalanadi: urokning
+ *  A qismi — eski R(NN) darsning savollari, 1-urokning B qismi — R00
+ *  (alifbo). Boshqa B qismlar imtihonga faqat lug'ati bilan kiradi (null) —
+ *  bitta bank ikki marta olinmasin. */
+const BANK_ALIAS: Record<string, string | null> = Object.fromEntries(
+  Array.from({ length: 14 }, (_, i) => {
+    const n = String(i + 1).padStart(2, "0");
+    return [
+      [`KA1-${n}A`, `R${n}`],
+      [`KA1-${n}B`, i === 0 ? "R00" : null],
+    ];
+  }).flat()
+);
+
 async function levelUnits(level: string) {
   return sql<{ id: number; code: string; title: string; order_index: number }[]>`
     SELECT u.id, u.code, u.title, u.order_index
     FROM units u JOIN levels l ON l.id = u.level_id
-    WHERE l.code = ${level} AND NOT u.draft
+    WHERE l.code = ${level} AND NOT u.draft AND NOT u.archived
     ORDER BY u.order_index
   `;
 }
 
 async function buildVariant(level: string): Promise<StoredQuestion[]> {
   const bank = EXAMS[level].bank;
-  const units = (await levelUnits(level)).filter((u) => bank[u.code]);
+  const units = (await levelUnits(level)).filter((u) => bank[u.code] || u.code in BANK_ALIAS);
   const words = await sql<{ id: number; unit_id: number; word: string; emoji: string; translation_uz: string }[]>`
     SELECT w.id, r.unit_id, w.word, w.emoji, w.translation_uz
     FROM vocabulary_words w JOIN vocabulary_rounds r ON r.id = w.round_id
@@ -184,7 +198,7 @@ async function buildVariant(level: string): Promise<StoredQuestion[]> {
   }));
 
   const grammar = spreadPick(
-    units.map((u) => bank[u.code]),
+    units.map((u) => bank[u.code] ?? (BANK_ALIAS[u.code] ? bank[BANK_ALIAS[u.code]!] ?? [] : [])),
     EXAM_GRAMMAR_COUNT
   ).map(({ lessonIndex, item }): StoredQuestion => {
     const options = shuffle(item.options);
