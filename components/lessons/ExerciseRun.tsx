@@ -250,13 +250,13 @@ export function ExerciseRun({
         <div className="mt-2 flex gap-2">
           <button
             onClick={onRetry}
-            className="btn-press rounded-full bg-ink-100 px-5 py-2.5 text-sm font-bold text-ink-800 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-100"
+            className="btn-press rounded-full bg-ink-100 px-5 min-h-11 py-2.5 text-sm font-bold text-ink-800 hover:bg-ink-200 dark:bg-white/10 dark:text-ink-100"
           >
             Qayta ishlash
           </button>
           <button
             onClick={() => onDone(result)}
-            className="btn-press btn-3d rounded-full bg-azure-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
+            className="btn-press btn-3d rounded-full bg-azure-600 px-6 min-h-11 py-2.5 text-sm font-bold text-white hover:bg-azure-500"
           >
             Tayyor
           </button>

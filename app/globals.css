@@ -269,6 +269,29 @@ body {
   }
 }
 
+/* Yuklanish skeleti: yumshoq «yaltirash» chizig'i o'tib turadi
+   (prefers-reduced-motion'da yuqoridagi qoida animatsiyani to'xtatadi). */
+.skeleton {
+  background-color: var(--color-ink-100);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s linear infinite;
+}
+.dark .skeleton {
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 70%
+  );
+}
+
 /* Subtle shimmering sheen used on premium CTA surfaces */
 .sheen {
   background-image: linear-gradient(
@@ -278,4 +301,13 @@ body {
     transparent 60%
   );
   background-size: 200% 100%;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
 }

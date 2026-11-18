@@ -293,10 +293,14 @@ export function VocabRoundFlow({
   if (round.words.length === 0) return null;
 
   const content = (
-    <div className="fixed inset-0 z-[200] flex animate-fade-in flex-col bg-gradient-to-br from-[#f5f7fb] to-[#e9edf6] dark:from-[#0b0f1a] dark:to-[#141a2c]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={round.title}
+      className="fixed inset-0 z-[200] flex animate-fade-in flex-col bg-gradient-to-br from-[#f5f7fb] to-[#e9edf6] dark:from-[#0b0f1a] dark:to-[#141a2c]">
       {/* Tepa panel */}
-      <div className="flex items-center justify-between border-b border-ink-900/10 px-5 py-4 dark:border-white/10 sm:px-8">
-        <div>
+      <div className="flex items-center justify-between gap-3 border-b border-ink-900/10 px-4 py-3 dark:border-white/10 sm:px-8 sm:py-4">
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">
             {round.title}
           </p>
@@ -338,7 +342,7 @@ export function VocabRoundFlow({
         </div>
       )}
 
-      <div className="flex flex-1 items-center justify-center overflow-y-auto px-4 py-6 sm:px-8">
+      <div className="flex flex-1 items-start justify-center overflow-y-auto overscroll-contain px-4 py-5 sm:px-8 sm:py-6 [&>*]:my-auto">
         {phase === "learn" && (
           <LearnCard
             word={learnWords[learnIndex]}
@@ -375,13 +379,13 @@ export function VocabRoundFlow({
                   setLearnIndex(0);
                   setPhase("learn");
                 }}
-                className="btn-press flex items-center justify-center gap-2 rounded-full border border-ink-200 bg-white px-5 py-2.5 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-50 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
+                className="btn-press flex items-center justify-center gap-2 rounded-full border border-ink-200 bg-white px-5 min-h-11 py-2.5 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-50 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
               >
                 <RotateCcw size={16} /> Qayta o'rganish
               </button>
               <button
                 onClick={startChecking}
-                className="btn-press btn-3d flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
+                className="btn-press btn-3d flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 min-h-11 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
               >
                 Tekshiruvni boshlash <ArrowRight size={16} />
               </button>
@@ -449,7 +453,7 @@ export function VocabRoundFlow({
             <button
               onClick={close}
               disabled={closing}
-              className="btn-press btn-3d rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-70"
+              className="btn-press btn-3d rounded-full bg-gradient-to-b from-azure-600 to-azure-700 px-6 min-h-11 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-70"
             >
               {closing ? "Saqlanmoqda…" : "Tugatish"}
             </button>
@@ -480,12 +484,12 @@ function LearnCard({
   return (
     <div
       key={word.id}
-      className="flex w-full max-w-md animate-pop-in flex-col gap-4 rounded-3xl bg-white p-6 shadow-xl shadow-ink-900/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-1 dark:ring-white/10"
+      className="flex w-full max-w-md animate-pop-in flex-col gap-3 rounded-3xl bg-white p-5 shadow-xl sm:gap-4 sm:p-6 shadow-ink-900/5 dark:bg-white/[0.045] dark:shadow-none dark:ring-1 dark:ring-white/10"
     >
       <p className="text-center text-xs font-semibold text-ink-500 dark:text-ink-400">
         So'z {index + 1} / {total}
       </p>
-      <div className="flex h-36 items-center justify-center rounded-2xl bg-gradient-to-br from-ink-50 to-gold-50 text-6xl dark:from-white/5 dark:to-gold-950/30">
+      <div aria-hidden="true" className="flex h-28 items-center justify-center rounded-2xl bg-gradient-to-br from-ink-50 to-gold-50 text-6xl sm:h-36 dark:from-white/5 dark:to-gold-950/30">
         {word.emoji}
       </div>
       <div className="flex items-center gap-3 rounded-2xl bg-ink-50/70 p-4 dark:bg-white/5">
@@ -497,7 +501,7 @@ function LearnCard({
           <Volume2 size={18} />
         </button>
         <div>
-          <p className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
+          <p lang="ru" className="font-display text-lg font-bold text-ink-950 dark:text-ink-50">
             {word.word}
           </p>
           <p className="text-sm text-ink-600 dark:text-ink-300">
@@ -511,11 +515,11 @@ function LearnCard({
           {word.translation_uz}
         </p>
         <p className="mb-1 text-xs text-ink-500 dark:text-ink-400">Izoh:</p>
-        <p className="mb-3 text-sm text-ink-700 dark:text-ink-200">{word.definition}</p>
+        <p lang="ru" className="mb-3 text-sm text-ink-700 dark:text-ink-200">{word.definition}</p>
         {word.example_sentence && (
           <>
             <p className="mb-1 text-xs text-ink-500 dark:text-ink-400">Misol:</p>
-            <p className="text-sm italic text-ink-700 dark:text-ink-200">
+            <p lang="ru" className="text-sm italic text-ink-700 dark:text-ink-200">
               {word.example_sentence}
             </p>
             {word.example_translation && (
@@ -528,7 +532,7 @@ function LearnCard({
       </div>
       <button
         onClick={onNext}
-        className="btn-press btn-3d flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
+        className="btn-press btn-3d flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-base font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600"
       >
         {index + 1 < total ? "Keyingisi" : "Tayyor"} <ArrowRight size={16} />
       </button>
@@ -571,14 +575,14 @@ function RoundSummary({
         {mistakeCount > 0 && (
           <button
             onClick={onReview}
-            className="btn-press btn-3d [--btn-glow:rgba(244,63,94,0.45)] flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-rose-600 to-rose-800 px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-rose-900/30 hover:from-rose-500 hover:to-rose-700"
+            className="btn-press btn-3d [--btn-glow:rgba(244,63,94,0.45)] flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-rose-600 to-rose-800 px-5 min-h-11 py-2.5 text-sm font-bold text-white shadow-sm shadow-rose-900/30 hover:from-rose-500 hover:to-rose-700"
           >
             Xatolarni qayta ko'rish
           </button>
         )}
         <button
           onClick={onFinish}
-          className="btn-press rounded-full border border-ink-200 bg-white px-6 py-2.5 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-50 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
+          className="btn-press rounded-full border border-ink-200 bg-white px-6 min-h-11 py-2.5 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-50 dark:border-white/10 dark:bg-white/5 dark:text-ink-200 dark:hover:bg-white/10"
         >
           Yakunlash
         </button>
@@ -1101,7 +1105,7 @@ function SentenceStage({
         <button
           onClick={submit}
           disabled={!value.trim()}
-          className="btn-press btn-3d rounded-full bg-gradient-to-b from-azure-600 to-azure-700 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-40"
+          className="btn-press btn-3d rounded-full bg-gradient-to-b from-azure-600 to-azure-700 min-h-11 py-2.5 text-sm font-bold text-white shadow-sm shadow-azure-900/30 hover:from-azure-500 hover:to-azure-600 disabled:opacity-40"
         >
           Tekshirish
         </button>
